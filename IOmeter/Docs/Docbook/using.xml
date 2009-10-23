@@ -1,0 +1,67 @@
+<sect1 id="using">
+<title>Using the Iometer GUI</title>
+<mediaobject>
+<imageobject role="html">
+<imagedata fileref="images/main.jpg" format="JPG" align="center"/>
+</imageobject>
+<imageobject role="fo">
+<imagedata fileref="images/main.jpg" format="JPG" align="center"/>
+</imageobject>
+</mediaobject>
+<para>
+The Iometer user interface is made up of the following major componants.
+</para>
+<itemizedlist>
+<listitem>
+<formalpara><title>Toolbar:</title><para>
+ Performs common operations such as starting and stopping tests.
+</para></formalpara></listitem>
+<listitem>
+<formalpara><title>Status bar:</title><para>
+Shows which test in a test series is currently running.
+</para></formalpara></listitem>
+<listitem>
+<formalpara><title>Topology panel:</title><para>
+Displays the available managers (Dynamos) and workers (threads). Actions 
+in the toolbar, Disk Targets, Network Targets, and Access Specifications 
+tabs apply to the manager(s) or worker(s) selected in this panel, and this 
+panel is used to select managers and workers for the Results Display tab.
+</para></formalpara></listitem>
+<listitem>
+<formalpara><title>Tabbed panels:</title><para>
+Several different tabs to control the parameters of the test:
+<itemizedlist>
+<listitem>
+<formalpara><title>Disk Targets tab:</title><para>
+Specifies the disks used by each disk worker.
+</para></formalpara></listitem>
+<listitem>
+<formalpara><title>Network Targets tab:</title><para>
+Specifies the network interfaces used by each network worker.
+</para></formalpara></listitem>
+<listitem>
+<formalpara><title>Access Specifications tab:</title><para>
+Specifies the type of I/O operations each worker performs to its targets.
+</para></formalpara></listitem>
+<listitem>
+<formalpara><title>Results Display tab:</title><para>
+Displays performance data during the test.
+</para></formalpara></listitem>
+<listitem>
+<formalpara><title>Test Setup tab:</title><para>
+Specifies the tests to be performed in a test series.
+</para></formalpara></listitem>
+</itemizedlist>
+</para></formalpara></listitem>
+</itemizedlist>
+
+
+&toolbar;
+&status;
+&topo;
+&disktab;
+
+
+
+</sect1>
+

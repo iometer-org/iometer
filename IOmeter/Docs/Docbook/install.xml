@@ -1,0 +1,122 @@
+<sect1 id="Install">
+<title>Installing Iometer</title>
+<sect2 id="platforms">
+<title>Supported Platforms</title>
+<para>
+The <ulink url="http://www.iometer.org/doc/matrix.html">Supported 
+Platforms Matrix</ulink> currently list all the systems that Iometer 
+currently runs on. This is updated as new systems are added.
+</para> 
+</sect2>
+<sect2 id="install">
+<title>Installing the Iometer Software</title>
+<para>
+As of this writing, the latest stable Iometer version is 
+<emphasis>2003-12-16</emphasis>.
+</para><para>
+The Iometer files are available at <ulink 
+url="http://www.iometer.org">www.iometer.org</ulink>. If a precompiled 
+binary is available for your system, we recommend its use.
+</para>
+<sect3 id="windows">
+<title>Installing the Windows Binaries</title>
+<para>
+The file for the Windows 32-bit binary is <ulink 
+url="http://prdownloads.sourceforge.net/iometer/iometer-2003.12.16.win32-bin.zip?download">
+iometer-2003.12.16.win32-bin.zip</ulink>.
+</para><para>
+The file for the Windows 64-bit binary is <ulink 
+url="http://prdownloads.sourceforge.net/iometer/iometer-2003.12.16.win64.ia64-bin.zip?download">
+iometer-2003.12.16.win64.ia64-bin.zip</ulink>.
+</para><para>
+To install:
+</para>
+<orderedlist>
+<listitem><para>
+Download the binary file by clicking on the appropriate link above. When 
+asked, select a directory to save the file into.
+</para></listitem>
+<listitem><para>
+Double-click the file in the directory where you saved the file. (WinZip 
+or another decompression program is required.)
+</para></listitem>
+<listitem><para>
+Extract the files into a directory of your choice. (eg. 'C:\IOMETER')
+</para></listitem>
+<listitem><para>
+On your desktop, right-click on the screen and select 'New' then 'Create 
+New Shortcut'.
+</para></listitem>
+<listitem><para>
+Select 'Browse"
+</para></listitem>
+<listitem><para>
+Find the directory where you decompressed the zip file. Double-Click on 
+'iometer-2003.12.16'.
+</para></listitem>
+<listitem><para>
+Double-Click on 'src'.
+</para></listitem>
+<listitem><para>
+Double-Click on 'Release'.
+</para></listitem>
+<listitem><para>
+Click on 'iometer.exe' then click 'Open'.
+</para></listitem>
+<listitem><para>
+Click 'Next' then 'Finish'
+</para></listitem>
+</orderedlist>
+<para>
+You now have the Iometer program installed on your computer. To run 
+Iometer, just double-click the icon that was created on your desktop.
+</para>
+</sect3>
+<sect3 id="linux">
+<title>Installing the Linux Binaries</title>
+<para>
+The file for the Linux 32-bit binary is <ulink 
+url="http://prdownloads.sourceforge.net/iometer/iometer-2003.12.16.linux-bin.tar.gz?download">
+iometer-2003.12.16.linux-bin.tar.gz</ulink>.
+</para><para>
+To Install:
+</para>
+<para>
+Decomress the files using the tar command.
+</para><para>
+<screen>$bash: tar xvfz iometer-2003.12.16.linux-bin.tar.gz</screen>
+</para><para>
+This will install the binary into 
+<emphasis>iometer-2003.12.16/src</emphasis> directory.
+</para>
+<formalpara><title>NOTE on Linux Machines:</title><para>
+If <emphasis>Dynamo</emphasis> ends in a segmentation fault, you need to 
+run the following command before starting dynamo.
+</para></formalpara>
+<para>
+<screen>$bash: export LD_ASSUME_KERNEL=2.4.1</screen>
+</para><para>
+This will fix problems with glibc 2.3 or higher with NPTL support. 
+This is the case with Red Hat 9.
+</para>
+</sect3>
+<sect3 id="unix">
+<title>Compiling Source Files on a Unix Platform</title>
+<para>
+At the current moment, this is beyond the scope of this document. 
+Please look at devlopers guide for more information.
+</para>
+</sect3>
+</sect2>
+<sect2 id="issues">
+<title>Known Issues / Bugs</title>
+<para>
+As new issues and bugs are found in Iometer, they are listed in the <ulink 
+url="http://www.iometer.org/doc/issues.html">Know Issues Listing</ulink>.
+</para><para>
+Please check here if you encounter any problems with Iometer before 
+sending a question to the Iometer Users Discussion List.
+</para>
+</sect2>
+</sect1>
+

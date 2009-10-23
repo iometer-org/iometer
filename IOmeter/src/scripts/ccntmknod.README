@@ -1,0 +1,32 @@
+
+IoMeter needs a high resolution time source for performance measurement.
+Under IA32 platform, this is achieved via rdtsc().
+
+Under Intel XScale Microarchitecture like IOP331 and IOP321, there is a
+32bit CCNT (cycle counter) available for this purpose. But since it is
+only 32 bits. It overflows very quickly. So I added an extra counter to
+record how many times it overflows. Then expand it to a 64bit value.
+
+Instead of adding a new system call to transfer this value to user space
+program, we create a virtual character device and export this value via
+ioctl interface.
+
+The device node is created by the ccntmknod script. And user program can
+access this counter with code piece:
+
+...
+#define CCNT_IOC_MAGIC		0xAC
+#define CCNT_IOC_GETCCNT	_IOR(CCNT_IOC_MAGIC, 1, unsigned long long)
+if ((fd = open("/dev/ccnt", O_RDONLY)) < 0) {
+	printf("device file open fail!\n");
+	exit(1);
+}
+
+if ((res = ioctl(fd, CCNT_IOC_GETCCNT, &x)) >= 0 ) {
+	printf("%llu\n", x);
+}
+...
+
+
+Write to me (mingz@ele.uri.edu) if there are any problem or suggestion. Thanks.
+

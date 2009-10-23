@@ -1,0 +1,64 @@
+Installation notes
+==================
+
+You can install IoMeter from pre-compiled binaries or from source files. 
+Because IoMeter contains two major components, IoMeter and dynamo, both 
+components need to be installed properly.
+
+IoMeter can only be installed in a Windows environment like Windows 2000,
+Windows XP, Windows 2003. Dynamo can be installed on a wide range of OS
+including Windows, Linux, Solaris, Mac OS X, and Netware.
+
+IoMeter.exe Installation From Pre-compiled Binaries
+===================================================
+
+   The easiest way to install IoMeter.exe is from the installer package 
+like iometer-200X.XX.XX.win32.i386-setup.exe. Simply run the setup program
+and follow the instruction in each page will finish the installation process.
+
+IoMeter.exe Installation From Source Files
+==========================================
+
+   You have to compile the IoMeter.exe from source files. There are two ways
+to do so. One is using the Visual C++ and another is to use DDK. For Visual 
+C++, version 6.0 and 2002 is known to work. Newer Visual C++ should be OK as well.
+Open the IoMeter project file with Visual C++ and compile the binaries. For DDK users,
+I assumed you are proficient enough to know how to compile.
+
+Dynamo Installation From Pre-compiled Binaries
+==============================================
+
+   For Windows, dynamo.exe is contained in same installer like 
+iometer-200X.XX.XX.win32.i386-setup.exe as IoMeter.exe. Follow same instruction
+as IoMeter.exe
+
+   For other platforms, simply uncompress the binary archive. For example, for Linux
+on X86 platform, download the file iometer-200X_XX_XX.linux.i386-bin.tgz to a local directory,
+uncompress it with command "tar zxvf iometer-200X_XX_XX.linux.i386-bin.tgz". It will
+generate an iometer-200X_XX_XX.linux.i386-bin dir, and src/dynamo is the binary.
+
+Note: because of different glibc and Linux distribution like Debian or Redhat, it is quite
+possible that the pre-compiled dynamo binary cannot run on a certain Linux environment. Then
+you have to install dynamo from source files.
+
+Dynamo Installation From Source Files
+=====================================
+
+   For Windows, follow the same instruction as IoMeter, using Visual C++ or DDK.
+
+   For other platforms, try to use followed steps:
+   * Find out the OS and CPU architecture of the box you want to run dynamo on.
+     For example, Linux OS with a X86 CPU, or Solaris with a SPARC CPU;
+   * Check if file "Makefile-<OS>.<cpu>" available in source directory. If so, then
+     dynamo can run on such platform. For OS+CPU platform that is not available, report
+     to IoMeter mailing list to see if developer can provide the port for this OS+CPU
+     platform.
+   * Run "make -f Makefile-<OS>.<cpu> all" to build dynamo.
+
+Report a Problem
+================
+
+If you meet any problem during installation and compilation, you can post your question
+to <iometer-user@lists.sourceforge.net>. You need to provide information like OS type,
+version, Visual C++ version if used, gcc version if used, detailed error message, and etc.
+

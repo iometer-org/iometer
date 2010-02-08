@@ -1,0 +1,38 @@
+// Style sheet for the Iometer project
+
+.block { text-align: justify; }
+.hidden {
+  background-color: #FFFFFF;
+  border: none;
+}
+.mdiv {
+  margin-left: 15px; 
+  margin-right: 15px; 
+}
+.tdh {
+  background-color: #125899;
+  color: #FFFFFF;
+  font-weight: bold;
+  vertical-align: bottom;
+}
+.vtp { vertical-align: top; }
+
+a, a:visited { color: #0040FF; }
+body { background-color: #FFFFFF; }
+p.desc {
+  font-size: 8pt;
+  margin-top: 5px;
+}
+table {
+  background-color: #FFFFCD;
+  border: 1px solid #000000;
+  margin-bottom: 0px;
+  width: 95%;
+}
+table.inner {
+  background-color: #FFFF80;
+  width: 100%;
+}
+
+
+

@@ -1,0 +1,235 @@
+<sect1 id="quickstart">
+<title>Quick Start</title>
+<para>
+This section is a rapid introduction to Iometer that will help you get up 
+and running fast.
+</para>
+<sect2 id="disk">
+<title>Testing Disk Performance</title>
+<para>
+To test disk performance:
+</para>
+<orderedlist>
+<listitem><para>
+Double-click on Iometer.exe. The Iometer main window appears, and a  
+Dynamo workload generator is automatically launched on the local computer.
+</para></listitem>
+<listitem><para>
+Click on a manager (the name of the local computer) in the Topology panel 
+on the left side of the Iometer window. The manager's available disk 
+drives appear in the Disk Targets tab. Blue icons represent physical 
+drives; they are only shown if they have no partitions on them. Yellow 
+icons represent logical (mounted) drives; they are only shown if they are 
+writable. A yellow icon with a red slash through it means that the drive 
+needs to be prepared before the test starts; see the Disk Targets Tab  
+Reference section for more information on preparation.
+</para></listitem>
+<listitem><para>
+In the Disk Targets tab, select a disk or disks to use in the test (use 
+Shift-click and Control-click to select multiple disks). The selected 
+disks will be automatically distributed among the manager's workers (threads). 
+</para></listitem>
+<listitem><para>
+Switch to the Access Specifications tab. Double-click on 'Default' in the 
+Global Access Specifications list (the one with the globe icon). The Edit 
+Access Specification dialog appears. 
+</para></listitem>
+<listitem><para>
+The Edit Access Specification dialog shows you how the disk will be 
+accessed. The default is 2-Kilobyte random I/Os with a mix of 67% reads 
+and 33% writes, which represents a typical database workload. You can 
+leave it alone or change it. Press OK to close the dialog when you are 
+through. 
+</para></listitem>
+<listitem><para>
+For maximum throughput (Megabytes per second), try changing the Transfer  
+Request Size to 64K, the Percent Read/Write Distribution to 100% Read, 
+and the Percent Random/Sequential Distribution to 100% Sequential.
+</para></listitem>
+<listitem><para>
+For the maximum I/O rate (I/O operations per second), try changing the  
+Transfer Request Size to 512 bytes, the Percent Read/Write Distribution 
+to 100% Read, and the Percent Random/Sequential Distribution to 100% 
+Sequential. 
+</para></listitem>
+<listitem><para>
+Switch to the Results Display tab. Set the Update Frequency to 10 seconds. 
+</para></listitem>
+<listitem><para>
+Press the Start Tests button (green flag). A standard Save File dialog 
+appears. Select a file to store the test results (default results.csv). 
+</para></listitem>
+<listitem><para>
+After 10 seconds the first test results appear in the Results Display 
+tab, and they are updated every 10 seconds after that. Press the button 
+to the left of each bar chart for a menu of the different results you can 
+display. You can also drag a worker or manager from the Topology panel to 
+a bar chart to see the results of just that worker or manager. 
+</para></listitem>
+<listitem><para>
+Press the Stop Test button (stop sign). The test stops and the final 
+results are saved in the results.csv file. This is a comma-separated text 
+file that can be viewed in any text editor or imported into a 
+spreadsheet. 
+</para></listitem>
+</orderedlist>
+</sect2>
+<sect2 id="network">
+<title>Testing Network Performance</title>
+<para>
+To test network performance between two computers (A and B): 
+</para>
+<orderedlist>
+<listitem><para>
+On computer A, double-click on Iometer.exe. The Iometer main window  
+appears and a Dynamo workload generator is automatically launched on 
+computer A. 
+</para></listitem>
+<listitem><para>
+On computer B, open an MS-DOS Command Prompt window and execute Dynamo, 
+specifying computer A's name as a command line argument. For example: 
+<screen>C:\> dynamo /i computer_a /m computer_b</screen>
+</para></listitem>
+<listitem><para>
+On computer A again, note that computer B has appeared as a new manager 
+in the Topology panel. Click on it and note that its disk drives appear 
+in the Disk Targets tab. 
+</para></listitem>
+<listitem><para>
+With computer B selected in the Topology panel, press the Start Network 
+Worker button (picture of network cables). This creates a network server 
+on computer B. 
+</para></listitem>
+<listitem><para>
+With computer B still selected in the Topology panel, switch to the 
+Network Targets tab, which shows the two computers and their network 
+interfaces. Select one of computer A's network interfaces from the list. 
+This creates a network client on computer A and connects the client and 
+server together. 
+</para></listitem>
+<listitem><para>
+Switch to the Access Specifications tab. Double-click on 'Default' in the 
+Global Access Specifications list. In the Edit Access Specification 
+dialog, specify a Transfer Request Size of 512 bytes. Press OK to close 
+the dialog. 
+</para></listitem>
+<listitem><para>
+Switch to the Results Display tab. Set the Update Frequency to 10 
+seconds. 
+</para></listitem>
+<listitem><para>
+Press the Start Tests button. Select a file to store the test results. If 
+you specify an existing file, the new results will be appended to the 
+existing ones. 
+</para></listitem>
+<listitem><para>
+Watch the results in the Results Display tab.
+</para></listitem>
+<listitem><para>
+Press the Stop Test button to stop the test and save the results.
+</para></listitem>
+</orderedlist>
+</sect2>
+<sect2 id="importaccess">
+<title>Importing Results into Microsoft Access</title>
+<para>
+To import a results.csv file into a Microsoft Access database using the 
+Import Wizard:
+</para>
+<orderedlist>
+<listitem><para>
+Double-click on Wizard.mdb to open Access. (If you use Access 2000, you 
+will be notified that the database is not in Access 2000 format. It does 
+not have to be in order to perform the import.) The first page of the 
+wizard appears.
+</para></listitem>
+<listitem><para>
+Specify the results file to import. Use the Browse button to locate it if 
+it isn't in the same directory as the Wizard.mdb file. Press Next. 
+</para></listitem>
+<listitem><para>
+Select the test(s) from the file that you want to import. Press Next. 
+</para></listitem>
+<listitem><para>
+Select 'Create a new database.' Press Next. 
+</para></listitem>
+<listitem><para>
+Specify the new .mdb file to import into. This must be a different file 
+from Wizard.mdb. Press Next. 
+</para></listitem>
+<listitem><para>
+Review your settings and press Finish. The results are imported into the 
+specified database. 
+</para></listitem>
+</orderedlist>
+</sect2>
+<sect2 id="graphexcel">
+<title>Graphing Results in Microsoft Excel</title>
+<para>
+To graph imported results into a Microsoft Excel spreadsheet using the 
+Graph Wizard: 
+</para>
+<orderedlist>
+<listitem><para>
+Open Wizard.mdb in Access, if necessary. 
+</para></listitem>
+<listitem><para>
+Click the Graph Data button. 
+</para></listitem>
+<listitem><para>
+Specify the database file that contains your imported data. This must be 
+a database produced by the Import Wizard. Press Next. 
+</para></listitem>
+<listitem><para>
+Select the test(s) from the database that you want to graph. Press Next. 
+</para></listitem>
+<listitem><para>
+This list shows predefined graph types that you can use. Press New to 
+define a new graph type. 
+</para></listitem>
+<listitem><para>
+Select the '# Disks' database field to graph on the X axis. Press Next. 
+</para></listitem>
+<listitem><para>
+Type a name to label the X axis, or accept the field name as the default. 
+Press Next. 
+</para></listitem>
+<listitem><para>
+Check 'Allow multiple Y values.' Select the 'IOps' and 'MBps' database 
+fields to graph on the Y axis. Press Next.
+</para></listitem>
+<listitem><para>
+Click on the MBps field and press 'Edit selected label.' Click 'Right 
+axis' to graph this field on the right axis of the graph. Change the name 
+to be displayed on the Y axis label if you like. Press OK, then Next. 
+</para></listitem>
+<listitem><para>
+The grouping criterion can be used to group the data into several 
+distinct lines on the graph. For now, leave 'None' selected. Press Next. 
+</para></listitem>
+<listitem><para>
+Leave the grouping criterion label blank. Press Next. 
+</para></listitem>
+<listitem><para>
+Type a name for the graph type you have just defined, or accept the 
+default. Press Next. 
+</para></listitem>
+<listitem><para>
+You have now defined a new graph type that you can edit or re-use in the 
+future. Select it from the list (if it isn't already selected). Press 
+Next. 
+</para></listitem>
+<listitem><para>
+Specify an .xls file to receive the graph. This can be a new or existing 
+file; if the file exists, the graph will be added to it. Press Next. 
+</para></listitem>
+<listitem><para>
+Review your settings and press Finish. The graph is created in the 
+specified spreadsheet. (If you just imported the results from one or two 
+tests, it is probably a very boring graph with only one or two points! 
+The Graph Wizard is most useful in graphing the results of multiple tests 
+against each other.)
+</para></listitem>
+</orderedlist>
+</sect2>
+</sect1>

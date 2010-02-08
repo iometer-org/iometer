@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" 
+	"file:///usr/local/share/sgml/docbook/x4.2/docbookx.dtd" [
+
+<!ENTITY intro SYSTEM "intro.xml">
+<!ENTITY quick SYSTEM "quick.xml">
+<!ENTITY install SYSTEM "install.xml">
+<!ENTITY using SYSTEM "using.xml">
+<!ENTITY toolbar SYSTEM "toolbar.xml">
+<!ENTITY status SYSTEM "status.xml">
+<!ENTITY topo SYSTEM "topo.xml">
+<!ENTITY disktab SYSTEM "disktab.xml">
+<!ENTITY targets SYSTEM "targets.xml">
+
+]>
+ 
+<article>
+  <articleinfo>
+    <title><inlinemediaobject>
+<imageobject role="html">
+<imagedata fileref="images/iometer.jpg" format="JPG" align="left"/>
+</imageobject>
+<imageobject role="fo">
+<imagedata fileref="images/iometer.jpg" format="JPG" align="center"/>
+</imageobject>
+</inlinemediaobject>Iometer User's Guide</title> 
+
+    <author>
+      <firstname>Iometer</firstname>
+      <surname>Project</surname>
+      <affiliation>
+        <address><email>iometer-user@lists.sourceforge.net</email></address>
+      </affiliation>
+    </author>
+    <pubdate>2004-02-20</pubdate>
+    <revhistory>
+      <revision>
+        <revnumber>0.01</revnumber>
+        <date>2004-02-17</date>
+        <authorinitials>JR</authorinitials>
+        <revremark>Inital Rewrite</revremark>
+      </revision>
+    </revhistory>
+    <abstract>
+
+	<para>
+TODO: (Things to remember on written content)
+<itemizedlist>
+<listitem><para>
+Allow for non-graphical browsers in HTML (ALT) header graphic.
+</para></listitem>
+<listitem><para>
+Find out WhatsNEW for WhatsNEW
+</para></listitem>
+<listitem><para>
+PDF: Fix output of header graphic/title.
+</para></listitem>
+</itemizedlist>
+</para><para>
+These docs are available in:
+<itemizedlist>
+<listitem><para>
+<ulink url="http://www.geocities.com/jrogers99/index.html">Multiple 
+HTML</ulink>
+</para></listitem>
+<listitem><para>
+<ulink url="http://www.geocities.com/jrogers99/iom.html">Single 
+HTML</ulink>
+</para></listitem>
+<listitem><para>
+<ulink url="http://www.geocities.com/jrogers99/iom.pdf">PDF</ulink>
+</para></listitem>
+</itemizedlist>
+</para>
+    </abstract>
+  </articleinfo>
+&intro;
+&install;
+&quick;
+&using;
+</article>

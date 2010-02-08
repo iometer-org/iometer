@@ -1,0 +1,185 @@
+###############################################################################
+##                                                                           ##
+##  Dynamo / Makefile-NetWare.i386                                           ##
+##                                                                           ##
+## ------------------------------------------------------------------------- ##
+##                                                                           ##
+##  Job .......: The Makefile for the GNU/NetWare on i386 variant.           ##
+##                                                                           ##
+## ------------------------------------------------------------------------- ##
+##                                                                           ##
+##  Intel Open Source License                                                ##
+##                                                                           ##
+##  Copyright (c) 2001 Intel Corporation                                     ##
+##  All rights reserved.                                                     ##
+##  Redistribution and use in source and binary forms, with or without       ##
+##  modification, are permitted provided that the following conditions       ##
+##  are met:                                                                 ##
+##                                                                           ##
+##  Redistributions of source code must retain the above copyright notice,   ##
+##  this list of conditions and the following disclaimer.                    ##
+##                                                                           ##
+##  Redistributions in binary form must reproduce the above copyright        ##
+##  notice, this list of conditions and the following disclaimer in the      ##
+##  documentation and/or other materials provided with the distribution.     ##
+##                                                                           ##
+##  Neither the name of the Intel Corporation nor the names of its           ##
+##  contributors may be used to endorse or promote products derived from     ##
+##  this software without specific prior written permission.                 ##
+##                                                                           ##
+##  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS      ##
+##  ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT      ##
+##  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR    ##
+##  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE INTEL OR      ##
+##  ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,         ##
+##  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT         ##
+##  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,    ##
+##  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY    ##
+##  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT      ##
+##  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE    ##
+##  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.     ##
+##                                                                           ##
+## ------------------------------------------------------------------------- ##
+##                                                                           ##
+##  Remarks ...: Compilers and Linkers used:                                 ##
+##  The MetroWorks CodeWarrior 7.0 or greater,                               ##
+##  the Novell CodeWarrior add-on 4.0 or greater,                            ##
+##  the Novell June 30,2003 or later Libc SDK from developer.support.com     ##
+##  downloads                                                                ##
+##  cigwin for using this makefile on windows (W2K was used).                ##
+##  The mpkxdc.exe is needed to make the NLM MP enabled on NetWare and comes ##
+##  with the LIBC SDK from developer support downloads                       ##
+##                                                                           ##
+## ------------------------------------------------------------------------- ##
+##                                                                           ##
+##  Changes ...: 2005-04-07 (tharmon@novell.com)                             ##
+##               - Remove extra white space and carriage return.             ##
+##               2004-08-07 (daniel.scheibli@edelbyte.org)                   ##
+##               - Added iometer target and explained that there is no       ##
+##                 Iometer GUI for non MS Windows platforms so far.          ##
+##               2004-04-19 (tharmon@novell.com)                             ##
+##               - Adopted paths to CodeWarrier 8                            ##
+##               2004-03-29 (tharmon@novell.com)                             ##
+##               - NetWare make file                                         ##
+##                                                                           ##
+###############################################################################
+.MAKE_VERSION: VERSION-1.0
+
+# un-comment out .IGNORE to suppress error messages and not stop make on errors.
+#.IGNORE:
+.SUFFIXES: .cpp .c .o
+
+RM=c:/cygwin/bin/rm -f
+MV=c:/cygwin/bin/mv
+TOUCH=c:/cygwin/usr/bin/touch
+STRIP=c:/cygwin/usr/bin/strip
+# these are actually found at "C:\Program Files\Metrowerks\CodeWarrior\Other Metrowerks Tools\Command Line Tools"
+# moved for convience
+CXX=c:/Novell/CLTools/mwccnlm
+CXY=c:/Novell/CLTools/mwldnlm
+CXZ=c:/Novell/CLTools/mpkxdc
+
+# Some common definitions used.
+# Note 1) -DWORKAROUND_MOD_BUG can be dropped if -O is used in place of -g in CFLAGS
+# Note 2) -DIOMTR_SETTING_OVERRIDE_FS controls inclusion of destructive dynamo code.
+# Note 3) -D_DETAILS=1 -D_DEBUG enables maximum debug information
+# cflags for mwccnlm.exe compiler
+CFLAGS= -c\
+        -Cpp_exceptions on\
+        -lang c++\
+        -enum int\
+        -nodefaults\
+        -warn on, nounwanted, nounused\
+        -align 1\
+        -O0\
+        -i .\
+        -I-\
+        -IC:/Novell/NDK/libc/include\
+        -IC:/Novell/NDK/libc/imports\
+        -I"C:\Program Files\Metrowerks\CodeWarrior8\Novell Support\Metrowerks Support\Headers"\
+        -I"C:\Program Files\Metrowerks\CodeWarrior8\Novell Support\Metrowerks Support\Libraries"\
+        -I"C:\Program Files\Metrowerks\CodeWarrior8\Novell Support\Metrowerks Support\Libraries\MSL C++\Include"\
+		-D_GNU_SOURCE\
+        -DIOMTR_OSFAMILY_NETWARE -DIOMTR_OS_NETWARE\
+        -DIOMTR_CPU_I386\
+        -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64\
+		-D_REENTRANT\
+	    -DUSE_NEW_DISCOVERY_MECHANISM -DFORCE_STRUCT_ALIGN
+
+# link flags for mwldnlm.exe
+LDFLAGS=-nlmversion 1,0,0 \
+		-nostdlib \
+		-stacksize 524288 \
+		-entry _LibCPrelude \
+		-exit _LibCPostlude \
+		-l . \
+		-copyright 'Intel (c) All rights reserved.' \
+		-description 'NetWare port of Intels Dynamo.'
+
+OBJECTS= IOGlobals.o \
+         Pulsar.o \
+         IOManager.o IOManagerNetware.o \
+    	 IOGrunt.o \
+	     IOTarget.o IOTargetDisk.o IOTargetTCP.o \
+	     IOPort.o IOPortTCP.o \
+	     Network.o NetTCP.o \
+	     ByteOrder.o \
+ 	     IOPerformance.o IOPerformanceNetware.o \
+	     IOTime.o \
+	     IOCQAIO.o IOCompletionQ.o \
+	     IOAccess.o
+
+LIBS = "C:\Program Files\Metrowerks\CodeWarrior8\Novell Support\Metrowerks Support\Libraries\MSL C++\mwcpp.lib" \
+       "C:\Program Files\Metrowerks\CodeWarrior8\Novell Support\Metrowerks Support\Libraries\MSL C++\mwcppd.lib" \
+       "C:\Program Files\Metrowerks\CodeWarrior8\Novell Support\Metrowerks Support\Libraries\Runtime\mwcrtld.lib" \
+       C:/Novell/NDK/libc/imports/libcpre.o
+
+# Make Rules
+help:
+	@echo
+	@echo "Please pick one of the listed targets:"
+	@echo                                                              
+	@echo "   all       Build the binaries"
+	@echo "   dynamo    Build the dynamo binary"
+	@echo "   iometer   Build the iometer binary (not supported) *"
+	@echo "   clean     Remove old binaries and object files"
+	@echo                                                              
+	@echo "   * = The Iometer GUI is so far only available for MS Windows," 
+	@echo "       but you can use it to control dynamo's running on Linux." 
+	@echo                                                              
+
+all: dynamo
+
+dynamo: $(OBJECTS)
+# build XDC file
+	$(CXZ) -n dynamo.xdc
+
+# create a def file for the nlm linker
+	$(RM) dynamo.def
+	@echo threadname Dynamo >>dynamo.def
+	@echo type 4                >>dynamo.def
+	@echo debug >>dynamo.def
+	@echo module libc.nlm >>dynamo.def
+	@echo import @C:/novell/ndk/libc/imports/libc.imp MM_FindObjectType, MM_ReturnObjectGenericInfo, \
+	MM_ReserveIOObject, MM_ReleaseIOObject, MM_RegisterObject, MM_UnregisterObject, MM_ObjectBlockingIO, \
+	MM_ObjectIO, fstat_500, stat_500, SSGetLANCommonCounters, EnterDebugger, GetTimerMinorTicksPerSecond, \
+	AllocateResourceTag >>dynamo.def
+	@echo xdcdata dynamo.xdc                                                          >>dynamo.def
+
+	$(CXY) -commandfile dynamo.def $(LDFLAGS) -map dynamo.map -o dynamo.nlm $(OBJECTS) $(LIBS) 
+	
+clean:
+	$(RM) $(OBJECTS) dynamo.nlm dynamo.def dynamo.xdc
+
+install:
+	echo "Not Supported."
+
+iometer:
+	echo "Not Supported."
+
+.cpp.o:
+	$(CXX) $(CFLAGS) -c $<
+
+.c.o:
+	$(CXX) $(CFLAGS) -c $<
+

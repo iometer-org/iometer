@@ -1,0 +1,699 @@
+12345678901234567890123456789012345678901234567890123456789012345678901234567890
+         1         2         3         4         5         6         7         8
+----+----|----+----|----+----|----+----|----+----|----+----|----+----|----+----|
+
+
+
+Additional Release Notes for Iometer (2003.02.08 and above)
+
+  ------------------------------------------------------------------------
+
+Table of Contents
+
+Iometer Developer's Guide
+
+   * 1     Introduction
+   * 1.1   Coding style
+   * 1.2   Creating a patch
+
+   * 2     Building Iometer
+   * 2.1   Makefile issues
+
+   * 3     Testing Iometer (coming later)
+
+   * 4     Porting Iometer
+   * 4.1   To another OS (coming later)
+   * 4.2   To another CPU (coming later)
+
+   * 5     Extending Iometer (coming later)
+   * 5.1   By other Storage targets (coming later)
+   * 5.2   By other Network targets (coming later)
+
+   * A     File descriptions
+   * A.1   Iometer
+   * A.2   Dynamo 
+
+  ------------------------------------------------------------------------
+
+Iometer Developer's Guide
+
+  ------------------------------------------------------------------------
+
+1 Introduction
+
+Starting with the development of Iometer you first have to have access to
+the source code. Best is to use the CVS server provided by sourceforge.
+
+If you do not have a change to get this done (restrictive firewall etc.)
+you can download the nightly tarball of the CVS respository from:
+
+http://cvs.sourceforge.net/cvstarballs/iometer-cvsroot.tar.bz2
+
+Another good source might be the development snapshots (iometer-devel
+package) that you can find in the download area at SourceForge.
+
+  ------------------------------------------------------------------------
+
+1.1 Coding style
+
+Right now there is not much to tell, as the source code is still under
+consolidation. But you should at least considere the following:
+
+ o Document each change you are doing. For which change ever, you have
+   to at least document it in the header of the touched codefile. Put
+   the date as well as your name / email address as basic input in
+   and describe what you are doing and why you are doing it.
+   
+   Try to reduce yourself to a realtive short but telling text - if
+   you need some examples, then have a look to IOCommon.h.
+   
+   In case you are doing a more complex change / addition, it is wise
+   to at some more documentation at the location of the code itself.
+   This helps other people and yourself (if you read your coding a
+   few months later!) understanding the purpose, assumptions and the
+   implementation itself.
+   
+   If it is even more relevant, then document it in this file. If in
+   doubt, then definitively document it in this file!
+
+ o Use normal tab spacing (tab = 8 spaces).
+
+ o Place the open "{" after the condition (for instance "if(...) {").
+
+ o If you want to mark the code to indicate that something still has
+   to be done there - use the "TODO:" token (simular to the "FIXME"
+   token in the Linux kernel). Of course it is best if you do not
+   have a need for such indicators - meaning you directly go with the
+   final version of the code.
+
+ o Make use of the IOMTR_... defines/macros (see further parts of the
+   document) and do not create you own FOO_BAR defines.
+   
+ o If you work with ifdef's that do have an else case, then formulate
+   your entire construct that way, that the else case is empty except
+   for a new platform.
+   
+   Lets thing about an example where you wanted to do foo for Netware
+   and Unix, but bar for Windows. In this case a single if/else/endif
+   is not enough, as introducing a new (4th) operating sytem family
+   would potentically brake unnoticed. Therefor it is a must that you
+   do the following:
+   
+   #if defined(IOMTR_OSFAMILY_NETWARE) || defined(IOMTR_OSFAMILY_UNIX)
+    // foo
+   #elif defined(IOMTR_OSFAMILY_WINDOWS)
+    // bar
+   #else
+    #warning ===> WARNING: You have to do some coding here to get the port done!
+   #endif
+
+ o If you are doing ifdefs with multiple conditions, then sort the
+   elements in an alphabetic order. The example in before for instance
+   is doing that and listing Netware before Unix (as this all gets
+   interpreted by the preprocessor, there is no need to tune - in
+   terms of most likely first - here).
+
+  ------------------------------------------------------------------------
+
+1.2 Creating a patch
+
+If you are going to develope some extension to Iometer or provide a new
+port, you soon or later will have to create a patch. Therefore it helps
+all involved parties enormously if you keep the following things in mind:
+
+ o First of all before starting coding it is a good idea to ask within the
+   iometer-devel@lists.sourceforge.net mailing list if someone is already
+   working on the changes you wanna go for.
+   
+ o While coding it is wise to comply with the points outlined in the Coding
+   Style section above. One of the most important things here is that you
+   document (within the code) what you have changed (and of course why).
+   
+ o Once you are finished and carefully tested what you did, you might
+   go for sending your patch into the free world. The best location for
+   submitting a patch is the Patch area of the
+   http://sourceforge.net/projects/iometer page. Another alternative is
+   to sent this patch to the already mentioned
+   iometer-devel@lists.sourceforge.net mailing list. If you are going to
+   sent the patch to one of the project managers, then at least CC the
+   iometer-devel@lists.sourceforge.net mailing list as well (except there
+   is some very good reason for not doing so - can't think of such a
+   reason).
+
+  ------------------------------------------------------------------------
+
+2.1 Makefile issues
+
+For each of the different supported Unix operating system we have a
+independent makefile. You can identify the appropriate one by its name
+(the makefile for Linux is named Makefile-Linux and so on).
+
+The most important part is the CFLAGS variable which defines the flags
+used while compilation of the sources. Beside the compiler flags you will
+find important global defines (-D<key>[=<value>]):
+
+ o IOMTR_OSFAMILY_...
+ 
+   This are global defines to identify the Operating System family:
+
+   IOMTR_OSFAMILY_NETWARE    Any Netware based Operating System
+   IOMTR_OSFAMILY_UNIX       Any UNIX, currently Linux and Solaris
+   IOMTR_OSFAMILY_WINDOWS    Any Windows based Operating System
+
+   Note: The Operating System family could be autodetected by mapping the
+         given IOMTR_OS_... value. But this implies, that every code- and
+	 headerfile includes IOCommon.h which is not given at this time.
+
+ o IOMTR_OS_...
+
+   This are global defines to identify the Operating System itself: 
+   IOMTR_OS_FREEBSD          FreeBSD, 32 bit *
+   IOMTR_OS_LINUX            Linux, 32 bit   
+   IOMTR_OS_LINUX64          Linux, 64 bit *
+   IOMTR_OS_NETWARE          Novell Netware, 32 bit
+   IOMTR_OS_OSX              Mac OS X, 64 bit
+   IOMTR_OS_SOLARIS          Sun Solaris (64 bit)
+   IOMTR_OS_WIN32            Microsoft Windows, 32 bit
+   IOMTR_OS_WIN64            Microsoft Windows, 64 bit
+   
+   * = Not yet implemented / supported.
+
+ o IOMTR_OSVERSION_...
+
+   This are _no_ global defines, but used in the iomtr_kstat module code,
+   so they are listed here as well:
+   IOMTR_OSVERSION_LINUX24   Linux, 2.4 kernel
+   IOMTR_OSVERSION_LINUX26   Linux, 2.6 kernel   
+   
+   * = Not yet implemented / supported.
+
+ o IOMTR_CPU_...
+
+   This are global defines to identify the Processor / CPU itself: 
+   IOMTR_CPU_ALPHA           Alpa CPU (Digital->Compaq->HP) *
+   IOMTR_CPU_I386            Intel x86 processors (32 bit)
+   IOMTR_CPU_IA64            Intel Itanium family (64 bit)
+   IOMTR_CPU_MIPS            MIPS CPU (used in SGI machines etc.) *
+   IOMTR_CPU_PPC             PowerPC processor (Apple machines etc.)
+   IOMTR_CPU_SPARC           Sun Sparc processor (64 bit)
+   IOMTR_CPU_X86_64          AMD x86 with 64 bit extention and
+                             Intel Xeon with EM64T
+   IOMTR_CPU_XSCALE          Intel XScale processor
+    
+   * = Not yet implemented / supported.
+
+ o IOMTR_SETTING_...
+
+   This family of global defines activates parts of the code that are not
+   active by default. Such parts of the code can be dangerous or require
+   non standard libraries: 
+   
+   IOMTR_SETTING_CPU_AFFINITY  Enables the CPU affinity support within the
+                               coding - currently supported on Linux and
+			       Windows only (on other platforms this code
+			       does nothing).
+   IOMTR_SETTING_GCC_M64       The GCC compiler used for Linux builds have
+                               a (GCC) build time option to make pointers
+                               and longs 64 bits. Useful only on 64 bit
+                               operating systems.
+   IOMTR_SETTING_KSTAT_PERCPU  For the Linux kernel module. The kstat kernel
+                               structure in some smp Linux version use an
+                               alternative structure called 'percpu'.
+   IOMTR_SETTING_NO_CPU_KHZ    For the Linux kernel module. A few non i386
+                               kernels don't export cpu_khz.
+   IOMTR_SETTING_OVERRIDE_FS   DANGER!!! - Additional code for dynamo, which
+                               allows it to use a (not mounted) file system
+			       partitions as target. Please notice that
+			       this destroys the file system and overwrites
+			       the contained data!
+			       This feature is for the Sun Solaris platform
+			       only and gets included when compiling with
+			       this global define. To activate it you also
+			       have to set a environment variable named
+			       IOMTR_SETTING_OVERRIDE_FS
+   IOMTR_SETTING_VI_SUPPORT    Adds VI (Virtual Interface Architecture)
+                               support to the dynamo executable.   
+
+ o IOMTR_MACRO_...
+ 
+   This family of global defines is not realy relevant to the makefile, but
+   we will covere them here as well as this is the best location for them
+   (with the current status of this document in mind).
+   
+   The global defines starting with this prefix are macros in reality. They
+   get defined in the IOCommon.h file and cover small functional parts like
+   min() / max() for instance. The documentation of the macros that are
+   realy implemented, can be found in the close to their definition (in
+   the IOCommon.h file).
+
+   IOMTR_MACRO_INTERLOCK_CAST  The different compilers used to build Dynamo
+                               can be senitive about parameter type. This
+                               macro casts the parameters to the interlocked
+                               functions used for thread communication.
+   
+ o _DEBUG
+
+   This is the global "switch" to activate the debugging code.  
+   
+   Note: We can not change its name to DEBUG for instance, because
+         the MFC Library (Windows only) gets into debugging mode when
+	 _DEBUG is defined, so we have to stick with it. Another option
+	 is to use our own DEBUG define and then activate _DEBUG using
+	 a #ifdef statement (something for the IOCommon.h file).
+
+ o _GALILEO_ / _PULSAR_
+
+   This are two global defines to distinguish Iometer (_GALILEO_) from
+   Dynamo (_PULSAR_) parts in the code. For instance this "switches" are
+   used to define if error messages are prompted as Message Box or
+   directly printed to the console.
+   
+ ...
+
+  ------------------------------------------------------------------------
+
+4 Porting Iometer
+
+Since Iometer is an Open Source project, there was/are different ports under
+way. If you are interested in porting to a new Operating System/Processor
+combination, the following mail - containing a first starting point - might
+be of interest to you:
+
+<snippet>
+
+Date: Tue, 18 Nov 2003 12:03:08 +0100 
+From: "Daniel Scheibli" <daniel.scheibli@edelbyte.org>     
+To: ...
+Subject: Re: Iometer
+ 
+Hi,
+
+well I think the first steps could be to download the latest
+CVS tree stuff.
+
+There I applied some big patches which brings the so called
+IOMTR_* defines (described in the second part of the README
+file). So that way you could create a new IOMTR_OS_* define
+for <OS/> (in the README and the IOCommon.h file), choose
+the proper IOMTR_OSFAMILY_* define [1] and create a Makefile
+for <OS/>.
+
+Then I would do a first compile - for shure it will not work,
+but that way you can easily identify most of the locations in
+the code where you might have to do something. This comes due
+to the "#warning" stuff which is everywhere in the code where
+we have a code inclusion based on IOMTR_OS_*, IOMTR_OSFAMILY_*
+or IOMTR_CPU_*.
+
+>From there you could start extending this "#if / #elif" clauses
+(most of the times it will be just adding IOMTR_OS_<OS/> to the
+Unix fraction). The most prominent needs for coding I see
+
+- <OS/> specific include files
+- Asynchronous I/O (there are Windows API
+  calls or a emulation for Linux / Solaris)
+- The time-measurement (for i386 we do
+  RDTSC calls which might differ in the
+  way of how to do this call for <OS/>.
+  You also have to ensure that the CPU
+  speed in MHz is detected properly)
+
+I think thats basically it - at least what comes to my mind
+first. If you are realy going for it (I would love to see and
+support it), then for shure we can go more into details.
+
+Looking forward to hear from you.
+
+Daniel Scheibli
+
+</snippet>
+
+In general it can be said, that the efforts for porting Dynamo depends on
+the possibilities of reuse.
+
+ - Operating System Family - Adding a new Operating System Family can eat
+   up a lot of effort. The good news is that Unix and Windows are already
+   in, so we do not expect to see that much new platforms.
+
+ - Operating System - If the Operating System fits into an already
+   supported Operting System Family the most effort was already done
+   for you.
+
+ - Processor Family - Supporting another processor mostly requires the
+   handling of endianess and the time measurement (using the RDTSC
+   instruction under I386 for instance).
+
+  ------------------------------------------------------------------------
+
+A File descriptions
+
+In the following two subchapters you will find a lists with descriptions
+for each file within the source tarball (grouped by there primary job).
+
+One of the few common rules within the Iometer / Dynamo source seems to
+be, that once a class is defined and implemented, you will find the class
+defintion in foo.h and its implementation in foo.cpp.
+
+  ------------------------------------------------------------------------
+
+A.1 Iometer
+
+ o Central configuration
+
+    - IOCommon.h               (<none>)
+
+      This is THE central header file of the project. It contains basic
+      settings for Iometer as well as Dynamo. Limits like MAX_WORKERS
+      or MAX_TARGETS are defined here.
+
+    - IOVersion.h              (<none>)
+
+      The primary job of this file is to set the version string
+      (IOVER_FILEVERSION) as well as other descriptive stuff.
+
+      Keep in mind, that once you have changed the version string, you
+      have to compile both Iometer and Dynamo - otherwise the login (which
+      is done at Dynamo startup) will fail.
+
+ o Core code
+
+    - GalileoApp.h             (CGalileoApp)
+    - GalileoApp.cpp           (CGalileoApp)
+
+      The CGalileoApp class is THE central class of Iometer - it is simular
+      to the main() function of traditional C programs.
+
+    - ManagerList.h 
+    - ManagerList.cpp 
+
+      The ManagerList class gets instantited by the CGalileoApp class. It
+      represents a list of Manager class instances.
+
+    - Manager.h 
+    - Manager.cpp 
+
+      The Manager class represents a single instance of an single manager
+      (which is a running instance of the Dynamo executable). Do not get
+      confused, due to the fact, that Dynamo has an Manager class as well.
+      Both are talking about the same subject, but contains different coding.
+      
+ o Helping code (User Interface)
+
+    - LegalBox.h               (CLegalBox)
+    - LegalBox.cpp             (CLegalBox)
+
+    - GalileoView.h            (CGalileoView)
+    - GalileoView.cpp          (CGalileoView)
+    
+      This class manages and contains the overall GUI stuff. It is a large
+      file containing a mixture of GUI handling and core functionality.
+      Beside other things, it contains the AddDefaultWorkers() method which
+      is responsible to add the number of disk and network workers (the
+      numbers are specified in the "Test setup" tab of the Iometer GUI).
+    
+    - MainFrm.h                (CMainFrame)
+    - MainFrm.cpp              (CMainFrame)    
+
+    - PageDisk.h               (CPageDisk)
+    - PageDisk.cpp             (CPageDisk)    
+    - PageNetwork.h            (CPageNetwork)
+    - PageNetwork.cpp          (CPageNetwork)
+    - PageTarget.h             (<none>)
+    - PageAccess.h             (CPageAccess)
+    - PageAccess.cpp           (CPageAccess)
+    - PageDisplay.h            (CPageDisplay)
+    - PageDisplay.cpp          (CPageDisplay)
+      ...
+
+    - PageSetup.h              (CPageSetup)
+    - PageSetup.cpp            (CPageSetup)
+
+      Responsible for the "Test Setup" tab of the Iometer GUI. Beside the
+      coding for user interaction, you find the default settings within the
+      OnInitDialog() method.
+      The number of disk and network workers per manager is defined here
+      too. The defaults differ between debug code and release code.      
+
+    - AccessDialog.h           (CAccessDialog)
+    - AccessDialog.cpp         (CAccessDialog)
+
+      Responsible for the "Access Specification" dialog in the Iometer GUI.
+      The SetSize() function for instance is setting the size of the
+      Transfer Requests based on the three sliding listboxes (MB, KB, Bytes).
+
+    - BigMeter.h               (CBigMeter)
+    - BigMeter.cpp             (CBigMeter)
+    - MeterCtrl.h              (CMeterCtrl)
+    - MeterCtrl.cpp            (CMeterCtrl)
+    ...
+ 
+ o Helping code (Rest of)
+
+    - GalileoDefs.h            (<none>)
+    - GalileoGlobals.cpp       (<none>)
+
+    - GalileoCmdLine.h         (<none>)
+    - GalileoCmdLine.cpp       (<none>)
+
+    - AccessSpecList.cpp       (AccessSpecList)
+
+      Implements the Global Access Specifications list shown in the dialog
+      with the same name. This list contains "Idle", "Default" and a number
+      of samples ready to use.
+
+    - GalileoDoc.h
+    - GalileoDoc.cpp
+    - ICF_ifstream.h
+    - ICF_ifstream.cpp
+    - ICFOpenDialog.h
+    - ICFOpenDialog.cpp
+    - ICFSaveDialog.h
+    - ICFSaveDialog.cpp
+    - IOAccess.h 
+    - IOAccess.cpp 
+    - IOGlobals.cpp 
+    - IOPort.h 
+    - IOPort.cpp 
+    - IOPortTCP.h 
+    - IOPortTCP.cpp
+    - IOSTREAM 
+    - IOTest.h 
+    - IOTime.h 
+    - IOTime.cpp 
+    - IOTransfer.h 
+    - ISTREAM 
+    - ManagerMap.h 
+    - ManagerMap.cpp 
+    - OSTREAM 
+    - StdAfx.h 
+    - StdAfx.cpp 
+    - TextDisplay.h 
+    - TextDisplay.cpp
+    - vipl.h 
+    - WaitingForManagers.h 
+    - WaitingForManagers.cpp 
+    - Worker.h 
+    - Worker.cpp 
+    - WorkerView.h 
+    - WorkerView.cpp
+    ...
+
+    - Galileo.rc              (<none>)
+    - resource.h              (<none>)
+    - res/Iometer.rc2         (<none>)
+
+      This resource and there header files which are needed to compile the
+      executable for Windows.
+
+    - Iometer.dsw             (<none>)
+    - Iometer.dsp             (<none>)
+
+      Both Workspace and Project file are used to compile the Iometer code
+      with Microsoft Developer / Visual Studio.
+
+    - Iometer/makefile        (<none>)
+    - Iometer/sources         (<none>)
+
+      Files needed to build the Iometer GUI executable with the Microsoft
+      Driver Development Kit.
+
+  ------------------------------------------------------------------------
+
+A.2 Dynamo
+
+ o Central configuration
+
+    - IOCommon.h               (<none>)
+
+      This is THE central header file of the project. It contains basic
+      settings for Iometer as well as Dynamo. Limits like MAX_WORKERS
+      or MAX_TARGETS are defined here.
+
+    - IOVersion.h              (<none>)
+
+      The primary job of this file is to set the version string
+      (IOVER_FILEVERSION) as well as other descriptive stuff.
+
+      Keep in mind, that once you have changed the version string, you
+      have to compile both Iometer and Dynamo - otherwise the login
+      (which is done at Dynamo startup) will fail.
+
+ o Core code
+
+    - Pulsar.cpp              (<none>)
+
+      This is THE central code file of Dynamo, housing the essential
+      main() function.      
+
+    - IOManager.h             (Manager)
+    - IOManager.cpp           (Manager)
+    - IOManagerLinux.cpp      (Manager)
+    - IOManagerSolaris.cpp    (Manager)      
+      
+      The Manager class is Dynamo's main class and is instantiated by
+      the main() function (see Pulsar.cpp).
+
+      IOManager.cpp implements the platform independent as well as the
+      Windows related stuff.
+      IOManagerLinux.cpp and IOManagerSolaris.cpp contains coding related
+      to that platforms - the differenciation is done by cheating with
+      defines.
+
+    - IOGrunt.h               (Grunt)
+    - IOGrunt.cpp             (Grunt)
+
+      The Grunt class represents an Worker thread and is instantiated up
+      to MAX_WORKERS (see IOCommon.h) times per Manager class object. 
+
+    - IOTarget.h              (Target)
+    - IOTarget.cpp            (Target)
+    - IOTargetDisk.h          (TargetDisk)
+    - IOTargetDisk.cpp        (TargetDisk)
+    - IOTargetTCP.h           (TargetTCP)
+    - IOTargetTCP.cpp         (TargetTCP)
+    - IOTargetVI.h            (TargetVI)
+    - IOTargetVI.cpp          (TargetVI)
+
+      The Target class is a virtual class that represents Worker Targets.
+      The TargetDisk, TargetTCP and TargetVI classes are based on that
+      and covers the target specific implementation.
+      They are instantiated up to MAX_TARGETS (see IOCommon.h) times per
+      Grunt class object.
+
+    - IOAccess.h              (IOAccess)
+    - IOAccess.cpp            (IOAccess)
+    
+      The Access class represents the current Access Specifications for
+      a Worker. An object contains up to MAX_ACCESS_SPECS (see IOAccess.h)
+      Access Specification lines (each represented by a ACCESS struct).
+
+    - IOTransfers.h           (<none>)
+ 
+      Within this header file the Transaction structure is defined which
+      is used by Grunt as well as Target class objects.
+
+ o Helping code (Communication)
+
+    - IOPort.h                (Port)
+    - IOPort.cpp              (Port)
+    - IOPortTCP.h             (PortTCP)
+    - IOPortTCP.cpp           (PortTCP)
+
+      The job of the Port class is to handle the communication between
+      Iometer and Dynamo. PortTCP is implementing the supported to do
+      so. Instantiation is done by the Manager class.
+ 
+    - IOMessage.h             (<none>)
+    - IOTest.h                (<none>)
+
+      This two header files defines message structs and substructs for
+      the communication between Iometer and Dynamo.
+
+    - Network.h               (Network)
+    - Network.cpp             (Network)
+    - NetTCP.h                (NetAsyncTCP)
+    - NetTCP.cpp              (NetAsyncTCP)
+    - NetVI.h                 (NetVI)
+    - NetVI.cpp               (NetVI)
+
+      The Network class is a virtual class which covers the communication
+      between network workers in Dynamo. The NetAsyncTCP and NetVI class
+      are based on that and covers the media specific implementation.
+      Instantiation is done by one of the Target classes.
+
+    - ByteOrder.cpp           (<none>)
+
+      This code file implements the reorder() function, which is used in
+      big endian environments (Sun Sparc processor for example) to swap
+      the byte order. 
+
+ o Helping code (Performance)
+
+    - IOPerformance.h         (Performance)
+    - IOPerformance.cpp       (Performance)
+    - IOPerformanceLinux.cpp  (Performance)
+
+      The Performance class is responsible for providing basic informations
+      as the number of CPU's and their speed. But its primary job is the
+      collection and calculation of system-wide performance figures as for
+      example the CPU utilization.
+
+      The platform independent coding as well as the Windows and Solaris
+      related stuff can be found in IOPerformance.cpp, while the Linux
+      related coding is kept in IOPerformanceLinux.cpp - the seperation is
+      done by cheating with defines.
+
+    - IOTime.cpp              (<none>)
+    
+      This files contains the different implementations for reading the 
+      processors high resolution timers.
+      
+ o Helping code (Rest of)
+
+    - IOCQ.h                  (CQ)
+    - IOCQAIO.h               (CQAIO)
+    - IOCQAIO.cpp             (CQAIO)
+    - IOCQVI.h                (CQVI)
+    - IOCQVI.cpp              (CQVI)
+    - IOCompletionQ.cpp       (<none>)
+
+      The CQ class (Completion Queue) is a virtual class which is used
+      to manage completions. The CQAIO class covers the TargetDisk and
+      TargetTCP objects, CQVI is used for TargetVI objects.
+
+      IOCompletionQ.cpp houses the UNIX implementation of several
+      Windows NT key functions for asynchronous I/O.
+
+    - IOVIPL.h                (VIPL)
+    - IOVIPL.cpp              (VIPL)
+    - VINic.h                 (VINic)
+    - VINic.cpp               (VINic)
+    - vipl.h                  (<none>)
+
+      The VIPL class is a wrapper for all the functions of the VI Provider
+      Library. It is used by the VINic class to abstracts the VI NIC's.
+      The vipl.h header file contains all the VI specific type definitions,
+      structs, enums etc.
+
+    - Pulsar.rc               (<none>)
+    - PulsarRC.h              (<none>)
+    - res/Iometer.rc2         (<none>)
+
+      This resource and there header files which are needed to compile the
+      executable for Windows.
+      
+    - Iometer.dsw             (<none>)
+    - Dynamo.dsp              (<none>)
+    
+      Both Workspace and Project file are used to compile the Dynamo code
+      with Microsoft Developer / Visual Studio.
+
+    - Dynamo/makefile         (<none>)
+    - Dynamo/sources          (<none>)
+
+      Files needed to build the Dynamo executable with the Microsoft Driver
+      Development Kit.
+
+  ------------------------------------------------------------------------
+
+

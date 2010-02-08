@@ -1,0 +1,68 @@
+TARGETNAME=IOMETER
+TARGETPATH=..\ddk\$(DDKBUILDENV)
+TARGETTYPE=PROGRAM
+
+USE_MFC=1
+USE_STL=1 		# requires to use revision stl70 unless using nolibs
+USE_NATIVE_EH=1
+USE_LIBCMT=1
+UMTYPE=windows
+
+MSC_WARNING_LEVEL=/W2
+#/W3 /WX
+
+#        newer DDKS have some SDK components
+#        |                new for Vista DDK, ok to use stl70
+#        |                |                          still requires headers from the real SDK
+#        |                |                          |
+INCLUDES=$(SDK_INC_PATH); $(SDK_INC_PATH)\crt\stl70; $(MSSDK)\INCLUDE; ..
+
+C_DEFINES=$(C_DEFINES) -D_GALILEO_ -D_WINDOWS -DDOSWIN32 -DUSE_NEW_DISCOVERY_MECHANISM -DIOMTR_SETTING_CPU_AFFINITY -DFORCE_STRUCT_ALIGN 
+# -DUSE_NEW_DISCOVERY_MECHANISM (for new disk detect)
+# -DFORCE_STRUCT_ALIGN (structure member alignment)
+# -DIOMTR_SETTING_CPU_AFFINITY (turns on cpu affinity code
+# -D_DETAILS (for more verbosity)
+# -D_DEBUG (for normal debug)
+# -DDEBUG (for DEBUG_NEW only)
+# -DUSING_DDK (not needed with vista ddk)
+
+
+TARGETLIBS=$(SDK_LIB_PATH)\COMCTL32.LIB	\
+	$(SDK_LIB_PATH)\VERSION.LIB	\
+	$(SDK_LIB_PATH)\WSOCK32.LIB	\
+	$(SDK_LIB_PATH)\WS2_32.LIB
+
+LINKER_STACKSIZE=-stack:0x200000,0x100000
+
+SOURCES=..\AccessDialog.cpp		\
+	..\AccessSpecList.cpp		\
+	..\BigMeter.cpp			\
+	..\GalileoApp.cpp		\
+	..\GalileoCmdLine.cpp		\
+	..\GalileoDoc.cpp		\
+	..\GalileoGlobals.cpp		\
+	..\GalileoView.cpp		\
+	..\ICF_ifstream.cpp		\
+	..\ICFOpenDialog.cpp		\
+	..\ICFSaveDialog.cpp		\
+	..\IOGlobals.cpp		\
+	..\IOPort.cpp			\
+	..\IOPortTCP.cpp		\
+	..\Iotime.cpp			\
+	..\LegalBox.cpp			\
+	..\MainFrm.cpp			\
+	..\Manager.cpp			\
+	..\ManagerList.cpp		\
+	..\ManagerMap.cpp		\
+	..\MeterCtrl.cpp		\
+	..\PageAccess.cpp		\
+	..\PageDisk.cpp			\
+	..\PageDisplay.cpp		\
+	..\PageNetwork.cpp		\
+	..\PageSetup.cpp		\
+	..\StdAfx.cpp			\
+	..\TextDisplay.cpp		\
+	..\WaitingForManagers.cpp	\
+	..\Worker.cpp			\
+	..\WorkerView.cpp		\
+	..\Galileo.rc

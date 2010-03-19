@@ -955,6 +955,8 @@ BOOL TargetDisk::Set_Sizes(BOOL open_disk)
 		DISK_GEOMETRY_EX disk_geo_info_ex;
 
 		SetLastError(0);
+
+		spec.disk_info.has_partitions = FALSE;
 		
 		// Try the EX version first
 		if (DeviceIoControl(disk_file, IOCTL_DISK_GET_DRIVE_LAYOUT_EX, NULL, 0,
@@ -1006,7 +1008,9 @@ BOOL TargetDisk::Set_Sizes(BOOL open_disk)
 		}
 
 		// Getting information on the size of the drive.
-		
+		size = 0;
+		spec.disk_info.sector_size = 0;
+
 		// Try the EX version first
 		if (DeviceIoControl(disk_file, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX, NULL, 0,
 			&disk_geo_info_ex, sizeof(disk_geo_info_ex), &disk_info_size, NULL)) {

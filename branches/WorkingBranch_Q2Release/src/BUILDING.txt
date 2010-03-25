@@ -1,0 +1,29 @@
+Windows
+-------
+
+IOmeter is comprised of 2 components for Windows -- the IOmeter GUI/control application and the dynamo I/O engine. Both are buildable in any version of windows in 2 ways.
+
+Requirements:
+Visual Studio 2008 (VC9) or
+Visual Studio 2005 (VC8)*  or
+Windows Development Kit (Win2k3 or later, also called DDK) and
+Platform SDK of a recent vintage (if using with WDK/DDK)
+
+src\msvc9  	-Contains the project files for x86/x64/ia64 builds. 
+		-Note, for ia64, the Team Suite version of Visual Studio is required.
+		-The resulting binaries are located within this directory.
+
+src\ddk		-Contains the resulting binaries when using the WDK/DDK
+src\pulsar	-Root directory from where to build dynamo using the WDK/DDK
+src\galileo	-Root direcyory from where to build iometer using the WDK/DDK
+		-Note, you may also build from \src which will build both concurrently
+
+Caveat, I have not tested ddk builds older than Vista (build 6000.xxx) and may will not guarantee WDK/DDK build success unless using something very recent.
+
+
+*Note, a VC8 projects does not exist yet, and older versions of the project file were deleted due to lack of proper cross platform build support.
+
+
+
+Linux
+-----

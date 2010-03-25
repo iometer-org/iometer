@@ -1,0 +1,100 @@
+IOMETER can not be here without efforts and support from many individuals and 
+companies. This is at least a partial credits file to list people and companies 
+that have contributed to the IOMETER project. It borrows the format used in 
+Linux kernel project and is sorted by last name.
+
+The fields are: 
+	Name (N),
+	Email (E),
+	Company (C),
+	Web-address (W),
+	Description (D)
+
+Note: This list is far from complete. Especially special thanks go to our end
+	users. And we are sorry that we can not list your names here.
+	
+	Please notify Daniel or Ming if there is anything missed or wrong. 
+	Thank you for your long time support on IOMETER!
+
+--------------------------------------------------------------------------------
+
+N:
+E:
+C: INTEL
+W: http://www.intel.com
+D: Initial code of IOMETER.
+D: Implemented Windows/IA32 support.
+
+N: Rick Altherr
+E: raltherr@apple.com
+C: APPLE
+W: http://www.apple.com
+D: Added Mac OS/X support for IOMETER.
+
+N: Lamont Cranston
+E: lamontcranston41@yahoo.com
+D: 
+
+N: Andy Currid
+E: acurrid@nvidia.com
+C: NVIDIA
+W: http://www.nvidia.com
+D: Various BUG fixes.
+
+N: Vedran Degoricija
+E: vedrand@users.sourceforge.net
+D: Current Windows/IA32 and Windows/IA64 maintainer.
+
+N: Dan Bar Dov
+E: danb@voltaire.com
+C: VOLTAIRE
+W: http://www.voltaire.com/
+D: Added Linux/PPC support for IOMETER and various bug fixes.
+
+N: Joe Eiler
+E: joe@eiler.net
+D: Current Solaris maintainer and various bug fixes.
+
+N: Thayne Harmon
+E: thayneharmon@users.sourceforge.net
+C: NOVELL
+W: http://www.novell.com
+D: Added Netware/IA32 support for IOMETER.
+
+N: Ralf Lichtenstein
+E: moozart@gmx.de
+D: Various Bug fixes.
+
+N: Richard Riggs
+E: reriggs@users.sourceforge.net
+D: Provide sample ICF's
+
+N: Matt D. Robinson
+E: yakker@aparity.com
+D: Various BUG fixes.
+
+N: Daniel Scheibli
+E: daniel.scheibli@edelbyte.org
+W: http://www.scheibli.com/
+D: Main maintainer.
+
+N: Henry Tieman
+E: henryx.w.tieman@intel.com
+C: INTEL
+W: http://www.intel.com
+D: Added Linux/X86_64 and Linux/IA64 support for IOMETER.
+
+N: Ming Zhang
+E: mingz@ele.uri.edu
+W: http://www.ele.uri.edu/~mingz
+D: Co-maintainer.
+
+N: Ian Brown
+E: ian@zestysoft.com
+D: Provided a perl script to generate graphs.
+
+N: Kris Murray and Allen Wayne
+C: INTEL
+D: Added code to randomize the written data. Also initial drop
+   of the new timer code on Windows platform.
+

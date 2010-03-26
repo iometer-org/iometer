@@ -116,6 +116,7 @@ class Access {
 
 	int max_transfer;	// Maximum size of a transfer request for a test.
 
+	BOOL HasWrite();
       private:
 
 	ACCESS access_grid[MAX_ACCESS_SPECS];

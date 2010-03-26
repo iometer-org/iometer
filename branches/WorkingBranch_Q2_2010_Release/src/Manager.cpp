@@ -605,9 +605,12 @@ void Manager::SaveResults(ostream * file, int access_index, int result_type)
 	    << "," << results[WHOLE_TEST_PERF].IOps
 	    << "," << results[WHOLE_TEST_PERF].read_IOps
 	    << "," << results[WHOLE_TEST_PERF].write_IOps
-	    << "," << results[WHOLE_TEST_PERF].MBps
-	    << "," << results[WHOLE_TEST_PERF].read_MBps
-	    << "," << results[WHOLE_TEST_PERF].write_MBps
+	    << "," << results[WHOLE_TEST_PERF].MBps_Bin
+	    << "," << results[WHOLE_TEST_PERF].read_MBps_Bin
+	    << "," << results[WHOLE_TEST_PERF].write_MBps_Bin
+	    << "," << results[WHOLE_TEST_PERF].MBps_Dec
+	    << "," << results[WHOLE_TEST_PERF].read_MBps_Dec
+	    << "," << results[WHOLE_TEST_PERF].write_MBps_Dec
 	    << "," << results[WHOLE_TEST_PERF].transactions_per_second
 	    << "," << results[WHOLE_TEST_PERF].connections_per_second
 	    << "," << results[WHOLE_TEST_PERF].ave_latency
@@ -790,9 +793,12 @@ void Manager::UpdateResults(int which_perf)
 		results[which_perf].raw.write_count += worker->results[which_perf].raw.write_count;
 
 		// Recording throughput results.
-		results[which_perf].MBps += worker->results[which_perf].MBps;
-		results[which_perf].read_MBps += worker->results[which_perf].read_MBps;
-		results[which_perf].write_MBps += worker->results[which_perf].write_MBps;
+		results[which_perf].MBps_Bin += worker->results[which_perf].MBps_Bin;
+		results[which_perf].read_MBps_Bin += worker->results[which_perf].read_MBps_Bin;
+		results[which_perf].write_MBps_Bin += worker->results[which_perf].write_MBps_Bin;
+		results[which_perf].MBps_Dec += worker->results[which_perf].MBps_Dec;
+		results[which_perf].read_MBps_Dec += worker->results[which_perf].read_MBps_Dec;
+		results[which_perf].write_MBps_Dec += worker->results[which_perf].write_MBps_Dec;
 		results[which_perf].raw.bytes_read += worker->results[which_perf].raw.bytes_read;
 		results[which_perf].raw.bytes_written += worker->results[which_perf].raw.bytes_written;
 
@@ -967,6 +973,16 @@ void Manager::SetConnectionRate(BOOL test_connection_rate, TargetType type)
 		GetWorker(w, type)->SetConnectionRate(test_connection_rate);
 }
 
+void Manager::SetUseRandomData(BOOL use_random_data, TargetType type)
+{
+	int w, wkr_count;
+
+	// Loop through all the workers.
+	wkr_count = WorkerCount(type);
+	for (w = 0; w < wkr_count; w++)
+		GetWorker(w, type)->SetUseRandomData(use_random_data);
+}
+
 void Manager::SetTransPerConn(int trans_per_conn, TargetType type)
 {
 	int w, wkr_count;
@@ -1005,6 +1021,33 @@ int Manager::GetConnectionRate(TargetType type)
 	// Compare the value with all the other workers of the same type.
 	for (w = 1; w < wkr_count; w++) {
 		if (wkr_result != GetWorker(w, type)->GetConnectionRate(type)) {
+			// The value isn't the same.
+			return AMBIGUOUS_VALUE;
+		}
+	}
+	// All workers have the same value.
+	return wkr_result;
+}
+
+//
+// Returns if the user has chosen to use random data
+//
+int Manager::GetUseRandomData(TargetType type)
+{
+	BOOL wkr_result;
+	int w, wkr_count;
+
+	// If there are no workers, return immediately.
+	if (!(wkr_count = WorkerCount(type)))
+		return AMBIGUOUS_VALUE;
+
+	// Find the first worker of the specified type's transaction per
+	// connection value.
+	wkr_result = GetWorker(0, type)->GetUseRandomData(type);
+
+	// Compare the value with all the other workers of the same type.
+	for (w = 1; w < wkr_count; w++) {
+		if (wkr_result != GetWorker(w, type)->GetUseRandomData(type)) {
 			// The value isn't the same.
 			return AMBIGUOUS_VALUE;
 		}

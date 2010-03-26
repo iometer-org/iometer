@@ -107,13 +107,15 @@ class Grunt {
 	//
 	BOOL Set_Targets(int count, Target_Spec * target_specs = NULL);
 	BOOL Set_Access(const Test_Spec * spec);
-	void Start_Test(int index);
+	void Start_Test(int index, unsigned char* _random_data_buffer, long long _random_data_buffer_size);
 	void Begin_IO();
 	void Record_On();
 	void Record_Off();
 	void Stop_Test();
 	void Wait_For_Stop();
 	void Set_Affinity();
+	int Get_Maximum_Sector_Size();
+	BOOL Need_Random_Buffer();
 	//
 	///////////////////////////////////////////////////////////////////////////
 
@@ -142,10 +144,12 @@ class Grunt {
 
 	volatile TestState grunt_state;	// Grunt's status within the test
 
+	long long random_offset_multiplier;
 	int target_count;	// Number of disks/networks.
 	Access access_spec;	// Access specs for a test.
 	void *read_data;	// Pointer to general data memory area for reading and writing.
 	void *write_data;
+	void *saved_write_data_pointer;
 	int data_size;		// Size of currently allocated data buffers.
 	// This is 0 when the grunt is using the manager's buffer.
 
@@ -157,6 +161,9 @@ class Grunt {
 
 	// Indicates the grunt was assigned an idle access spec.
 	BOOL idle;
+
+	long long random_data_buffer_size;
+	unsigned char* random_data_buffer;
 
       private:
 	void Initialize_Results();

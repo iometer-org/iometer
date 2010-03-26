@@ -108,6 +108,7 @@ void CPageDisk::DoDataExchange(CDataExchange * pDX)
 	DDX_Control(pDX, EQueueDepth, m_EQueueDepth);
 	DDX_Control(pDX, SConnectionRate, m_SConnectionRate);
 	DDX_Control(pDX, CConnectionRate, m_CConnectionRate);
+	DDX_Control(pDX, CUseRandomData, m_CUseRandomData);
 	DDX_Control(pDX, TTargets, m_TTargets);
 	DDX_Control(pDX, EConnectionRate, m_EConnectionRate);
 	DDX_Control(pDX, EDiskStart, m_EDiskStart);
@@ -129,6 +130,7 @@ BEGIN_MESSAGE_MAP(CPageDisk, CPropertyPage)
     ON_EN_SETFOCUS(EConnectionRate, OnSetfocusEConnectionRate)
     ON_NOTIFY(UDN_DELTAPOS, SConnectionRate, OnDeltaposSConnectionRate)
     ON_BN_CLICKED(CConnectionRate, OnCConnectionRate)
+	ON_BN_CLICKED(CUseRandomData, OnCUseRandomData)
     ON_NOTIFY(NM_SETFOCUS, TTargets, OnSetfocusTTargets)
 ON_NOTIFY(TVN_SELCHANGING, TTargets, OnSelchangingTTargets)
     //}}AFX_MSG_MAP
@@ -162,9 +164,10 @@ void CPageDisk::Reset()
 	// Clear the target list.
 	m_TTargets.DeleteAllItems();
 
-	// Display the conneciton rate and disk settings.
+	// Display the conneciton rate, disk settings, and random data check.
 	ShowConnectionRate();
 	ShowSettings();
+	ShowRandomData();
 
 	selected = NULL;
 	highlighted = NULL;
@@ -235,6 +238,9 @@ void CPageDisk::EnableWindow(BOOL enable)
 	// Enable the connection rate check box.
 	m_CConnectionRate.EnableWindow(enable);
 
+	// Enable the random data check box.
+	m_CUseRandomData.EnableWindow(enable);
+
 	// Enable the connection rate edit box and spin control if the connection 
 	// rate check box is checked.
 	m_EConnectionRate.EnableWindow(enable && m_CConnectionRate.GetCheck() == 1);
@@ -285,6 +291,8 @@ void CPageDisk::ShowData()
 	ShowFocus();
 	// Show the connection rate settings.
 	ShowConnectionRate();
+	// Show random data setting
+	ShowRandomData();
 	// Show the disk specific settings.
 	ShowSettings();
 	// Enable the apropriate windows and redraw the page.
@@ -507,6 +515,43 @@ void CPageDisk::ShowConnectionRate()
 			m_EConnectionRate.SetPasswordChar(32);
 			m_EConnectionRate.Invalidate();
 		}
+	}
+}
+
+void CPageDisk::ShowRandomData()
+{
+	Manager *manager;
+	Worker *worker;
+	int use_random_data = 0;
+
+	switch (theApp.pView->m_pWorkerView->GetSelectedType()) {
+	case WORKER:
+		// update controls with worker's data
+		worker = theApp.pView->m_pWorkerView->GetSelectedWorker();
+		if (IsType(worker->Type(), GenericDiskType)) {
+			use_random_data = worker->GetUseRandomData(GenericDiskType);
+		}
+		break;
+	case MANAGER:
+		manager = theApp.pView->m_pWorkerView->GetSelectedManager();
+		use_random_data = manager->GetUseRandomData(GenericDiskType);
+		break;
+	default:
+		use_random_data = theApp.manager_list.GetUseRandomData(GenericDiskType);
+		break;
+	}
+	// If the test connection rate settings are different between a manager's
+	// workers, set the state of the check box to AUTO3STATE and disable the
+	// edit box and spin control.
+	//SetDlgItemInt(EConnectionRate, trans_per_conn);
+	if (use_random_data == AMBIGUOUS_VALUE) {
+		m_CUseRandomData.SetButtonStyle(BS_AUTO3STATE);
+
+		// Set check box to undetermined state.
+		CheckDlgButton(CUseRandomData, 2);
+	} else {
+		m_CUseRandomData.SetButtonStyle(BS_AUTOCHECKBOX);
+		CheckDlgButton(CUseRandomData, use_random_data);
 	}
 }
 
@@ -1224,6 +1269,33 @@ void CPageDisk::OnCConnectionRate()
 		break;
 	case ALL_MANAGERS:
 		theApp.manager_list.SetConnectionRate(m_CConnectionRate.GetCheck(), GenericDiskType);
+		break;
+	}
+	EnableWindow();
+}
+
+//
+// Enables and disables the Use Random Data box
+void CPageDisk::OnCUseRandomData()
+{
+	Manager *manager;
+	Worker *worker;
+
+	// change the check box to true/false only (having clicked, cannot 
+	// return to intermediate state)
+	m_CUseRandomData.SetButtonStyle(BS_AUTOCHECKBOX);
+	// Seeing what kind of item is selected.
+	switch (theApp.pView->m_pWorkerView->GetSelectedType()) {
+	case WORKER:
+		worker = theApp.pView->m_pWorkerView->GetSelectedWorker();
+		worker->SetUseRandomData(m_CUseRandomData.GetCheck());
+		break;
+	case MANAGER:
+		manager = theApp.pView->m_pWorkerView->GetSelectedManager();
+		manager->SetUseRandomData(m_CUseRandomData.GetCheck(), GenericDiskType);
+		break;
+	case ALL_MANAGERS:
+		theApp.manager_list.SetUseRandomData(m_CUseRandomData.GetCheck(), GenericDiskType);
 		break;
 	}
 	EnableWindow();

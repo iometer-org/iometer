@@ -185,7 +185,7 @@ void CPageDisplay::Initialize()
 	theApp.pView->OnMDisplay(MDisplayOpsSubmenuID, MDisplayOpsIOPS);
 
 	selected_button = 1;
-	theApp.pView->OnMDisplay(MDisplayMBsSubmenuID, MDisplayMBsMBPS);
+	theApp.pView->OnMDisplay(MDisplayMBsSubmenuID, MDisplayMBsMBPSDec);
 
 	selected_button = 2;
 	theApp.pView->OnMDisplay(MDisplayAvgSubmenuID, MDisplayAvgIO);
@@ -369,14 +369,23 @@ void CPageDisplay::Update()
 unsigned int CPageDisplay::GetMaxRange(Results * results, int result_type)
 {
 	switch (result_type) {
-	case MBPS_RESULT:
-		return ReportMaxRange((double)results->MBps);
+	case MBPS_BIN_RESULT:
+		return ReportMaxRange((double)results->MBps_Bin);
 		break;
-	case READ_MBPS_RESULT:
-		return ReportMaxRange((double)results->read_MBps);
+	case READ_MBPS_BIN_RESULT:
+		return ReportMaxRange((double)results->read_MBps_Bin);
 		break;
-	case WRITE_MBPS_RESULT:
-		return ReportMaxRange((double)results->write_MBps);
+	case WRITE_MBPS_BIN_RESULT:
+		return ReportMaxRange((double)results->write_MBps_Bin);
+		break;
+	case MBPS_DEC_RESULT:
+		return ReportMaxRange((double)results->MBps_Dec);
+		break;
+	case READ_MBPS_DEC_RESULT:
+		return ReportMaxRange((double)results->read_MBps_Dec);
+		break;
+	case WRITE_MBPS_DEC_RESULT:
+		return ReportMaxRange((double)results->write_MBps_Dec);
 		break;
 
 	case IOPS_RESULT:
@@ -512,17 +521,29 @@ unsigned int CPageDisplay::ReportMaxRange(double max_range_needed)
 BOOL CPageDisplay::GetDisplayData(Results * results, int result_type, double *result_value, CString * result_text)
 {
 	switch (result_type) {
-	case MBPS_RESULT:
-		*result_value = results->MBps;
-		result_text->Format("%.2f", results->MBps);
+	case MBPS_BIN_RESULT:
+		*result_value = results->MBps_Bin;
+		result_text->Format("%.2f", results->MBps_Bin);
 		break;
-	case READ_MBPS_RESULT:
-		*result_value = results->read_MBps;
-		result_text->Format("%.2f", results->read_MBps);
+	case READ_MBPS_BIN_RESULT:
+		*result_value = results->read_MBps_Bin;
+		result_text->Format("%.2f", results->read_MBps_Bin);
 		break;
-	case WRITE_MBPS_RESULT:
-		*result_value = results->write_MBps;
-		result_text->Format("%.2f", results->write_MBps);
+	case WRITE_MBPS_BIN_RESULT:
+		*result_value = results->write_MBps_Bin;
+		result_text->Format("%.2f", results->write_MBps_Bin);
+		break;
+	case MBPS_DEC_RESULT:
+		*result_value = results->MBps_Dec;
+		result_text->Format("%.2f", results->MBps_Dec);
+		break;
+	case READ_MBPS_DEC_RESULT:
+		*result_value = results->read_MBps_Dec;
+		result_text->Format("%.2f", results->read_MBps_Dec);
+		break;
+	case WRITE_MBPS_DEC_RESULT:
+		*result_value = results->write_MBps_Dec;
+		result_text->Format("%.2f", results->write_MBps_Dec);
 		break;
 
 	case IOPS_RESULT:

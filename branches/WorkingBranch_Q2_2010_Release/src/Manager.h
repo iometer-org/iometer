@@ -125,6 +125,7 @@ class Manager {
 	///////////////////////////////////////////////////////////////////////////
 	// Retrieving/setting information about a worker's targets.
 	//
+	BOOL GetUseRandomData(TargetType type);
 	int GetConnectionRate(TargetType type);
 	DWORDLONG GetDiskStart(TargetType type);
 	DWORDLONG GetDiskSize(TargetType type);
@@ -133,6 +134,7 @@ class Manager {
 	int GetMaxSends(TargetType type);
 	int GetTransPerConn(TargetType type);
 	//
+	void SetUseRandomData(BOOL use_random_data, TargetType type);
 	void SetConnectionRate(BOOL test_connection_rate, TargetType type);
 	void SetDiskSize(DWORDLONG disk_size);
 	void SetDiskStart(DWORDLONG disk_start);

@@ -260,6 +260,9 @@ struct Target_Spec {
 	// Target independent test specifications.
 	int queue_depth;
 
+	// Generate random data for writes
+	BOOL UseRandomData;
+
 #ifndef USE_NEW_DISCOVERY_MECHANISM // move above
 	BOOL test_connection_rate;
 #endif

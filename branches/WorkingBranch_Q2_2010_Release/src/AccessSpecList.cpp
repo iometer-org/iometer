@@ -896,6 +896,7 @@ BOOL AccessSpecList::LoadConfigNew(ICF_ifstream & infile)
 	int line_index;
 	int total_access;
 	Test_Spec *spec;
+	string str;
 
 	while (1) {
 		if (!infile.GetPair(key, value)) {
@@ -956,18 +957,30 @@ BOOL AccessSpecList::LoadConfigNew(ICF_ifstream & infile)
 
 			// Read lines until total percentage reaches 100.
 			while (infile.peek() != '\'') {
-				char comma;	// Used to throw commas away.
+				getline(infile,str,',');
+				spec->access[line_index].size = atoi(str.c_str());
 
-				infile >> spec->access[line_index].size >> comma;
-				infile >> spec->access[line_index].of_size >> comma;
-				infile >> spec->access[line_index].reads >> comma;
-				infile >> spec->access[line_index].random >> comma;
-				infile >> spec->access[line_index].delay >> comma;
-				infile >> spec->access[line_index].burst >> comma;
-				infile >> spec->access[line_index].align >> comma;
-				infile >> spec->access[line_index].reply;
-				infile.GetNextLine();
+				getline(infile,str,',');
+				spec->access[line_index].of_size = atoi(str.c_str());
 
+				getline(infile,str,',');
+				spec->access[line_index].reads = atoi(str.c_str());
+
+				getline(infile,str,',');
+				spec->access[line_index].random = atoi(str.c_str());
+
+				getline(infile,str,',');
+				spec->access[line_index].delay = atoi(str.c_str());
+
+				getline(infile,str,',');
+				spec->access[line_index].burst = atoi(str.c_str());
+
+				getline(infile,str,',');
+				spec->access[line_index].align = atoi(str.c_str());
+
+				getline(infile,str);
+				spec->access[line_index].reply = atoi(str.c_str());
+				
 				// Sanity check.
 				if (spec->access[line_index].of_size > 100 ||
 				    spec->access[line_index].reads > 100 ||
@@ -1155,11 +1168,11 @@ void AccessSpecList::SmartName(Test_Spec * spec)
 	case 512:
 		name = "512byte";
 		break;
-	case MEGABYTE:
+	case MEGABYTE_BIN:
 		name = "1MB";
 		break;
 	default:
-		name.Format("%dKB", (spec->access[0].size / KILOBYTE));
+		name.Format("%dKB", (spec->access[0].size / KILOBYTE_BIN));
 	}
 
 	// Switch statement for random/sequential part of name

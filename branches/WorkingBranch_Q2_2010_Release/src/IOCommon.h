@@ -435,17 +435,21 @@ using namespace std;
 #define LONG_DELAY    3000   // msec. to wait before reattempting an action
 #define IDLE_DELAY    1000   // max msec to wait between calls to CGalileoApp::OnIdle()
 
-#define KILOBYTE   1024
-#define MEGABYTE   1048576
-#define GIGABYTE   1073741824
-#define TERABYTE   1099511627776
+#define KILOBYTE_BIN   1024
+#define MEGABYTE_BIN   1048576
+#define GIGABYTE_BIN   1073741824
+#define TERABYTE_BIN   1099511627776
 
+#define KILOBYTE_DEC   1000
+#define MEGABYTE_DEC   1000000
+#define GIGABYTE_DEC   1000000000
+#define TERABYTE_DEC   1000000000000
 
 #define MAX_NAME	      80   // xca1019: Was 64 - changed according to
                                    // the Solaris 2.6 man page for swapctl(2)
 #define	MAX_CPUS	      64
 #define	MAX_WORKERS	      128
-#define MAX_TARGETS	      2048
+#define MAX_TARGETS	      512
 #define MAX_NETWORK_NAME      128
 #define MAX_NUM_INTERFACES    64
 #define MAX_WORKER_NAME	      128
@@ -656,9 +660,12 @@ struct Results
 	double	     IOps;
 	double	     read_IOps;
 	double	     write_IOps;
-	double	     MBps;
-	double	     read_MBps;
-	double	     write_MBps;
+	double	     MBps_Bin;
+	double	     read_MBps_Bin;
+	double	     write_MBps_Bin;
+	double	     MBps_Dec;
+	double	     read_MBps_Dec;
+	double	     write_MBps_Dec;
 	double	     ave_latency;
 	double	     max_latency;
 	double	     ave_read_latency;

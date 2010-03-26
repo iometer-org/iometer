@@ -83,6 +83,7 @@ class CPageDisk:public CPropertyPage {
 	CEdit m_EQueueDepth;
 	CSpinButtonCtrl m_SConnectionRate;
 	CButton m_CConnectionRate;
+	CButton m_CUseRandomData;
 	CTreeCtrl m_TTargets;
 	CEdit m_EConnectionRate;
 	CEdit m_EDiskStart;
@@ -103,6 +104,7 @@ class CPageDisk:public CPropertyPage {
 	void SetFocusHome();
 	void SetFocusEnd();
 
+	void ShowRandomData();
 	void ShowConnectionRate();
 	void ShowTargetSelection();
 	void ShowSettings();
@@ -143,6 +145,7 @@ class CPageDisk:public CPropertyPage {
 	afx_msg void OnSetfocusEConnectionRate();
 	afx_msg void OnDeltaposSConnectionRate(NMHDR * pNMHDR, LRESULT * pResult);
 	afx_msg void OnCConnectionRate();
+	afx_msg void OnCUseRandomData();
 	afx_msg void OnSetfocusTTargets(NMHDR * pNMHDR, LRESULT * pResult);
 	afx_msg void OnSelchangingTTargets(NMHDR * pNMHDR, LRESULT * pResult);
 	//}}AFX_MSG

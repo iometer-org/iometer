@@ -189,6 +189,29 @@ void Grunt::Initialize_Results()
 	memset(&prev_worker_performance, 0, sizeof(Worker_Results));
 }
 
+int Grunt::Get_Maximum_Sector_Size() {
+
+	int max_sector_size = 0;
+	for (int i = 0; i < target_count; i++) {
+		max_sector_size = __max(targets[i]->spec.disk_info.sector_size, max_sector_size);
+	}
+	return max_sector_size;
+}
+
+BOOL Grunt::Need_Random_Buffer() {
+
+	BOOL need_random_buffer = false;
+	BOOL has_write = access_spec.HasWrite();
+
+	for (int i = 0; i < target_count; i++) {
+		if(targets[i]->spec.UseRandomData && has_write) {
+			need_random_buffer = true;
+			break;
+		}
+	}
+	return need_random_buffer;
+}
+
 //
 // Setting the size of the target array to hold the number and type of 
 // targets specified.  If the requested number of targets is 0, the 
@@ -619,6 +642,8 @@ BOOL Grunt::Set_Access(const Test_Spec * spec)
 
 	data_size = access_spec.max_transfer;
 
+	saved_write_data_pointer = write_data;
+
 	/* Fill write buffer with something non-zero, it can affect the
 	 * rate at which the processor can do crc calculations
 	 */
@@ -993,6 +1018,24 @@ void Grunt::Asynchronous_Delay(int transfer_delay)
 //
 void CDECL Grunt_Thread_Wrapper(void *grunt)
 {
+	BOOL need_random_buffer = ((Grunt *) grunt)->Need_Random_Buffer();
+	((Grunt *) grunt)->random_offset_multiplier = 0;
+	long long rand_max = RAND_MAX;
+	int max_sector_size = ((Grunt *) grunt)->Get_Maximum_Sector_Size();
+
+	if(need_random_buffer) {
+
+		//calculate maximum sector-aligned offset using two random integers
+		long long max_random_sector_aligned_number = (rand_max * rand_max * (long long)max_sector_size);
+
+		//come up with a divisor to keep offset in the 500MB region
+		((Grunt *) grunt)->random_offset_multiplier = max_random_sector_aligned_number / ((Grunt *) grunt)->random_data_buffer_size;
+
+		//increment if remainder
+		if(max_random_sector_aligned_number % ((Grunt *) grunt)->random_data_buffer_size)
+			((Grunt *) grunt)->random_offset_multiplier += 1;
+	}
+
 	((Grunt *) grunt)->Set_Affinity();
 
 	// open targets
@@ -1262,7 +1305,15 @@ void Grunt::Do_IOs()
 			if (transaction->is_read) {
 				transfer_result = target->Read(read_data, transaction);
 			} else {
-				memset(write_data, rand(), transaction->size);
+
+				if(IsType(target->spec.type, GenericDiskType) && ((TargetDisk *) targets[target_id])->spec.UseRandomData) {
+					long long offset = ((long long)rand() * (long long)rand() / random_offset_multiplier) * (long long)((TargetDisk *) targets[target_id])->spec.disk_info.sector_size ;
+					write_data = &random_data_buffer[offset];
+				} else {
+					write_data = saved_write_data_pointer;
+					memset(write_data, rand(), transaction->size);
+				}
+
 				transfer_result = target->Write(write_data, transaction);
 			}
 
@@ -1406,7 +1457,7 @@ void Grunt::Do_Partial_IO(Transaction * transaction, int bytes_done)
 	if (transaction->is_read) {
 		result = targets[transaction->target_id]->Read(read_data, transaction);
 	} else {
-		result = targets[transaction->target_id]->Write(write_data, transaction);
+		result = targets[transaction->target_id]->Write((unsigned char* )write_data, transaction);
 	}
 
 	if ((result != ReturnSuccess) && (result != ReturnPending) && (grunt_state == TestRecording)) {
@@ -1423,7 +1474,7 @@ void Grunt::Do_Partial_IO(Transaction * transaction, int bytes_done)
 //
 // Start threads to access targets.
 //
-void Grunt::Start_Test(int index)
+void Grunt::Start_Test(int index, unsigned char* _random_data_buffer, long long _random_data_buffer_size)
 {
 #if defined(IOMTR_OSFAMILY_NETWARE) || defined(IOMTR_OSFAMILY_UNIX)
 	pthread_t newThread;
@@ -1441,6 +1492,9 @@ void Grunt::Start_Test(int index)
 	// do not create the thread.
 	if (!target_count || idle)
 		return;
+
+	random_data_buffer = _random_data_buffer;
+	random_data_buffer_size = _random_data_buffer_size;
 
 	ramp_up_ios_pending = 0;
 

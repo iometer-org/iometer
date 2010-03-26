@@ -130,6 +130,7 @@ class CPageSetup:public CPropertyPage {
 	int disk_worker_count;	// Number of disk workers to spawn for every new manager.
 	int net_worker_count;	// Number of network workers to spawn for every new manager.
 	int test_type;		// Identifies whether to cycle or not.
+	int use_random_data;
 
 	Cycling_Info worker_cycling;
 	Cycling_Info target_cycling;

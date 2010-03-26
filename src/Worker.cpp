@@ -258,8 +258,10 @@ void Worker::AddTarget(Target_Spec * target_info)
 	target->spec.trans_per_conn = spec.trans_per_conn;
 
 	// Copy default settings specific to the target's type.
-	if (IsType(target->spec.type, GenericDiskType))
+	if (IsType(target->spec.type, GenericDiskType)) {
 		memcpy(&target->spec.disk_info, &spec.disk_info, sizeof(Disk_Spec));
+		target->spec.UseRandomData = spec.UseRandomData;
+	}
 	else if (IsType(target->spec.type, VIClientType))
 		target->spec.vi_info.outstanding_ios = spec.vi_info.outstanding_ios;
 	else if (!IsType(target->spec.type, GenericClientType)) {
@@ -677,9 +679,12 @@ void Worker::SaveResults(ostream * file, int access_index, int result_type)
 	(*file) << "," << results[WHOLE_TEST_PERF].IOps
 	    << "," << results[WHOLE_TEST_PERF].read_IOps
 	    << "," << results[WHOLE_TEST_PERF].write_IOps
-	    << "," << results[WHOLE_TEST_PERF].MBps
-	    << "," << results[WHOLE_TEST_PERF].read_MBps
-	    << "," << results[WHOLE_TEST_PERF].write_MBps
+	    << "," << results[WHOLE_TEST_PERF].MBps_Bin
+	    << "," << results[WHOLE_TEST_PERF].read_MBps_Bin
+	    << "," << results[WHOLE_TEST_PERF].write_MBps_Bin
+	    << "," << results[WHOLE_TEST_PERF].MBps_Dec
+	    << "," << results[WHOLE_TEST_PERF].read_MBps_Dec
+	    << "," << results[WHOLE_TEST_PERF].write_MBps_Dec
 	    << "," << results[WHOLE_TEST_PERF].transactions_per_second
 	    << "," << results[WHOLE_TEST_PERF].connections_per_second
 	    << "," << results[WHOLE_TEST_PERF].ave_latency
@@ -802,9 +807,12 @@ void Worker::SaveResults(ostream * file, int access_index, int result_type)
 		    << "," << target->results[WHOLE_TEST_PERF].IOps
 		    << "," << target->results[WHOLE_TEST_PERF].read_IOps
 		    << "," << target->results[WHOLE_TEST_PERF].write_IOps
-		    << "," << target->results[WHOLE_TEST_PERF].MBps
-		    << "," << target->results[WHOLE_TEST_PERF].read_MBps
-		    << "," << target->results[WHOLE_TEST_PERF].write_MBps
+		    << "," << target->results[WHOLE_TEST_PERF].MBps_Bin
+		    << "," << target->results[WHOLE_TEST_PERF].read_MBps_Bin
+		    << "," << target->results[WHOLE_TEST_PERF].write_MBps_Bin
+		    << "," << target->results[WHOLE_TEST_PERF].MBps_Dec
+		    << "," << target->results[WHOLE_TEST_PERF].read_MBps_Dec
+		    << "," << target->results[WHOLE_TEST_PERF].write_MBps_Dec
 		    << "," << target->results[WHOLE_TEST_PERF].transactions_per_second
 		    << "," << target->results[WHOLE_TEST_PERF].connections_per_second
 		    << "," << target->results[WHOLE_TEST_PERF].ave_latency
@@ -963,11 +971,16 @@ void Worker::UpdateResults(int which_perf)
 		// Calculating MB/s and IO/s data rates.
 		if (run_time) {
 			// Calculating results on a per drive basis.
-			device_results->read_MBps = ((double)(_int64)
-						     raw_device_results->bytes_read / (double)MEGABYTE) / run_time;
-			device_results->write_MBps = ((double)(_int64)
-						      raw_device_results->bytes_written / (double)MEGABYTE) / run_time;
-			device_results->MBps = device_results->read_MBps + device_results->write_MBps;
+			device_results->read_MBps_Bin = ((double)(_int64)
+						     raw_device_results->bytes_read / (double)MEGABYTE_BIN) / run_time;
+			device_results->write_MBps_Bin = ((double)(_int64)
+						      raw_device_results->bytes_written / (double)MEGABYTE_BIN) / run_time;
+			device_results->MBps_Bin = device_results->read_MBps_Bin + device_results->write_MBps_Bin;
+			device_results->read_MBps_Dec = ((double)(_int64)
+						     raw_device_results->bytes_read / (double)MEGABYTE_DEC) / run_time;
+			device_results->write_MBps_Dec = ((double)(_int64)
+						      raw_device_results->bytes_written / (double)MEGABYTE_DEC) / run_time;
+			device_results->MBps_Dec = device_results->read_MBps_Dec + device_results->write_MBps_Dec;
 			device_results->read_IOps = ((double)(_int64)
 						     raw_device_results->read_count) / run_time;
 			device_results->write_IOps = ((double)(_int64)
@@ -989,18 +1002,24 @@ void Worker::UpdateResults(int which_perf)
 			raw->transaction_count += raw_device_results->transaction_count;
 
 			// Calculated results.
-			results[which_perf].MBps += device_results->MBps;
-			results[which_perf].read_MBps += device_results->read_MBps;
-			results[which_perf].write_MBps += device_results->write_MBps;
+			results[which_perf].MBps_Bin += device_results->MBps_Bin;
+			results[which_perf].read_MBps_Bin += device_results->read_MBps_Bin;
+			results[which_perf].write_MBps_Bin += device_results->write_MBps_Bin;
+			results[which_perf].MBps_Dec += device_results->MBps_Dec;
+			results[which_perf].read_MBps_Dec += device_results->read_MBps_Dec;
+			results[which_perf].write_MBps_Dec += device_results->write_MBps_Dec;
 			results[which_perf].IOps += device_results->IOps;
 			results[which_perf].read_IOps += device_results->read_IOps;
 			results[which_perf].write_IOps += device_results->write_IOps;
 			results[which_perf].transactions_per_second += device_results->transactions_per_second;
 			results[which_perf].connections_per_second += device_results->connections_per_second;
 		} else {
-			device_results->MBps = (double)0;
-			device_results->read_MBps = (double)0;
-			device_results->write_MBps = (double)0;
+			device_results->MBps_Bin = (double)0;
+			device_results->read_MBps_Bin = (double)0;
+			device_results->write_MBps_Bin = (double)0;
+			device_results->MBps_Dec = (double)0;
+			device_results->read_MBps_Dec = (double)0;
+			device_results->write_MBps_Dec = (double)0;
 			device_results->IOps = (double)0;
 			device_results->read_IOps = (double)0;
 			device_results->write_IOps = (double)0;
@@ -1349,6 +1368,18 @@ void Worker::SetConnectionRate(BOOL test_connection_rate)
 		GetTarget(i)->spec.test_connection_rate = test_connection_rate;
 }
 
+void Worker::SetUseRandomData(BOOL use_random_data)
+{
+	int i, target_count;
+
+	spec.UseRandomData = use_random_data;
+
+	// Loop through all the worker's targets.
+	target_count = TargetCount();
+	for (i = 0; i < target_count; i++)
+		GetTarget(i)->spec.UseRandomData = use_random_data;
+}
+
 void Worker::SetTransPerConn(int trans_per_conn)
 {
 	int i, target_count;
@@ -1418,6 +1449,14 @@ int Worker::GetConnectionRate(TargetType type)
 		return ENABLED_VALUE;
 	else
 		return DISABLED_VALUE;
+}
+
+BOOL Worker::GetUseRandomData(TargetType type)
+{
+	if (IsType(Type(), GenericClientType))
+		return net_partner->GetUseRandomData(type);
+
+	return spec.UseRandomData;
 }
 
 DWORDLONG Worker::GetDiskStart(TargetType type)
@@ -1971,10 +2010,10 @@ BOOL Worker::SaveConfig(ostream & outfile, BOOL save_aspecs, BOOL save_targets)
 	    << "," << GetTransPerConn(Type()) << endl;
 
 	if (IsType(spec.type, GenericDiskType)) {
-		outfile << "'Disk maximum size,starting sector" << endl;
+		outfile << "'Disk maximum size,starting sector,Use Random Data" << endl;
 
 		outfile << "\t" << GetDiskSize(Type())
-		    << "," << GetDiskStart(Type()) << endl;
+		    << "," << GetDiskStart(Type()) << "," << GetUseRandomData(Type()) << endl;
 	}
 
 	if (IsType(spec.type, GenericNetType)) {
@@ -2156,7 +2195,7 @@ BOOL Worker::LoadConfigDefault(ICF_ifstream & infile)
 			}
 
 			SetTransPerConn(temp_number);
-		} else if (key.CompareNoCase("'Disk maximum size,starting sector") == 0) {
+		}  else if (key.CompareNoCase("'Disk maximum size,starting sector") == 0) {
 			if (!IsType(Type(), GenericDiskType)) {
 				ErrorMessage("Error restoring worker " + (CString) name + ".  "
 					     "Cannot specify \"Disk maximum size,starting sector\" for a non-disk worker.");
@@ -2178,6 +2217,36 @@ BOOL Worker::LoadConfigDefault(ICF_ifstream & infile)
 			}
 
 			SetDiskStart(temp_num64);
+		} else if (key.CompareNoCase("'Disk maximum size,starting sector,Use Random Data") == 0) {
+			if (!IsType(Type(), GenericDiskType)) {
+				ErrorMessage("Error restoring worker " + (CString) name + ".  "
+					     "Cannot specify \"Disk maximum size,starting sector\" for a non-disk worker.");
+				return FALSE;
+			}
+
+			if (!ICF_ifstream::ExtractFirstInt64(value, temp_num64)) {
+				ErrorMessage("Error while reading file.  "
+					     "\"Disk maximum size\" should be specified as an integer value.");
+				return FALSE;
+			}
+
+			SetDiskSize(temp_num64);
+
+			if (!ICF_ifstream::ExtractFirstInt64(value, temp_num64)) {
+				ErrorMessage("Error while reading file.  "
+					     "\"Starting sector\" should be specified as an integer value.");
+				return FALSE;
+			}
+
+			SetDiskStart(temp_num64);
+
+			if (!ICF_ifstream::ExtractFirstInt64(value, temp_num64)) {
+				ErrorMessage("Error while reading file.  "
+					     "\"Use Random Data\" should be specified as an integer value.");
+				return FALSE;
+			}
+
+			SetUseRandomData(temp_num64);
 		} else if (key.CompareNoCase("'Local network interface") == 0) {
 			if (!IsType(Type(), GenericNetType)) {
 				ErrorMessage("Error restoring worker " + (CString) name + ".  "

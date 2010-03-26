@@ -174,9 +174,12 @@ BEGIN_MESSAGE_MAP(CGalileoView, CView)
     ON_COMMAND(MDisplayMaxRIO, OnMDisplayMaxRIO)
     ON_COMMAND(MDisplayMaxTrans, OnMDisplayMaxTrans)
     ON_COMMAND(MDisplayMaxWIO, OnMDisplayMaxWIO)
-    ON_COMMAND(MDisplayMBsMBPS, OnMDisplayMBsMBPS)
-    ON_COMMAND(MDisplayMBsRMBPS, OnMDisplayMBsRMBPS)
-    ON_COMMAND(MDisplayMBsWMBPS, OnMDisplayMBsWMBPS)
+    ON_COMMAND(MDisplayMBsMBPSBin, OnMDisplayMBsMBPSBin)
+    ON_COMMAND(MDisplayMBsRMBPSBin, OnMDisplayMBsRMBPSBin)
+    ON_COMMAND(MDisplayMBsWMBPSBin, OnMDisplayMBsWMBPSBin)
+    ON_COMMAND(MDisplayMBsMBPSDec, OnMDisplayMBsMBPSDec)
+    ON_COMMAND(MDisplayMBsRMBPSDec, OnMDisplayMBsRMBPSDec)
+    ON_COMMAND(MDisplayMBsWMBPSDec, OnMDisplayMBsWMBPSDec)
     ON_COMMAND(MDisplayNetPacketErrors, OnMDisplayNetPacketErrors)
     ON_COMMAND(MDisplayNetPacketsPS, OnMDisplayNetPacketsPS)
     ON_COMMAND(MDisplayNetRetransPS, OnMDisplayNetRetransPS)
@@ -2471,19 +2474,34 @@ void CGalileoView::OnMDisplayMaxWIO()
 	OnMDisplay(MDisplayMaxSubmenuID, MDisplayMaxWIO);
 }
 
-void CGalileoView::OnMDisplayMBsMBPS()
+void CGalileoView::OnMDisplayMBsMBPSBin()
 {
-	OnMDisplay(MDisplayMBsSubmenuID, MDisplayMBsMBPS);
+	OnMDisplay(MDisplayMBsSubmenuID, MDisplayMBsMBPSBin);
 }
 
-void CGalileoView::OnMDisplayMBsRMBPS()
+void CGalileoView::OnMDisplayMBsRMBPSBin()
 {
-	OnMDisplay(MDisplayMBsSubmenuID, MDisplayMBsRMBPS);
+	OnMDisplay(MDisplayMBsSubmenuID, MDisplayMBsRMBPSBin);
 }
 
-void CGalileoView::OnMDisplayMBsWMBPS()
+void CGalileoView::OnMDisplayMBsWMBPSBin()
 {
-	OnMDisplay(MDisplayMBsSubmenuID, MDisplayMBsWMBPS);
+	OnMDisplay(MDisplayMBsSubmenuID, MDisplayMBsWMBPSBin);
+}
+
+void CGalileoView::OnMDisplayMBsMBPSDec()
+{
+	OnMDisplay(MDisplayMBsSubmenuID, MDisplayMBsMBPSDec);
+}
+
+void CGalileoView::OnMDisplayMBsRMBPSDec()
+{
+	OnMDisplay(MDisplayMBsSubmenuID, MDisplayMBsRMBPSDec);
+}
+
+void CGalileoView::OnMDisplayMBsWMBPSDec()
+{
+	OnMDisplay(MDisplayMBsSubmenuID, MDisplayMBsWMBPSDec);
 }
 
 void CGalileoView::OnMDisplayNetPacketErrors()
@@ -2597,14 +2615,23 @@ void CGalileoView::OnMDisplay(int submenu_id, int menu_item)
 	case MDisplayMaxWIO:
 		result_code = MAX_WRITE_LATENCY_RESULT;
 		break;
-	case MDisplayMBsMBPS:
-		result_code = MBPS_RESULT;
+	case MDisplayMBsMBPSBin:
+		result_code = MBPS_BIN_RESULT;
 		break;
-	case MDisplayMBsRMBPS:
-		result_code = READ_MBPS_RESULT;
+	case MDisplayMBsRMBPSBin:
+		result_code = READ_MBPS_BIN_RESULT;
 		break;
-	case MDisplayMBsWMBPS:
-		result_code = WRITE_MBPS_RESULT;
+	case MDisplayMBsWMBPSBin:
+		result_code = WRITE_MBPS_BIN_RESULT;
+		break;
+	case MDisplayMBsMBPSDec:
+		result_code = MBPS_DEC_RESULT;
+		break;
+	case MDisplayMBsRMBPSDec:
+		result_code = READ_MBPS_DEC_RESULT;
+		break;
+	case MDisplayMBsWMBPSDec:
+		result_code = WRITE_MBPS_DEC_RESULT;
 		break;
 	case MDisplayNetPacketErrors:
 		result_code = NI_ERROR_RESULT;

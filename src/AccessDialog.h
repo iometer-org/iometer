@@ -100,7 +100,7 @@ struct MKBControls {
 	// To call FUNCNAME with VALUE:         (this->*(which->SetFunc))( VALUE );
 };
 
-#define MAX_SIZE_RANGE	KILOBYTE - 1
+#define MAX_SIZE_RANGE	KILOBYTE_BIN - 1
 
 /////////////////////////////////////////////////////////////////////////////
 // CAccessDialog dialog

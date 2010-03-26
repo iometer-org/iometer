@@ -110,6 +110,8 @@
 #warning ===> WARNING: You have to do some coding here to get the port done!
 #endif
 
+#define RANDOM_BUFFER_SIZE 500*1024*1024
+
 void Wait_for_Prepare(void *grunt_thread_info);
 
 //
@@ -131,6 +133,12 @@ class Manager {
 
 	void *data;		// Buffer for I/O requests.
 	int data_size;		// Size of currently allocated data buffer.
+
+	unsigned char* randomDataBuffer;
+	BOOL IsWrite;
+	BOOL IsRandomData;
+
+	void GenerateRandomData();
 
 	char manager_name[MAX_WORKER_NAME];	// Name of manager, customizable on command line.
 	char exclude_filesys[MAX_EXCLUDE_FILESYS];	// filesystem types to exclude, command line option

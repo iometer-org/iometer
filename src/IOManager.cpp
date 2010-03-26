@@ -992,16 +992,19 @@ void Manager::Start_Test(int target)
 {
 	int g;
 
+	IsRandomData = FALSE;
+	IsWrite = FALSE;
+
 	cout << "Starting..." << endl << flush;
 
 	// Start all the grunts.  This creates the grunt threads.
 	// Pass as argument the index of the Target. Can be used for affinity.
 	if (target == ALL_WORKERS) {
 		for (g = 0; g < grunt_count; g++) {
-			grunts[g]->Start_Test(g);
+			grunts[g]->Start_Test(g,randomDataBuffer,RANDOM_BUFFER_SIZE);
 		}
 	} else {
-		grunts[target]->Start_Test(target);
+		grunts[target]->Start_Test(target,randomDataBuffer,RANDOM_BUFFER_SIZE);
 	}
 #ifdef _DEBUG
 	cout << "   Started." << endl << flush;
@@ -1009,6 +1012,26 @@ void Manager::Start_Test(int target)
 	// Reply that test has started.
 	msg.data = TRUE;
 	prt->Send(&msg);
+}
+
+void Manager::GenerateRandomData() 
+{
+	long long rand_buffer_size = RANDOM_BUFFER_SIZE;
+
+	if(IsWrite && IsRandomData) {
+
+		cout << "   Generating random data..." << endl;
+
+		//random data used for writes
+		randomDataBuffer = (unsigned char*)VirtualAlloc(NULL, RANDOM_BUFFER_SIZE, MEM_COMMIT, PAGE_READWRITE);
+
+		srand(time(NULL));
+
+		for( int x = 0; x < RANDOM_BUFFER_SIZE; x++)
+			randomDataBuffer[x] = (unsigned char)rand();
+
+		cout << "   Done generating random data." << endl;
+	}
 }
 
 //
@@ -1052,6 +1075,9 @@ void Manager::Begin_IO(int target)
 //
 void Manager::Stop_Test(int target)
 {
+	IsRandomData = FALSE;
+	IsWrite = FALSE;
+
 	if (target == ALL_WORKERS) {
 		for (int i = 0; i < grunt_count; i++) {
 			grunts[i]->Stop_Test();
@@ -1069,6 +1095,8 @@ void Manager::Stop_Test(int target)
 	} else {
 		grunts[target]->Wait_For_Stop();
 	}
+
+	VirtualFree(randomDataBuffer, 0, MEM_RELEASE);
 
 	cout << "   Stopped." << endl << flush;
 
@@ -1125,6 +1153,11 @@ void Manager::Remove_Workers(int target)
 //
 BOOL Manager::Set_Targets(int worker_no, int count, Target_Spec * target_specs)
 {
+	if(target_specs->UseRandomData && !IsRandomData) {
+		IsRandomData = TRUE;
+		GenerateRandomData();
+	}
+
 	if (worker_no == ALL_WORKERS) {
 		for (int i = 0; i < grunt_count; i++) {
 			cout << "Worker " << i << " setting targets..." << endl;
@@ -1146,6 +1179,9 @@ BOOL Manager::Set_Targets(int worker_no, int count, Target_Spec * target_specs)
 BOOL Manager::Set_Access(int target, const Test_Spec * spec)
 {
 	int g;			// loop control variable
+
+	if(spec->access->reads < 100)
+		IsWrite = TRUE;
 
 	// Recursively assign all workers the same access specification.
 	if (target == ALL_WORKERS) {
@@ -1205,6 +1241,7 @@ BOOL Manager::Set_Access(int target, const Test_Spec * spec)
 		if (!grunts[g]->data_size) {
 			grunts[g]->read_data = data;
 			grunts[g]->write_data = data;
+			grunts[g]->saved_write_data_pointer = data;
 		}
 	}
 	return TRUE;

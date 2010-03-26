@@ -68,6 +68,7 @@
 #define SReplyMegabytes                 1042
 #define CConnectionRate                 1043
 #define SReplyKilobytes                 1044
+#define CUseRandomData                  1044
 #define EConnectionRate                 1045
 #define SReplyBytes                     1046
 #define SConnectionRate                 1047
@@ -233,6 +234,15 @@
 #define MDisplayMaxRIO                  9033
 #define MDisplayMaxTrans                9034
 #define MDisplayMaxCon                  9035
+#define ID__MEGABYTESPERSECOND          10000
+#define ID_Menu                         10001
+#define MDisplayMBsTMBPS                10002
+#define MDisplayMBsMBPSDec              10003
+#define MDisplayMBsRMBPSDec             10004
+#define MDisplayMBsWMBPSDec             10005
+#define MDisplayMBsMBPSBin              10006
+#define MDisplayMBsRMBPSBin             10007
+#define MDisplayMBsWMBPSBin             10008
 #define IDS_OPEN_DIALOG_TITLE           57605
 #define IDS_SAVE_DIALOG_TITLE           57606
 #define IDS_CMDLINE_SYNTAX              57607
@@ -244,7 +254,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        137
-#define _APS_NEXT_COMMAND_VALUE         10000
+#define _APS_NEXT_COMMAND_VALUE         10009
 #define _APS_NEXT_CONTROL_VALUE         1119
 #define _APS_NEXT_SYMED_VALUE           500
 #endif

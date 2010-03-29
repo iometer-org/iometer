@@ -1160,7 +1160,7 @@ int Report_NetDisks( Target_Spec *disk_spec, int start_count, bool show_unc_path
 char * DeleteSpaces(char *input)
 {
 	int i = strlen(input);
-	char *prev = &input[i-1];
+	char *prev = &input[i];
 
 	while (i--)
 	{

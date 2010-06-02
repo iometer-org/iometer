@@ -182,6 +182,7 @@ class TargetDisk:public Target {
 	DWORDLONG ending_position;	// Last byte where transfers can occur.
 	DWORDLONG offset;
 	DWORD bytes_transferred;	// Number of bytes successfully transferred to the disk.
+	unsigned char* randomDataBuffer;
 
 #if defined(IOMTR_OSFAMILY_NETWARE)
 	LONG mmAppTag;

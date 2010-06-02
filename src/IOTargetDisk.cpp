@@ -1190,6 +1190,25 @@ BOOL TargetDisk::Prepare(void *buffer, DWORDLONG * prepare_offset, DWORD bytes, 
 	BOOL retval;
 	int i;
 
+	switch (spec.DataPattern) {
+		case DATA_PATTERN_REPEATING_BYTES:
+			// Do nothing here...a new random byte will be chosen below for each IO
+			break;
+		case DATA_PATTERN_PSEUDO_RANDOM:
+			for( int x = 0; x < bytes; x++)
+				((unsigned char*)buffer)[x] = (unsigned char)Rand(0xff);
+			break;
+		case DATA_PATTERN_FULL_RANDOM:
+			cout << "   Generating random data..." << endl;
+			//random data used for writes
+			randomDataBuffer = (unsigned char*)VirtualAlloc(NULL, RANDOM_BUFFER_SIZE, MEM_COMMIT, PAGE_READWRITE);
+			srand(time(NULL));
+			for( int x = 0; x < RANDOM_BUFFER_SIZE; x++)
+				randomDataBuffer[x] = (unsigned char)rand();
+			cout << "   Done generating random data." << endl;
+			break;
+	}
+
 #ifdef _DEBUG
 	cout << "into function TargetDisk::Prepare()" << endl;
 #endif
@@ -1269,11 +1288,15 @@ BOOL TargetDisk::Prepare(void *buffer, DWORDLONG * prepare_offset, DWORD bytes, 
 					olap[i].OffsetHigh = (DWORD) (*prepare_offset >> 32);
 
 					// Fill the buffer with some new random data so we aren't writing all zeros each time
-					if(spec.UseRandomData) {
-						for( int x = 0; x < bytes; x++)
-							((unsigned char*)buffer)[x] = (unsigned char)rand();
-					} else
-						memset(buffer, rand(), bytes);
+					switch (spec.DataPattern) {
+						case DATA_PATTERN_REPEATING_BYTES:
+							memset(buffer, rand(), bytes);
+							break;
+						case DATA_PATTERN_PSEUDO_RANDOM:
+							break; // Nothing to do here, buffer was set above
+						case DATA_PATTERN_FULL_RANDOM:
+							break; // Nothing to do here, buffer was set above
+					}
 
 					// Do the asynchronous write.
 					if (WriteFile(disk_file, (char *)buffer, bytes, &bytes_written, &(olap[i]))) {
@@ -1396,6 +1419,11 @@ BOOL TargetDisk::Prepare(void *buffer, DWORDLONG * prepare_offset, DWORD bytes, 
 #ifdef _DEBUG
 	cout << "out of member function TargetDisk::Prepare()" << endl;
 #endif
+
+	// If we did full random data, clean up the buffer
+	if(spec.DataPattern == DATA_PATTERN_FULL_RANDOM)
+		VirtualFree(randomDataBuffer, 0, MEM_RELEASE);
+
 	return retval;
 }
 

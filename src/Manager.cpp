@@ -973,14 +973,14 @@ void Manager::SetConnectionRate(BOOL test_connection_rate, TargetType type)
 		GetWorker(w, type)->SetConnectionRate(test_connection_rate);
 }
 
-void Manager::SetUseRandomData(BOOL use_random_data, TargetType type)
+void Manager::SetDataPattern(int data_pattern, TargetType type)
 {
 	int w, wkr_count;
 
 	// Loop through all the workers.
 	wkr_count = WorkerCount(type);
 	for (w = 0; w < wkr_count; w++)
-		GetWorker(w, type)->SetUseRandomData(use_random_data);
+		GetWorker(w, type)->SetDataPattern(data_pattern);
 }
 
 void Manager::SetTransPerConn(int trans_per_conn, TargetType type)
@@ -1032,24 +1032,25 @@ int Manager::GetConnectionRate(TargetType type)
 //
 // Returns if the user has chosen to use random data
 //
-int Manager::GetUseRandomData(TargetType type)
+int Manager::GetDataPattern(TargetType type)
 {
 	BOOL wkr_result;
 	int w, wkr_count;
 
 	// If there are no workers, return immediately.
 	if (!(wkr_count = WorkerCount(type)))
-		return AMBIGUOUS_VALUE;
+		return 1; //Full random data pattern
 
 	// Find the first worker of the specified type's transaction per
 	// connection value.
-	wkr_result = GetWorker(0, type)->GetUseRandomData(type);
+	wkr_result = GetWorker(0, type)->GetDataPattern(type);
 
 	// Compare the value with all the other workers of the same type.
 	for (w = 1; w < wkr_count; w++) {
-		if (wkr_result != GetWorker(w, type)->GetUseRandomData(type)) {
+		if (wkr_result != GetWorker(w, type)->GetDataPattern(type)) {
 			// The value isn't the same.
-			return AMBIGUOUS_VALUE;
+			AfxMessageBox("The data pattern values selected for each worker is not the same. Defaulting to 'Full random'.");
+			return DATA_PATTERN_FULL_RANDOM; //Full random data pattern
 		}
 	}
 	// All workers have the same value.

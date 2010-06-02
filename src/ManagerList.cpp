@@ -720,14 +720,14 @@ void ManagerList::SetConnectionRate(BOOL connection_rate, TargetType type)
 		GetManager(i, type)->SetConnectionRate(connection_rate, type);
 }
 
-void ManagerList::SetUseRandomData(BOOL use_random_data, TargetType type)
+void ManagerList::SetDataPattern(int data_pattern, TargetType type)
 {
 	int i, mgr_count;
 
 	// Loop through all the managers.
 	mgr_count = ManagerCount(type);
 	for (i = 0; i < mgr_count; i++)
-		GetManager(i, type)->SetUseRandomData(use_random_data, type);
+		GetManager(i, type)->SetDataPattern(data_pattern, type);
 }
 
 void ManagerList::SetTransPerConn(int trans_per_conn, TargetType type)
@@ -771,7 +771,7 @@ int ManagerList::GetConnectionRate(TargetType type)
 	return mgr_result;
 }
 
-int ManagerList::GetUseRandomData(TargetType type)
+int ManagerList::GetDataPattern(TargetType type)
 {
 	BOOL mgr_result;
 	int m, mgr_count;
@@ -780,14 +780,15 @@ int ManagerList::GetUseRandomData(TargetType type)
 		return AMBIGUOUS_VALUE;
 
 	// Get the value of the first manager.
-	mgr_result = GetManager(0, type)->GetUseRandomData(type);
+	mgr_result = GetManager(0, type)->GetDataPattern(type);
 
 	// Compare each manager's value with the first manager.
 	for (m = 1; m < mgr_count; m++) {
 		if (GetManager(m, type)->WorkerCount(type) &&
-		    mgr_result != GetManager(m, type)->GetUseRandomData(type)) {
-			// The values are not the same.
-			return AMBIGUOUS_VALUE;
+		    mgr_result != GetManager(m, type)->GetDataPattern(type)) {
+			// The values are not the same so set to the default value
+			AfxMessageBox("The data pattern values selected for each manager is not the same. Defaulting to 'Full random'.");
+			return DATA_PATTERN_FULL_RANDOM; //Full random
 		}
 	}
 	// All managers have the same value.

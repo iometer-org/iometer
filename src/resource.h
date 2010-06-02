@@ -68,7 +68,6 @@
 #define SReplyMegabytes                 1042
 #define CConnectionRate                 1043
 #define SReplyKilobytes                 1044
-#define CUseRandomData                  1044
 #define EConnectionRate                 1045
 #define SReplyBytes                     1046
 #define SConnectionRate                 1047
@@ -127,6 +126,7 @@
 #define CkAssignTargets                 1114
 #define TCountdown                      1117
 #define LManagers                       1118
+#define CDataPattern                    1119
 #define TVersion                        2000
 #define TAccess                         2001
 #define TRandom                         2002
@@ -253,9 +253,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        137
+#define _APS_NEXT_RESOURCE_VALUE        138
 #define _APS_NEXT_COMMAND_VALUE         10009
-#define _APS_NEXT_CONTROL_VALUE         1119
+#define _APS_NEXT_CONTROL_VALUE         1120
 #define _APS_NEXT_SYMED_VALUE           500
 #endif
 #endif

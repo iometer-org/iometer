@@ -204,7 +204,7 @@ BOOL Grunt::Need_Random_Buffer() {
 	BOOL has_write = access_spec.HasWrite();
 
 	for (int i = 0; i < target_count; i++) {
-		if(targets[i]->spec.UseRandomData && has_write) {
+		if(targets[i]->spec.DataPattern == DATA_PATTERN_FULL_RANDOM && has_write) {
 			need_random_buffer = true;
 			break;
 		}
@@ -644,12 +644,15 @@ BOOL Grunt::Set_Access(const Test_Spec * spec)
 
 	saved_write_data_pointer = write_data;
 
-	/* Fill write buffer with something non-zero, it can affect the
-	 * rate at which the processor can do crc calculations
-	 */
-	write_ptr = (char *)write_data;
-	while ((ULONG_PTR)write_ptr < ((ULONG_PTR)write_data + data_size)) {
-		*write_ptr++ = (char)Rand(0xff);
+	/* If we are doing pseudo random, fill the write buffer with a pseudo random pattern now as
+	   we don't want to be doing this during IO submission */
+	int target_id = trans_slots[available_trans_queue[available_head]].target_id;
+	if (((TargetDisk *) targets[target_id])->spec.DataPattern==DATA_PATTERN_PSEUDO_RANDOM)
+	{
+		write_ptr = (char *)write_data;
+		while ((ULONG_PTR)write_ptr < ((ULONG_PTR)write_data + data_size)) {
+			*write_ptr++ = (char)Rand(0xff);
+		}
 	}
 
 	return TRUE;
@@ -1028,7 +1031,7 @@ void CDECL Grunt_Thread_Wrapper(void *grunt)
 		//calculate maximum sector-aligned offset using two random integers
 		long long max_random_sector_aligned_number = (rand_max * rand_max * (long long)max_sector_size);
 
-		//come up with a divisor to keep offset in the 500MB region
+		//come up with a divisor to keep offset in the 16MB region
 		((Grunt *) grunt)->random_offset_multiplier = max_random_sector_aligned_number / ((Grunt *) grunt)->random_data_buffer_size;
 
 		//increment if remainder
@@ -1306,12 +1309,19 @@ void Grunt::Do_IOs()
 				transfer_result = target->Read(read_data, transaction);
 			} else {
 
-				if(IsType(target->spec.type, GenericDiskType) && ((TargetDisk *) targets[target_id])->spec.UseRandomData) {
-					long long offset = ((long long)rand() * (long long)rand() / random_offset_multiplier) * (long long)((TargetDisk *) targets[target_id])->spec.disk_info.sector_size ;
-					write_data = &random_data_buffer[offset];
-				} else {
-					write_data = saved_write_data_pointer;
-					memset(write_data, rand(), transaction->size);
+				// Depending on the data pattern selected, set the write_data appropriately
+				switch (((TargetDisk *) targets[target_id])->spec.DataPattern){
+					case DATA_PATTERN_REPEATING_BYTES:
+						write_data = saved_write_data_pointer;
+						memset(write_data, rand(), transaction->size);
+						break;
+					case DATA_PATTERN_PSEUDO_RANDOM:
+						// Do nothing...pattern set by the "Set_Access" routine
+						break;
+					case DATA_PATTERN_FULL_RANDOM:
+						long long offset = ((long long)rand() * (long long)rand() / random_offset_multiplier) * (long long)((TargetDisk *) targets[target_id])->spec.disk_info.sector_size ;
+						write_data = &random_data_buffer[offset];
+						break;
 				}
 
 				transfer_result = target->Write(write_data, transaction);

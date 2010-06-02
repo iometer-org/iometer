@@ -435,6 +435,12 @@ using namespace std;
 #define LONG_DELAY    3000   // msec. to wait before reattempting an action
 #define IDLE_DELAY    1000   // max msec to wait between calls to CGalileoApp::OnIdle()
 
+#define DATA_PATTERN_REPEATING_BYTES	0
+#define DATA_PATTERN_PSEUDO_RANDOM		1
+#define DATA_PATTERN_FULL_RANDOM		2
+
+#define RANDOM_BUFFER_SIZE 500*1024*1024
+
 #define KILOBYTE_BIN   1024
 #define MEGABYTE_BIN   1048576
 #define GIGABYTE_BIN   1073741824

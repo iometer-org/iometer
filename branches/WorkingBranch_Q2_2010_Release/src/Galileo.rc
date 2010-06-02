@@ -174,7 +174,8 @@ BEGIN
     GROUPBOX        "# of Outstanding I/Os",IDC_STATIC,150,78,103,29
     EDITTEXT        EQueueDepth,155,89,40,14,ES_AUTOHSCROLL | ES_NUMBER
     LTEXT           "per target",IDC_STATIC,200,90,35,10
-    CONTROL         "Use Random Data",CUseRandomData,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,157,174,74,8
+    GROUPBOX        "Write IO Data Pattern",IDC_STATIC,150,168,160,29
+    COMBOBOX        CDataPattern,157,179,81,78,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
 END
 
 IDD_DISPLAY DIALOG  0, 0, 383, 210
@@ -808,6 +809,17 @@ BEGIN
 0x6944, 0x6b73, 0x5720, 0x726f, 0x656b, 0x7372, "\000" 
     CDefaultAssignment, 0x403, 16, 0
 0x654e, 0x7774, 0x726f, 0x206b, 0x6f57, 0x6b72, 0x7265, 0x0073, 
+    0
+END
+
+IDD_DISKS DLGINIT
+BEGIN
+    CDataPattern, 0x403, 16, 0
+0x6552, 0x6570, 0x7461, 0x6e69, 0x2067, 0x7962, 0x6574, 0x0073, 
+    CDataPattern, 0x403, 14, 0
+0x7350, 0x7565, 0x6f64, 0x7220, 0x6e61, 0x6f64, 0x006d, 
+    CDataPattern, 0x403, 12, 0
+0x7546, 0x6c6c, 0x7220, 0x6e61, 0x6f64, 0x006d, 
     0
 END
 

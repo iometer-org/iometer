@@ -155,7 +155,7 @@ class Worker {
 	///////////////////////////////////////////////////////////////////////////
 	// Retrieving/setting information about a worker's targets.
 	//
-	BOOL GetUseRandomData(TargetType type);
+	int GetDataPattern(TargetType type);
 	int GetConnectionRate(TargetType type);
 	DWORDLONG GetDiskSize(TargetType type);
 	DWORDLONG GetDiskStart(TargetType type);
@@ -166,7 +166,7 @@ class Worker {
 	// GetValue will replace most Get*() functions.
 	//      int                     GetValue( TargetType type, int offset );
 	//
-	void SetUseRandomData(BOOL use_random_data);
+	void SetDataPattern(int data_pattern);
 	void SetConnectionRate(BOOL test_connection_rate);
 	void SetDiskSize(DWORDLONG disk_size);
 	void SetDiskStart(DWORDLONG disk_start);

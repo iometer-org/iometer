@@ -260,7 +260,7 @@ void Worker::AddTarget(Target_Spec * target_info)
 	// Copy default settings specific to the target's type.
 	if (IsType(target->spec.type, GenericDiskType)) {
 		memcpy(&target->spec.disk_info, &spec.disk_info, sizeof(Disk_Spec));
-		target->spec.UseRandomData = spec.UseRandomData;
+		target->spec.DataPattern = spec.DataPattern;
 	}
 	else if (IsType(target->spec.type, VIClientType))
 		target->spec.vi_info.outstanding_ios = spec.vi_info.outstanding_ios;
@@ -1368,16 +1368,16 @@ void Worker::SetConnectionRate(BOOL test_connection_rate)
 		GetTarget(i)->spec.test_connection_rate = test_connection_rate;
 }
 
-void Worker::SetUseRandomData(BOOL use_random_data)
+void Worker::SetDataPattern(int data_pattern)
 {
 	int i, target_count;
 
-	spec.UseRandomData = use_random_data;
+	spec.DataPattern = data_pattern;
 
 	// Loop through all the worker's targets.
 	target_count = TargetCount();
 	for (i = 0; i < target_count; i++)
-		GetTarget(i)->spec.UseRandomData = use_random_data;
+		GetTarget(i)->spec.DataPattern = data_pattern;
 }
 
 void Worker::SetTransPerConn(int trans_per_conn)
@@ -1451,12 +1451,12 @@ int Worker::GetConnectionRate(TargetType type)
 		return DISABLED_VALUE;
 }
 
-BOOL Worker::GetUseRandomData(TargetType type)
+BOOL Worker::GetDataPattern(TargetType type)
 {
 	if (IsType(Type(), GenericClientType))
-		return net_partner->GetUseRandomData(type);
+		return net_partner->GetDataPattern(type);
 
-	return spec.UseRandomData;
+	return spec.DataPattern;
 }
 
 DWORDLONG Worker::GetDiskStart(TargetType type)
@@ -2010,10 +2010,10 @@ BOOL Worker::SaveConfig(ostream & outfile, BOOL save_aspecs, BOOL save_targets)
 	    << "," << GetTransPerConn(Type()) << endl;
 
 	if (IsType(spec.type, GenericDiskType)) {
-		outfile << "'Disk maximum size,starting sector,Use Random Data" << endl;
+		outfile << "'Disk maximum size,starting sector,Data pattern" << endl;
 
 		outfile << "\t" << GetDiskSize(Type())
-		    << "," << GetDiskStart(Type()) << "," << GetUseRandomData(Type()) << endl;
+		    << "," << GetDiskStart(Type()) << "," << GetDataPattern(Type()) << endl;
 	}
 
 	if (IsType(spec.type, GenericNetType)) {
@@ -2242,11 +2242,11 @@ BOOL Worker::LoadConfigDefault(ICF_ifstream & infile)
 
 			if (!ICF_ifstream::ExtractFirstInt64(value, temp_num64)) {
 				ErrorMessage("Error while reading file.  "
-					     "\"Use Random Data\" should be specified as an integer value.");
+					     "\"Data pattern\" should be specified as an integer value.");
 				return FALSE;
 			}
 
-			SetUseRandomData(temp_num64);
+			SetDataPattern(temp_num64);
 		} else if (key.CompareNoCase("'Local network interface") == 0) {
 			if (!IsType(Type(), GenericNetType)) {
 				ErrorMessage("Error restoring worker " + (CString) name + ".  "

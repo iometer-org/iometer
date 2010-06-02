@@ -992,7 +992,6 @@ void Manager::Start_Test(int target)
 {
 	int g;
 
-	IsRandomData = FALSE;
 	IsWrite = FALSE;
 
 	cout << "Starting..." << endl << flush;
@@ -1016,19 +1015,20 @@ void Manager::Start_Test(int target)
 
 void Manager::GenerateRandomData() 
 {
-	long long rand_buffer_size = RANDOM_BUFFER_SIZE;
-
-	if(IsWrite && IsRandomData) {
+	if(IsWrite) {
 
 		cout << "   Generating random data..." << endl;
 
 		//random data used for writes
-		randomDataBuffer = (unsigned char*)VirtualAlloc(NULL, RANDOM_BUFFER_SIZE, MEM_COMMIT, PAGE_READWRITE);
+		randomDataBuffer = (unsigned char*)VirtualAlloc(NULL, RANDOM_BUFFER_SIZE, MEM_COMMIT|MEM_RESERVE, PAGE_READWRITE);
 
 		srand(time(NULL));
 
-		for( int x = 0; x < RANDOM_BUFFER_SIZE; x++)
-			randomDataBuffer[x] = (unsigned char)rand();
+		if (randomDataBuffer != NULL)
+		{
+			for( int x = 0; x < RANDOM_BUFFER_SIZE; x++)
+				randomDataBuffer[x] = (unsigned char)rand();
+		}
 
 		cout << "   Done generating random data." << endl;
 	}
@@ -1075,7 +1075,6 @@ void Manager::Begin_IO(int target)
 //
 void Manager::Stop_Test(int target)
 {
-	IsRandomData = FALSE;
 	IsWrite = FALSE;
 
 	if (target == ALL_WORKERS) {
@@ -1096,7 +1095,8 @@ void Manager::Stop_Test(int target)
 		grunts[target]->Wait_For_Stop();
 	}
 
-	VirtualFree(randomDataBuffer, 0, MEM_RELEASE);
+	if (randomDataBuffer != NULL)
+		VirtualFree(randomDataBuffer, 0, MEM_RELEASE);
 
 	cout << "   Stopped." << endl << flush;
 
@@ -1153,8 +1153,7 @@ void Manager::Remove_Workers(int target)
 //
 BOOL Manager::Set_Targets(int worker_no, int count, Target_Spec * target_specs)
 {
-	if(target_specs->UseRandomData && !IsRandomData) {
-		IsRandomData = TRUE;
+	if(target_specs->DataPattern == DATA_PATTERN_FULL_RANDOM) {
 		GenerateRandomData();
 	}
 

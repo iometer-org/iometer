@@ -110,8 +110,6 @@
 #warning ===> WARNING: You have to do some coding here to get the port done!
 #endif
 
-#define RANDOM_BUFFER_SIZE 500*1024*1024
-
 void Wait_for_Prepare(void *grunt_thread_info);
 
 //
@@ -136,7 +134,6 @@ class Manager {
 
 	unsigned char* randomDataBuffer;
 	BOOL IsWrite;
-	BOOL IsRandomData;
 
 	void GenerateRandomData();
 

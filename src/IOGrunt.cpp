@@ -537,8 +537,6 @@ void Grunt::Wait_For_Stop()
 //
 BOOL Grunt::Set_Access(const Test_Spec * spec)
 {
-	char *write_ptr = NULL;
-
 	// Check for idle spec.
 	if ((idle = (spec->access[0].of_size == IOERROR)))
 		return TRUE;
@@ -643,17 +641,6 @@ BOOL Grunt::Set_Access(const Test_Spec * spec)
 	data_size = access_spec.max_transfer;
 
 	saved_write_data_pointer = write_data;
-
-	/* If we are doing pseudo random, fill the write buffer with a pseudo random pattern now as
-	   we don't want to be doing this during IO submission */
-	int target_id = trans_slots[available_trans_queue[available_head]].target_id;
-	if (((TargetDisk *) targets[target_id])->spec.DataPattern==DATA_PATTERN_PSEUDO_RANDOM)
-	{
-		write_ptr = (char *)write_data;
-		while ((ULONG_PTR)write_ptr < ((ULONG_PTR)write_data + data_size)) {
-			*write_ptr++ = (char)Rand(0xff);
-		}
-	}
 
 	return TRUE;
 }
@@ -1493,6 +1480,7 @@ void Grunt::Start_Test(int index, unsigned char* _random_data_buffer, long long 
 #else
 #warning ===> WARNING: You have to do some coding here to get the port done!
 #endif
+	char *write_ptr = NULL;
 
 	// Clear the results.
 	Initialize_Results();
@@ -1511,6 +1499,17 @@ void Grunt::Start_Test(int index, unsigned char* _random_data_buffer, long long 
 	worker_index = index; // save off our index
 
 	Initialize_Transaction_Arrays();
+
+	/* If we are doing pseudo random, fill the write buffer with a pseudo random pattern now as
+	   we don't want to be doing this during IO submission */
+	int target_id = trans_slots[available_trans_queue[available_head]].target_id;
+	if (((TargetDisk *) targets[target_id])->spec.DataPattern==DATA_PATTERN_PSEUDO_RANDOM)
+	{
+		write_ptr = (char *)write_data;
+		while ((ULONG_PTR)write_ptr < ((ULONG_PTR)write_data + data_size)) {
+			*write_ptr++ = (char)Rand(0xff);
+		}
+	}
 
 	// The grunt thread will become ready after opening its targets.
 	InterlockedExchange(IOMTR_MACRO_INTERLOCK_CAST(long)&not_ready, 1);

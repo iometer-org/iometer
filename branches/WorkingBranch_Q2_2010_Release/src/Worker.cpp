@@ -115,6 +115,7 @@ Worker::Worker(Manager * mgr, TargetType wkr_type)
 	spec.queue_depth = 1;
 	spec.test_connection_rate = FALSE;
 	spec.trans_per_conn = 1;
+	spec.DataPattern = DATA_PATTERN_FULL_RANDOM;
 
 	if (IsType(wkr_type, GenericServerType)) {
 		SetLocalNetworkInterface(0, (TargetType) (wkr_type & NETWORK_COMPATIBILITY_MASK));
@@ -2217,7 +2218,7 @@ BOOL Worker::LoadConfigDefault(ICF_ifstream & infile)
 			}
 
 			SetDiskStart(temp_num64);
-		} else if (key.CompareNoCase("'Disk maximum size,starting sector,Use Random Data") == 0) {
+		} else if (key.CompareNoCase("'Disk maximum size,starting sector,Data pattern") == 0) {
 			if (!IsType(Type(), GenericDiskType)) {
 				ErrorMessage("Error restoring worker " + (CString) name + ".  "
 					     "Cannot specify \"Disk maximum size,starting sector\" for a non-disk worker.");

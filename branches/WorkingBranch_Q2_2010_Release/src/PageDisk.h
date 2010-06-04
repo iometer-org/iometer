@@ -154,6 +154,11 @@ class CPageDisk:public CPropertyPage {
 public:
 	afx_msg void OnEnChangeEdisksize();
 	afx_msg void OnEnChangeEdiskstart();
+
+private:
+	bool m_RepeatingBytesMessageBox_Shown;
+	bool m_PseudoRandomMessageBox_Shown;
+	bool m_FullRandomMessageBox_Shown;
 };
 
 #endif

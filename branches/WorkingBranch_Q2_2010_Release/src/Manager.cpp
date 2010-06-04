@@ -1039,7 +1039,7 @@ int Manager::GetDataPattern(TargetType type)
 
 	// If there are no workers, return immediately.
 	if (!(wkr_count = WorkerCount(type)))
-		return 1; //Full random data pattern
+		return DATA_PATTERN_FULL_RANDOM; //Full random data pattern
 
 	// Find the first worker of the specified type's transaction per
 	// connection value.
@@ -1049,8 +1049,7 @@ int Manager::GetDataPattern(TargetType type)
 	for (w = 1; w < wkr_count; w++) {
 		if (wkr_result != GetWorker(w, type)->GetDataPattern(type)) {
 			// The value isn't the same.
-			AfxMessageBox("The data pattern values selected for each worker is not the same. Defaulting to 'Full random'.");
-			return DATA_PATTERN_FULL_RANDOM; //Full random data pattern
+			return AMBIGUOUS_VALUE;
 		}
 	}
 	// All workers have the same value.

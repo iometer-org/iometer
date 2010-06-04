@@ -786,9 +786,8 @@ int ManagerList::GetDataPattern(TargetType type)
 	for (m = 1; m < mgr_count; m++) {
 		if (GetManager(m, type)->WorkerCount(type) &&
 		    mgr_result != GetManager(m, type)->GetDataPattern(type)) {
-			// The values are not the same so set to the default value
-			AfxMessageBox("The data pattern values selected for each manager is not the same. Defaulting to 'Full random'.");
-			return DATA_PATTERN_FULL_RANDOM; //Full random
+			// The values are not the same.
+			return AMBIGUOUS_VALUE;
 		}
 	}
 	// All managers have the same value.

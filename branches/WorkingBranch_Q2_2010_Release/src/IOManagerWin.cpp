@@ -1372,7 +1372,7 @@ bool GetDeviceNumber(char *name, PSTORAGE_DEVICE_NUMBER sdn)
 	#if _DETAILS
 	cout << " DeviceType=" << (int) storDevNum.DeviceType
 		 << " DeviceNumber=" << (int) storDevNum.DeviceNumber 
-		 << " ParitionNumber=" << (int) storDevNum.PartitionNumber << endl;
+		 << " PartitionNumber=" << (int) storDevNum.PartitionNumber << endl;
 	#endif
 
 	//
@@ -1782,7 +1782,7 @@ int MergeVolumesAndRawDisks(Target_Spec *dest, Target_Spec *source, ULONG mid_po
 			source[quick_index].type = PhysicalDiskTypeHasPartitions;
 
 #ifdef _DETAILS2 
-		cout << " Quick-matched raw disk " << source[quick_index].name << endl;
+		cout << " Quick matched raw disk " << source[quick_index].name << endl;
 #endif
 
 			dest[++d] = source[quick_index];

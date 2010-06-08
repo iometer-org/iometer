@@ -1420,8 +1420,8 @@ bool GetDiskExtents(char *name, PVOID vde, PULONG size, bool allocate)
 		return FALSE;
 	}
 
-	// some weird packing problem, so use *2 for initial, just to be sure
-	bufLen = sizeof(VOLUME_DISK_EXTENTS) * 2;
+	// some weird packing problem, so use 4 extents for starters
+	bufLen = sizeof(VOLUME_DISK_EXTENTS) +  4 * sizeof(DISK_EXTENT);
 
 	while (tries--) {
 		volBuf =  new char[bufLen];
@@ -1438,20 +1438,21 @@ bool GetDiskExtents(char *name, PVOID vde, PULONG size, bool allocate)
 			NULL);
 
 		if (!ErrorCode) {
+			ErrorCode = GetLastError();
 			delete [] volBuf;
-			if (GetLastError() != ERROR_MORE_DATA) { 
+			if (ErrorCode == ERROR_MORE_DATA || ErrorCode == ERROR_INSUFFICIENT_BUFFER) {
+				//bufLen = sizeof(VOLUME_DISK_EXTENTS) + ((volDiskExt->NumberOfDiskExtents-1) * sizeof(DISK_EXTENT));
+				bufLen *=4;
+			#ifdef _DETAILS
+				cout << "GetDiskExtents(): Retrying IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS to device "
+					 << Buffer <<  " with size=" << bufLen << ", numext=" << volDiskExt->NumberOfDiskExtents << endl;
+			#endif
+			} else { 
 			//#ifdef _DETAILS
 				cerr << "GetDiskExtents(): Failed sending IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS with error="
 					 << GetLastError() << endl;
 			//#endif
 				break;
-			}
-			else {
-				bufLen = sizeof(VOLUME_DISK_EXTENTS) + ((volDiskExt->NumberOfDiskExtents-1) * sizeof(DISK_EXTENT));
-			#ifdef _DETAILS
-				cout << "GetDiskExtents(): Retrying IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS to device "
-					 << Buffer <<  " with size=" << bufLen << ", numext=" << volDiskExt->NumberOfDiskExtents << endl;
-			#endif
 			}
 		}
 		else break;
@@ -1771,7 +1772,7 @@ int MergeVolumesAndRawDisks(Target_Spec *dest, Target_Spec *source, ULONG mid_po
 		// problem is if there are holes. Could check for easy case first (plus extents) and 
 		// then fall back to slow search.
 
-		int quick_index = mid_point + GET_SDN_PTR(source[v].disk_info)->DeviceNumber;
+		int quick_index = mid_point + GET_SDN_PTR(source[v].disk_info)->DeviceNumber + 1;
 		if (EQUAL_DEVICE_NUMBERS(GET_SDN_PTR(source[v].disk_info), GET_SDN_PTR(source[quick_index].disk_info)))
 		{
 			PVOLUME_DISK_EXTENTS *pvde = GET_VDE_PTR(source[v].disk_info);				
@@ -1866,14 +1867,15 @@ int MergeVolumesAndRawDisks(Target_Spec *dest, Target_Spec *source, ULONG mid_po
 
 						// re-scan the raw list for the rest of the extents
 						ULONG e=1;
-						for (ULONG rr = mid_point; 
-							 (rr < (total - mid_point)) && (e < (*pvde)->NumberOfDiskExtents);
+						for (ULONG rr = r+1; 
+							 (rr < total) && (e < (*pvde)->NumberOfDiskExtents);
 							 rr++)
 						{
 							if (source[rr].type == 0)
 								continue;
 
 							psdn = GET_SDN_PTR(source[rr].disk_info);
+
 							// this only works, becuase both raw and extents disk numbers ordered
 							if (psdn->DeviceType == FILE_DEVICE_DISK &&
 								(psdn->DeviceNumber == (*pvde)->Extents[e].DiskNumber))

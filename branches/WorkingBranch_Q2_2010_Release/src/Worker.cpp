@@ -529,7 +529,11 @@ BOOL Worker::SetTargets()
 		target = GetTarget(i, ActiveType);
 
 		// Initialize random number generator.
-		target->spec.random = timer_value();
+		// If Using a fixed seed is specified use that value, else get a timestamp to use as a seed value
+		if(spec.use_fixed_seed)
+			target->spec.random = spec.fixed_seed_value;
+		else
+			target->spec.random = timer_value();
 
 		// Initialize unique discriminator for VI targets.
 		if (IsType(target->spec.type, VIClientType)) {
@@ -1393,6 +1397,33 @@ void Worker::SetTransPerConn(int trans_per_conn)
 		GetTarget(i)->spec.trans_per_conn = trans_per_conn;
 }
 
+// Sets whether to use Fixed RNG Seed Values for the worker. 
+// If use_fixed_seed is TRUE, it means that a fixed seed will be
+// used.  If FALSE, the default RNG seed will be used.
+void Worker::SetUseFixedSeed(BOOL use_fixed_seed)
+{
+	int i, target_count;
+
+	spec.use_fixed_seed = use_fixed_seed;
+
+	// Loop through all the worker's targets.
+	target_count = TargetCount();
+	for (i = 0; i < target_count; i++)
+		GetTarget(i)->spec.use_fixed_seed = use_fixed_seed;
+}
+
+void Worker::SetFixedSeedValue(DWORDLONG fixed_seed_value)
+{
+	int i, target_count;
+
+	spec.fixed_seed_value = fixed_seed_value;
+
+	// Loop through all the worker's targets.
+	target_count = TargetCount();
+	for (i = 0; i < target_count; i++)
+		GetTarget(i)->spec.fixed_seed_value = fixed_seed_value;
+}
+
 ///////////////////////////////////////////////
 //
 // Functions to retrieve worker information
@@ -1458,6 +1489,33 @@ BOOL Worker::GetDataPattern(TargetType type)
 		return net_partner->GetDataPattern(type);
 
 	return spec.DataPattern;
+}
+
+int Worker::GetUseFixedSeed(TargetType type)
+{
+	if (IsType(Type(), GenericClientType))
+		return net_partner->GetUseFixedSeed(type);
+
+	if (!IsType(Type(), type))
+		return AMBIGUOUS_VALUE;
+
+	// Assume that all targets have the same value.
+	if (spec.use_fixed_seed)
+		return ENABLED_VALUE;
+	else
+		return DISABLED_VALUE;
+}
+
+DWORDLONG Worker::GetFixedSeedValue(TargetType type)
+{
+	if (IsType(Type(), GenericClientType))
+		return net_partner->GetFixedSeedValue(type);
+
+	if (!IsType(Type(), type))
+		return AMBIGUOUS_VALUE;
+
+	// Assume all targets have the same value.
+	return spec.fixed_seed_value;
 }
 
 DWORDLONG Worker::GetDiskStart(TargetType type)
@@ -2004,11 +2062,12 @@ BOOL Worker::SaveConfig(ostream & outfile, BOOL save_aspecs, BOOL save_targets)
 
 	outfile << "'Default target settings for worker" << endl;
 
-	outfile << "'Number of outstanding IOs,test connection rate,transactions per connection" << endl;
-
+	outfile << "'Number of outstanding IOs,test connection rate,transactions per connection,use fixed seed,fixed seed value" << endl;
 	outfile << "\t" << GetQueueDepth(Type())
-	    << "," << (GetConnectionRate(Type())? "ENABLED" : "DISABLED")
-	    << "," << GetTransPerConn(Type()) << endl;
+		<< "," << (GetConnectionRate(Type())? "ENABLED" : "DISABLED")
+		<< "," << GetTransPerConn(Type()) 
+		<< "," << (GetUseFixedSeed(Type())? "ENABLED" : "DISABLED")
+		<< "," << GetFixedSeedValue(Type()) << endl;
 
 	if (IsType(spec.type, GenericDiskType)) {
 		outfile << "'Disk maximum size,starting sector,Data pattern" << endl;
@@ -2154,7 +2213,7 @@ BOOL Worker::LoadConfigDefault(ICF_ifstream & infile)
 	CString key, value;
 	CString token;
 	int temp_number;
-	__int64 temp_num64;
+	DWORDLONG temp_num64;
 
 	while (1) {
 		if (!infile.GetPair(key, value)) {
@@ -2165,9 +2224,14 @@ BOOL Worker::LoadConfigDefault(ICF_ifstream & infile)
 
 		if (key.CompareNoCase("'End default target settings for worker") == 0) {
 			return TRUE;	// This is the only normal exit.
-		} else if (key.
-			   CompareNoCase("'Number of outstanding IOs,test connection rate,transactions per connection")
-			   == 0) {
+
+		//Check for two keys here, this will allow backwards compatabilty to icf files before the use fixed seed changes
+		//For backwards compatability with builds of Iomter that do not support the fixed seed value
+		//SaveConfig() Only print out the new ICF values if the worker is using fixed seeds.
+		//NOTE: If different workers have different UseFixedSeed values, the output line here could be different
+		} else if (key.CompareNoCase("'Number of outstanding IOs,test connection rate,transactions per connection") == 0
+				|| key.CompareNoCase("'Number of outstanding IOs,test connection rate,transactions per connection,use fixed seed,fixed seed value") == 0) 
+			{
 			if (!ICF_ifstream::ExtractFirstInt(value, temp_number)) {
 				ErrorMessage("Error while reading file.  "
 					     "\"Number of outstanding IOs\" should be specified as an integer value.");
@@ -2196,6 +2260,30 @@ BOOL Worker::LoadConfigDefault(ICF_ifstream & infile)
 			}
 
 			SetTransPerConn(temp_number);
+
+			//Load the Use Fixed Seed flag and value if this icf has those values
+			if(key.CompareNoCase("'Number of outstanding IOs,test connection rate,transactions per connection,use fixed seed,fixed seed value") == 0) {
+				token = ICF_ifstream::ExtractFirstToken(value);
+				if (token.CompareNoCase("ENABLED") == 0)
+					SetUseFixedSeed(TRUE);
+				else if (token.CompareNoCase("DISABLED") == 0)
+					SetUseFixedSeed(FALSE);
+				else {
+					ErrorMessage("Error restoring worker " + (CString) name + ".  "
+							 "\"Use fixed seed\" should be set to ENABLED or DISABLED.");
+					return FALSE;
+				}
+
+				if (!ICF_ifstream::ExtractFirstUInt64(value, temp_num64)) {
+					ErrorMessage("Error while reading file.  "
+							 "\"Fixed seed value\" should "
+							 "be specified as an integer value.");
+					return FALSE;
+				}
+				SetFixedSeedValue(temp_num64);
+			}
+
+
 		}  else if (key.CompareNoCase("'Disk maximum size,starting sector") == 0) {
 			if (!IsType(Type(), GenericDiskType)) {
 				ErrorMessage("Error restoring worker " + (CString) name + ".  "
@@ -2203,7 +2291,7 @@ BOOL Worker::LoadConfigDefault(ICF_ifstream & infile)
 				return FALSE;
 			}
 
-			if (!ICF_ifstream::ExtractFirstInt64(value, temp_num64)) {
+			if (!ICF_ifstream::ExtractFirstUInt64(value, temp_num64)) {
 				ErrorMessage("Error while reading file.  "
 					     "\"Disk maximum size\" should be specified as an integer value.");
 				return FALSE;
@@ -2211,7 +2299,7 @@ BOOL Worker::LoadConfigDefault(ICF_ifstream & infile)
 
 			SetDiskSize(temp_num64);
 
-			if (!ICF_ifstream::ExtractFirstInt64(value, temp_num64)) {
+			if (!ICF_ifstream::ExtractFirstUInt64(value, temp_num64)) {
 				ErrorMessage("Error while reading file.  "
 					     "\"Starting sector\" should be specified as an integer value.");
 				return FALSE;
@@ -2225,7 +2313,7 @@ BOOL Worker::LoadConfigDefault(ICF_ifstream & infile)
 				return FALSE;
 			}
 
-			if (!ICF_ifstream::ExtractFirstInt64(value, temp_num64)) {
+			if (!ICF_ifstream::ExtractFirstUInt64(value, temp_num64)) {
 				ErrorMessage("Error while reading file.  "
 					     "\"Disk maximum size\" should be specified as an integer value.");
 				return FALSE;
@@ -2233,7 +2321,7 @@ BOOL Worker::LoadConfigDefault(ICF_ifstream & infile)
 
 			SetDiskSize(temp_num64);
 
-			if (!ICF_ifstream::ExtractFirstInt64(value, temp_num64)) {
+			if (!ICF_ifstream::ExtractFirstUInt64(value, temp_num64)) {
 				ErrorMessage("Error while reading file.  "
 					     "\"Starting sector\" should be specified as an integer value.");
 				return FALSE;
@@ -2241,13 +2329,13 @@ BOOL Worker::LoadConfigDefault(ICF_ifstream & infile)
 
 			SetDiskStart(temp_num64);
 
-			if (!ICF_ifstream::ExtractFirstInt64(value, temp_num64)) {
+			if (!ICF_ifstream::ExtractFirstInt(value, temp_number)) {
 				ErrorMessage("Error while reading file.  "
 					     "\"Data pattern\" should be specified as an integer value.");
 				return FALSE;
 			}
 
-			SetDataPattern(temp_num64);
+			SetDataPattern(temp_number);
 		} else if (key.CompareNoCase("'Local network interface") == 0) {
 			if (!IsType(Type(), GenericNetType)) {
 				ErrorMessage("Error restoring worker " + (CString) name + ".  "

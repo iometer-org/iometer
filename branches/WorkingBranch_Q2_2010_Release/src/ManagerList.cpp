@@ -740,6 +740,25 @@ void ManagerList::SetTransPerConn(int trans_per_conn, TargetType type)
 		GetManager(i, type)->SetTransPerConn(trans_per_conn, type);
 }
 
+void ManagerList::SetUseFixedSeed(BOOL use_fixed_seed, TargetType type)
+{
+	int i, mgr_count;
+
+	// Loop through all the managers.
+	mgr_count = ManagerCount(type);
+	for (i = 0; i < mgr_count; i++)
+		GetManager(i, type)->SetUseFixedSeed(use_fixed_seed, type);
+}
+
+void ManagerList::SetFixedSeedValue(DWORDLONG fixed_seed_value, TargetType type)
+{
+	int i, mgr_count;
+
+	// Loop through all the managers.
+	mgr_count = ManagerCount(type);
+	for (i = 0; i < mgr_count; i++)
+		GetManager(i, type)->SetFixedSeedValue(fixed_seed_value, type);
+}
 ///////////////////////////////////////////////
 //
 // Functions to retrieve worker information
@@ -808,6 +827,50 @@ int ManagerList::GetTransPerConn(TargetType type)
 	// workers of the specified type.
 	for (m = 1; m < mgr_count; m++) {
 		if (GetManager(m, type)->WorkerCount(type) && mgr_result != GetManager(m, type)->GetTransPerConn(type)) {
+			// The values are not the same.
+			return AMBIGUOUS_VALUE;
+		}
+	}
+	return mgr_result;
+}
+
+int ManagerList::GetUseFixedSeed(TargetType type)
+{
+	int m, mgr_count, mgr_result;
+
+	if (!(mgr_count = ManagerCount(type)))
+		return AMBIGUOUS_VALUE;
+
+	// Get the value of the first manager.
+	mgr_result = GetManager(0, type)->GetUseFixedSeed(type);
+
+	// Compare each manager's value with the first manager.
+	for (m = 1; m < mgr_count; m++) {
+		if (GetManager(m, type)->WorkerCount(type) &&
+		    mgr_result != GetManager(m, type)->GetUseFixedSeed(type)) {
+			// The values are not the same.
+			return AMBIGUOUS_VALUE;
+		}
+	}
+	// All managers have the same value.
+	return mgr_result;
+}
+
+DWORDLONG ManagerList::GetFixedSeedValue(TargetType type)
+{
+	int m, mgr_count;
+	DWORDLONG mgr_result;
+
+	if (!(mgr_count = ManagerCount(type)))
+		return AMBIGUOUS_VALUE;
+
+	// Get the value of the first manager.
+	mgr_result = GetManager(0, type)->GetFixedSeedValue(type);
+
+	// Compare each manager's value with the first manager, if it has any
+	// workers of the specified type.
+	for (m = 1; m < mgr_count; m++) {
+		if (GetManager(m, type)->WorkerCount(type) && mgr_result != GetManager(m, type)->GetFixedSeedValue(type)) {
 			// The values are not the same.
 			return AMBIGUOUS_VALUE;
 		}

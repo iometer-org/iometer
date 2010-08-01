@@ -1106,6 +1106,14 @@ void CGalileoView::TestDone(ReturnVal test_successful)
 
 	switch (test_successful) {
 	case ReturnSuccess:
+		//If saving results, write a message into the result file to indicate all runs are complete
+		//This is to allow Automated tools to know when all testing is complete.
+		if ((m_pPageSetup->result_type != RecordNone) && !result_file.IsEmpty()) {
+			ofstream file(result_file, ios::app);
+
+			file << "'End Test" << endl;
+			file.close();
+		}
 		m_pPageAccess->MarkAccesses(access_index);
 		SetStatusBarText("Test Completed Successfully");
 		break;

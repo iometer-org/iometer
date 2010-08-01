@@ -83,9 +83,11 @@ class CPageDisk:public CPropertyPage {
 	CEdit m_EQueueDepth;
 	CSpinButtonCtrl m_SConnectionRate;
 	CButton m_CConnectionRate;
+	CButton m_CUseFixedSeed;
 	CComboBox m_CDataPattern;
 	CTreeCtrl m_TTargets;
 	CEdit m_EConnectionRate;
+	CEdit m_EFixedSeed;
 	CEdit m_EDiskStart;
 	CEdit m_EDiskSize;
 	//}}AFX_DATA
@@ -106,6 +108,7 @@ class CPageDisk:public CPropertyPage {
 
 	void ShowDataPattern();
 	void ShowConnectionRate();
+	void ShowFixedSeedValue();
 	void ShowTargetSelection();
 	void ShowSettings();
 	void ShowFocus();
@@ -159,6 +162,10 @@ private:
 	bool m_RepeatingBytesMessageBox_Shown;
 	bool m_PseudoRandomMessageBox_Shown;
 	bool m_FullRandomMessageBox_Shown;
+public:
+	afx_msg void OnKillfocusEFixedSeed();
+	afx_msg void OnCUseFixedSeed();
+	afx_msg void OnSetfocusEFixedSeed();
 };
 
 #endif

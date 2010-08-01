@@ -274,6 +274,10 @@ struct Target_Spec {
 #endif
 	// Random value used to keep connections in synch.
 	DWORDLONG random;
+
+	// Variables for Using Fixed Seed for RNG
+	BOOL use_fixed_seed;
+	DWORDLONG fixed_seed_value;
 };
 
 #ifdef FORCE_STRUCT_ALIGN

@@ -328,7 +328,7 @@ BOOL ICF_ifstream::ExtractFirstInt(CString & string, int &number)
 	return TRUE;
 }
 
-BOOL ICF_ifstream::ExtractFirstInt64(CString & string, __int64 &number)
+BOOL ICF_ifstream::ExtractFirstUInt64(CString & string, DWORDLONG &number)
 {
 	const CString backup_string = string;
 	CString substring;
@@ -354,7 +354,7 @@ BOOL ICF_ifstream::ExtractFirstInt64(CString & string, __int64 &number)
 		return FALSE;
 	}
 
-	number = _atoi64((LPCTSTR) substring);
+	number = _strtoui64((LPCTSTR) substring, NULL, 10);
 
 	// Prepare string for further processing.  Eat whitespace.
 	string.TrimLeft();
@@ -368,6 +368,8 @@ BOOL ICF_ifstream::ExtractFirstInt64(CString & string, __int64 &number)
 
 	return TRUE;
 }
+
+
 
 BOOL ICF_ifstream::ExtractFirstIntVersion(CString & string, int &number)
 {

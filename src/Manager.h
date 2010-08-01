@@ -133,6 +133,8 @@ class Manager {
 	int GetQueueDepth(TargetType type);
 	int GetMaxSends(TargetType type);
 	int GetTransPerConn(TargetType type);
+	int GetUseFixedSeed(TargetType type);
+	DWORDLONG GetFixedSeedValue(TargetType type);
 	//
 	void SetDataPattern(int data_pattern, TargetType type);
 	void SetConnectionRate(BOOL test_connection_rate, TargetType type);
@@ -142,6 +144,8 @@ class Manager {
 	void SetQueueDepth(int queue_depth, TargetType type);
 	void SetMaxSends(int max_sends);
 	void SetTransPerConn(int trans_per_conn, TargetType type);
+	void SetUseFixedSeed(BOOL use_fixed_seed, TargetType type);
+	void SetFixedSeedValue(DWORDLONG fixed_seed_value, TargetType type);
 	//
 	///////////////////////////////////////////////////////////////////////////
 

@@ -993,6 +993,25 @@ void Manager::SetTransPerConn(int trans_per_conn, TargetType type)
 		GetWorker(w, type)->SetTransPerConn(trans_per_conn);
 }
 
+void Manager::SetUseFixedSeed(BOOL use_fixed_seed, TargetType type)
+{
+	int w, wkr_count;
+
+	// Loop through all the workers.
+	wkr_count = WorkerCount(type);
+	for (w = 0; w < wkr_count; w++)
+		GetWorker(w, type)->SetUseFixedSeed(use_fixed_seed);
+}
+
+void Manager::SetFixedSeedValue(DWORDLONG fixed_seed_value, TargetType type)
+{
+	int w, wkr_count;
+
+	// Loop through all the workers.
+	wkr_count = WorkerCount(type);
+	for (w = 0; w < wkr_count; w++)
+		GetWorker(w, type)->SetFixedSeedValue(fixed_seed_value);
+}
 ///////////////////////////////////////////////
 //
 // Functions to retrieve worker information
@@ -1075,6 +1094,53 @@ int Manager::GetTransPerConn(TargetType type)
 	// Compare the value with all the other workers of the same type.
 	for (w = 1; w < wkr_count; w++) {
 		if (wkr_result != GetWorker(w, type)->GetTransPerConn(type)) {
+			// The value isn't the same.
+			return AMBIGUOUS_VALUE;
+		}
+	}
+	// Return the first worker's value if all other workers have the same.
+	return wkr_result;
+}
+
+int Manager::GetUseFixedSeed(TargetType type)
+{
+	int w, wkr_count, wkr_result;
+
+	// If there are no workers, return immediately.
+	if (!(wkr_count = WorkerCount(type)))
+		return AMBIGUOUS_VALUE;
+
+	// Find the first worker of the specified type's transaction per
+	// connection value.
+	wkr_result = GetWorker(0, type)->GetUseFixedSeed(type);
+
+	// Compare the value with all the other workers of the same type.
+	for (w = 1; w < wkr_count; w++) {
+		if (wkr_result != GetWorker(w, type)->GetUseFixedSeed(type)) {
+			// The value isn't the same.
+			return AMBIGUOUS_VALUE;
+		}
+	}
+	// All workers have the same value.
+	return wkr_result;
+}
+
+DWORDLONG Manager::GetFixedSeedValue(TargetType type)
+{
+	int w, wkr_count;
+	DWORDLONG wkr_result;
+
+	// If there are no workers, return immediately.
+	if (!(wkr_count = WorkerCount(type)))
+		return AMBIGUOUS_VALUE;
+
+	// Find the first worker of the specified type's transaction per
+	// connection value.
+	wkr_result = GetWorker(0, type)->GetFixedSeedValue(type);
+
+	// Compare the value with all the other workers of the same type.
+	for (w = 1; w < wkr_count; w++) {
+		if (wkr_result != GetWorker(w, type)->GetFixedSeedValue(type)) {
 			// The value isn't the same.
 			return AMBIGUOUS_VALUE;
 		}

@@ -68,10 +68,14 @@
 #define SReplyMegabytes                 1042
 #define CConnectionRate                 1043
 #define SReplyKilobytes                 1044
+#define CUseFixedSeed                   1044
 #define EConnectionRate                 1045
 #define SReplyBytes                     1046
+#define EFixedSeed                      1046
 #define SConnectionRate                 1047
 #define RDiskSpawnCPUs                  1048
+#define SConnectionRate2                1048
+#define SFixedSeed                      1048
 #define EDiskWorkerCount                1049
 #define RDiskSpawnUser                  1050
 #define RNetSpawnCPUs                   1051

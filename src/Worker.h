@@ -163,6 +163,8 @@ class Worker {
 	int GetQueueDepth(TargetType type);
 	int GetMaxSends(TargetType type);
 	int GetTransPerConn(TargetType type);
+	int GetUseFixedSeed(TargetType type);
+	DWORDLONG GetFixedSeedValue(TargetType type);
 	// GetValue will replace most Get*() functions.
 	//      int                     GetValue( TargetType type, int offset );
 	//
@@ -175,6 +177,8 @@ class Worker {
 	void SetQueueDepth(int queue_depth);
 	void SetMaxSends(int queue_depth);
 	void SetTransPerConn(int trans_per_conn);
+	void SetUseFixedSeed(BOOL use_fixed_seed);
+	void SetFixedSeedValue(DWORDLONG fixed_seed_value);
 	//      SetValue will replace most Set*() functions.
 	//      void            SetValue( TargetType type, int offset, int value );
 	//

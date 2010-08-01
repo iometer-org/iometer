@@ -935,7 +935,7 @@
 	<Globals>
 		<Global
 			Name="RESOURCE_FILE"
-			Value="\Development\opensource\iometer\berlios\2008.04.14\src\Galileo.rc"
+			Value="\Documents and Settings\rbever\My Documents\Visual Studio 2008\Projects\iometer\svn\branches\WorkingBranch_Q2_2010_Release\src\Galileo.rc"
 		/>
 	</Globals>
 </VisualStudioProject>

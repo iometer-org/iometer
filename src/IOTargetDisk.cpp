@@ -1195,17 +1195,48 @@ BOOL TargetDisk::Prepare(void *buffer, DWORDLONG * prepare_offset, DWORD bytes, 
 			// Do nothing here...a new random byte will be chosen below for each IO
 			break;
 		case DATA_PATTERN_PSEUDO_RANDOM:
-			for( int x = 0; x < bytes; x++)
+			for( DWORD x = 0; x < bytes; x++)
 				((unsigned char*)buffer)[x] = (unsigned char)Rand(0xff);
 			break;
 		case DATA_PATTERN_FULL_RANDOM:
 			cout << "   Generating random data..." << endl;
 			//random data used for writes
-			randomDataBuffer = (unsigned char*)VirtualAlloc(NULL, RANDOM_BUFFER_SIZE, MEM_COMMIT, PAGE_READWRITE);
+#if defined(IOMTR_OSFAMILY_NETWARE)
+		randomDataBuffer = NXMemAlloc(RANDOM_BUFFER_SIZE, 1);
+
+#elif defined(IOMTR_OSFAMILY_UNIX)
+#if defined(IOMTR_OS_LINUX)
+		posix_memalign(&randomDataBuffer, sysconf(_SC_PAGESIZE), RANDOM_BUFFER_SIZE);
+
+#elif defined(IOMTR_OS_SOLARIS) || defined(IOMTR_OS_OSX)
+		randomDataBuffer = valloc(RANDOM_BUFFER_SIZE);
+
+#else
+#warning ===> WARNING: You have to do some coding here to get the port done! 
+#endif
+
+#elif defined(IOMTR_OSFAMILY_WINDOWS)
+		randomDataBuffer = (unsigned char*)VirtualAlloc(NULL, RANDOM_BUFFER_SIZE, MEM_COMMIT|MEM_RESERVE, PAGE_READWRITE);
+
+#else
+#warning ===> WARNING: You have to do some coding here to get the port done!
+#endif
+
 			srand(time(NULL));
-			for( int x = 0; x < RANDOM_BUFFER_SIZE; x++)
-				randomDataBuffer[x] = (unsigned char)rand();
-			cout << "   Done generating random data." << endl;
+
+			if (randomDataBuffer)
+			{
+				for( int x = 0; x < RANDOM_BUFFER_SIZE; x++)
+					randomDataBuffer[x] = (unsigned char)rand();
+
+				cout << "   Done generating random data." << endl;
+			}
+			else
+			{
+				// Could not allocate a larger buffer.  Signal failure.
+				cout << "   Error allocating random data buffer..." << endl;
+			}
+
 			break;
 	}
 

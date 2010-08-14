@@ -1020,7 +1020,26 @@ void Manager::GenerateRandomData()
 		cout << "   Generating random data..." << endl;
 
 		//random data used for writes
+#if defined(IOMTR_OSFAMILY_NETWARE)
+		randomDataBuffer = NXMemAlloc(RANDOM_BUFFER_SIZE, 1);
+
+#elif defined(IOMTR_OSFAMILY_UNIX)
+#if defined(IOMTR_OS_LINUX)
+		posix_memalign(&randomDataBuffer, sysconf(_SC_PAGESIZE), RANDOM_BUFFER_SIZE);
+
+#elif defined(IOMTR_OS_SOLARIS) || defined(IOMTR_OS_OSX)
+		randomDataBuffer = valloc(RANDOM_BUFFER_SIZE);
+
+#else
+#warning ===> WARNING: You have to do some coding here to get the port done! 
+#endif
+
+#elif defined(IOMTR_OSFAMILY_WINDOWS)
 		randomDataBuffer = (unsigned char*)VirtualAlloc(NULL, RANDOM_BUFFER_SIZE, MEM_COMMIT|MEM_RESERVE, PAGE_READWRITE);
+
+#else
+#warning ===> WARNING: You have to do some coding here to get the port done!
+#endif
 
 		srand(time(NULL));
 
@@ -1028,9 +1047,14 @@ void Manager::GenerateRandomData()
 		{
 			for( int x = 0; x < RANDOM_BUFFER_SIZE; x++)
 				randomDataBuffer[x] = (unsigned char)rand();
-		}
 
-		cout << "   Done generating random data." << endl;
+			cout << "   Done generating random data." << endl;
+		}
+		else
+		{
+			// Could not allocate a larger buffer.  Signal failure.
+			cout << "   Error allocating random data buffer..." << endl;
+		}
 	}
 }
 
@@ -1096,8 +1120,21 @@ void Manager::Stop_Test(int target)
 	}
 
 	if (randomDataBuffer != NULL)
-		VirtualFree(randomDataBuffer, 0, MEM_RELEASE);
+	{
+#if defined(IOMTR_OS_LINUX) || defined(IOMTR_OS_OSX) || defined(IOMTR_OS_SOLARIS)
+		free(randomDataBuffer);
 
+#elif defined(IOMTR_OS_NETWARE)
+		NXMemFree(randomDataBuffer);
+
+#elif defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)
+		VirtualFree(randomDataBuffer, 0, MEM_RELEASE);
+	
+#else
+#warning ===> WARNING: You have to do some coding here to get the port done!
+#endif
+
+	}
 	cout << "   Stopped." << endl << flush;
 
 	// Reply that test has stopped.

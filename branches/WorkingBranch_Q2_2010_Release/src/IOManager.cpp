@@ -294,6 +294,22 @@ BOOL Manager::Login(char* port_name, int login_port_number)
 #endif
 #endif
 
+#if _DEBUG
+	{
+		printf("Debugging data_msg size...\n");
+		printf("Sizes: int=%d, long=%d, dword=%d, ulonglong=%d, dwordlong=%d\n", 
+			sizeof(int), sizeof(LONG), sizeof(DWORD), sizeof(unsigned long long), sizeof(DWORDLONG));
+		printf("Sizes: Message_Data=%d, Manager_Info=%d, Target_Spec=%d, Test_Spec=%d, Manager_Results=%d, Worker_Results=%d\n",
+			sizeof(Message_Data), sizeof(Manager_Info), sizeof(Target_Spec), sizeof(Test_Spec),
+			sizeof(Manager_Results), sizeof(Worker_Results));
+
+		printf("Sizes: Disk_Spec=%d, TCP_Spec=%d, VI_Spec=%d\n", sizeof(Disk_Spec), sizeof(TCP_Spec), sizeof(VI_Spec));
+	}
+#endif
+
+
+
+
 	// Sending login request message.
 	cout << "Sending login request..." << endl;
 	cout << "   " << data_msg.data.manager_info.names[0] << endl;
@@ -1025,7 +1041,7 @@ void Manager::GenerateRandomData()
 
 #elif defined(IOMTR_OSFAMILY_UNIX)
 #if defined(IOMTR_OS_LINUX)
-		posix_memalign(&randomDataBuffer, sysconf(_SC_PAGESIZE), RANDOM_BUFFER_SIZE);
+		posix_memalign((void **)&randomDataBuffer, sysconf(_SC_PAGESIZE), RANDOM_BUFFER_SIZE);
 
 #elif defined(IOMTR_OS_SOLARIS) || defined(IOMTR_OS_OSX)
 		randomDataBuffer = valloc(RANDOM_BUFFER_SIZE);

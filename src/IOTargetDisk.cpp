@@ -1206,7 +1206,7 @@ BOOL TargetDisk::Prepare(void *buffer, DWORDLONG * prepare_offset, DWORD bytes, 
 
 #elif defined(IOMTR_OSFAMILY_UNIX)
 #if defined(IOMTR_OS_LINUX)
-		posix_memalign(&randomDataBuffer, sysconf(_SC_PAGESIZE), RANDOM_BUFFER_SIZE);
+		posix_memalign((void **)&randomDataBuffer, sysconf(_SC_PAGESIZE), RANDOM_BUFFER_SIZE);
 
 #elif defined(IOMTR_OS_SOLARIS) || defined(IOMTR_OS_OSX)
 		randomDataBuffer = valloc(RANDOM_BUFFER_SIZE);
@@ -1453,8 +1453,20 @@ BOOL TargetDisk::Prepare(void *buffer, DWORDLONG * prepare_offset, DWORD bytes, 
 
 	// If we did full random data, clean up the buffer
 	if(spec.DataPattern == DATA_PATTERN_FULL_RANDOM)
-		VirtualFree(randomDataBuffer, 0, MEM_RELEASE);
+	{
+#if defined(IOMTR_OS_LINUX) || defined(IOMTR_OS_OSX) || defined(IOMTR_OS_SOLARIS)
+		free(randomDataBuffer);
 
+#elif defined(IOMTR_OS_NETWARE)
+		NXMemFree(randomDataBuffer);
+
+#elif defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)
+		VirtualFree(randomDataBuffer, 0, MEM_RELEASE);
+	
+#else
+#warning ===> WARNING: You have to do some coding here to get the port done!
+#endif
+	}
 	return retval;
 }
 

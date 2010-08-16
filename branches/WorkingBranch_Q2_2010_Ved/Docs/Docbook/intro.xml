@@ -1,0 +1,145 @@
+<sect1 id="intro">
+<title>Introduction</title>
+<para>
+Iometer is an I/O subsystem measurement and characterization tool for
+single and clustered systems. Iometer is pronounced "eye-OM-i-ter," to
+rhyme with "thermometer." Iometer does for a computer's I/O subsystem what
+a dynamometer does for an engine: it measures performance under a
+controlled load. Iometer was formerly known as "Galileo."
+</para><para>
+Iometer is both a workload generator (that is, it performs I/O operations
+in order to stress the system) and a measurement tool (that is, it
+examines and records the performance of its I/O operations and their
+impact on the system). It can be configured to emulate the disk or
+network I/O load of any program or benchmark, or can be used to generate
+entirely synthetic I/O loads. It can generate and measure loads on single 
+or multiple (networked) systems.
+</para><para>
+Iometer can be used for measurement and characterization of:
+</para>
+<itemizedlist>
+<listitem><para>
+Performance of disk and network controllers.
+</para></listitem>
+<listitem><para>
+Bandwidth and latency capabilities of buses.
+</para></listitem>
+<listitem><para>
+Network throughput to attached drives.
+</para></listitem>
+<listitem><para>
+Shared bus performance.
+</para></listitem>
+<listitem><para>
+System-level hard drive performance.
+</para></listitem>
+<listitem><para>
+System-level network performance.
+</para></listitem>
+</itemizedlist>
+<para>
+Iometer consists of two programs, Iometer and Dynamo.
+</para><para>
+<emphasis>Iometer</emphasis> is the controlling program. Using Iometer's
+graphical user interface, you configure the workload, set operating
+parameters, and start and stop tests. Iometer tells Dynamo what to do,
+collects the resulting data, and summarizes the results in output files.
+Only one copy of Iometer should be running at a time; it is typically run
+on the server machine.
+</para><para>
+<emphasis>Dynamo</emphasis> is the workload generator. It has no user
+interface. At Iometer's command, Dynamo performs I/O operations and
+records performance information, then returns the data to Iometer. There
+can be more than one copy of Dynamo running at a time; typically one copy
+runs on the server machine and one additional copy runs on each client
+machine. Dynamo is multithreaded; each copy can simulate the workload of
+multiple client programs. Each running copy of Dynamo is called a
+manager; each thread within a copy of Dynamo is called a worker.
+</para>
+<sect2 id="new">
+<title>What's new?</title>
+<para>
+The current version of Iometer is 2003.12.16. Here are some of the more
+significant changes since the last version (2003.05.10):
+</para><para>
+New features:
+</para><para>
+For a complete list of all enhancements and bug fixes since the previous
+version, please see the file "CHANGELOG".
+</para><para>
+NOTE
+</para><para>
+It is important to keep in mind, that resuls might not be comparable
+between two different Iometer versions. For example if there was an error
+in the old version you might see this effect.
+</para></sect2>
+<sect2 id="copyright">
+<title>Copyright and License</title>
+<para>
+This document, <emphasis>Iometer User's Guide</emphasis>, is copyrighted 
+&copy; by <emphasis>The Iometer Project Group</emphasis>, 
+Permission is granted to copy, distribute and/or modify this document 
+under the terms of the GNU Free Document License, Version 1.1 or any later 
+version published by the Free Software Foundation; with no Back-Cover 
+texts. A copy of the license is available at <ulink 
+url="http://www.gnu.org/copyleft/fdl.html">
+http://www.gnu.org/copyleft/fdl.html</ulink>
+</para>
+<para>
+The program(s), <emphasis>Iometer</emphasis> and 
+<emphasis>Dynamo</emphasis> are release under the <emphasis>Intel Open 
+Software License</emphasis> which is displayed the first time you run 
+iometer. A copy of the license is available at <ulink 
+url="http://www.iometer.org/doc/licenses/iosl.txt">www.iometer.org</ulink> 
+website.
+</para>
+</sect2>
+<sect2 id="disclaimer">
+<title>Disclaimer</title>
+<itemizedlist>
+<listitem><para>
+No liability for the contents of this document can be accepted.
+</para></listitem>
+<listitem><para>
+Iometer is provided <emphasis>"as-is"</emphasis>, without warranty or
+guarantee of any kind.
+</para></listitem>
+<listitem><para>
+Intel does not endorse, support, or guarantee Iometer performance results.
+</para></listitem>
+</itemizedlist>
+</sect2>
+<sect2 id="contribute">
+<title>Credits / Contributors</title>
+<para>
+Put info here
+</para>
+</sect2>
+<sect2 id="feedback">
+<title>Feedback</title>
+<para>
+Iometer is provided <emphasis>"as-is"</emphasis>, but we are interested in
+input from you. If you have a problem while running Iometer our found a
+bug you should consult the Know Issues page first at <ulink
+url="http://www.iometer.org/doc/issues.html">
+http://www.iometer.org/doc/issues.html</ulink>
+</para><para>
+There you will find workarounds for this known issues. If you have a new
+issue you might join the iometer-user mailing list (see <ulink
+url="http://lists.sourceforge.net/lists/listinfo/iometer-user">
+http://lists.sourceforge.net/lists/listinfo/iometer-user</ulink>) and ask
+the
+community for help. If it is a real bug, then please provide a patch or
+go ahead and file the bug at <ulink
+url="http://sourceforge.net/projects/iometer">
+http://sourceforge.net/projects/iometer</ulink>
+</para><para>
+We cannot promise to fix any bugs or provide any requested features, but
+we try to read and respond to all our mail. Be sure to include all
+information necessary to reproduce the problem, including the version
+number of Iometer. If you aren't using the current version, you will be
+asked to reproduce the problem using the current version before any
+action is taken on the bug report.
+</para></sect2>
+ </sect1> 
+

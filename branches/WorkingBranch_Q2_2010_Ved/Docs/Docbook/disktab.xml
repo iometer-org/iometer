@@ -1,0 +1,56 @@
+<sect2 id="diskt">
+<title>The Disk Targets Tab</title>
+<mediaobject>
+<imageobject role="html">
+<imagedata fileref="images/diskt.jpg" format="JPG" align="center"/>
+</imageobject>
+<imageobject role="fo">
+<imagedata fileref="images/diskt.jpg" format="JPG" align="center"/>
+</imageobject>
+</mediaobject>
+<para>
+The Disk Targets tab lets you see and control the disks used by the disk 
+worker(s) currently selected in the Topology panel. You can control which 
+disks are used, how much of each disk is used, the maximum number of 
+outstanding I/Os per disk for each worker, and how frequently the disks 
+are opened and closed.
+</para><para>
+By Clicking, Shift-click, and Control-click you can select any number of 
+drives to be used by the selected worker(s) during the test.
+</para><para>
+Physical drives are displayed with a blue disk icon and the name 
+<emphasis>PHYSICALDRIVE:n</emphasis> (only if they contain nothing but 
+free space).
+</para><para>
+Logical drives are displayed with a yellow disk icon and a drive letter 
+and optional name (only if they are writable). Logical drives are accessed 
+by writing to a file called \iobw.tst. If this file does not exist, the 
+drive's icon has a red slash through it. At the start of the test the file
+will be created and grown until the disk is full.
+</para><para>
+Running with physical drives is recommended.
+</para><para>
+If a disk worker is selected in the Topology panel, that worker's current 
+configuration is displayed in the Disk Targets tab; any changes you make 
+affect only that worker. 
+</para><para>
+If a manager or <emphasis>All Managers</emphasis> is selected, the disk 
+workers' common configuration is displayed: controls (other than Target 
+assignments) for which all workers have the same setting show that 
+setting, while controls for which not all workers have the same setting 
+are blank. <emphasis role="bold">Any changes you make in the Disk Targets 
+tab are  applied to all of the selected manager or managers' 
+workers.</emphasis>
+</para><para>
+If a network worker is selected in the Topology panel, the Disk Targets 
+tab is disabled. Clicking on a network worker while the Disk Targets tab 
+is displayed automatically switches to the Network Targets tab. The same 
+applies to a manager that has no disk workers, or <emphasis>All 
+Managers</emphasis> if no manager has any disk workers.
+</para>
+
+&targets;
+
+
+</sect2>
+

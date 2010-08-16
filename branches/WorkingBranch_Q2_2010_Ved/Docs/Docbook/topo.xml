@@ -1,0 +1,164 @@
+<sect2 id="topology">
+<title>The Topology Panel</title>
+<mediaobject>
+<imageobject role="html">
+<imagedata fileref="images/topo.jpg" format="JPG" align="left"/>
+</imageobject>
+<imageobject role="fo">
+<imagedata fileref="images/topo.jpg" format="JPG" align="left"/>
+</imageobject>
+</mediaobject>
+<para>
+The Topology panel displays a hierarchical list of the managers (copies of 
+Dynamo) and workers (threads within each copy of Dynamo) currently active. 
+This panel is a hierarchical list like the one used in Windows Explorer. 
+</para><para>
+To display or hide a manager's workers, double-click on the manager's 
+name, or click the plus or minus sign to the left of the manager's
+name.
+</para><para>
+The icons that appear in the Topology panel are as follows:
+</para>
+<itemizedlist>
+<listitem>
+<para><inlinemediaobject>
+<imageobject role="html">
+<imagedata fileref="images/topo1.jpg" format="JPG" align="left"/>
+</imageobject>
+<imageobject role="fo">
+<imagedata fileref="images/topo1.jpg" format="JPG" align="left"/>
+</imageobject>
+</inlinemediaobject>
+All managers connected to this copy of Iometer.
+</para></listitem>
+<listitem>
+<para><inlinemediaobject>
+<imageobject role="html">
+<imagedata fileref="images/topo2.jpg" format="JPG" align="left"/>
+</imageobject>
+<imageobject role="fo">
+<imagedata fileref="images/topo2.jpg" format="JPG" align="left"/>
+</imageobject>
+</inlinemediaobject>
+A manager.
+</para></listitem>
+<listitem>
+<para><inlinemediaobject>
+<imageobject role="html">
+<imagedata fileref="images/topo3.jpg" format="JPG" align="left"/>
+</imageobject>
+<imageobject role="fo">
+<imagedata fileref="images/topo3.jpg" format="JPG" align="left"/>
+</imageobject>
+</inlinemediaobject>
+A disk worker.
+</para></listitem>
+<listitem>
+<para><inlinemediaobject>
+<imageobject role="html">
+<imagedata fileref="images/topo4.jpg" format="JPG" align="left"/>
+</imageobject>
+<imageobject role="fo">
+<imagedata fileref="images/topo4.jpg" format="JPG" align="left"/>
+</imageobject>
+</inlinemediaobject>
+A network server.
+</para></listitem>
+<listitem>
+<para><inlinemediaobject>
+<imageobject role="html">
+<imagedata fileref="images/topo5.jpg" format="JPG" align="left"/>
+</imageobject>
+<imageobject role="fo">
+<imagedata fileref="images/topo5.jpg" format="JPG" align="left"/>
+</imageobject>
+</inlinemediaobject>
+A network client (created automatically when you select a
+target for a network server). Its name reflects the name of its
+corresponding network server.
+</para></listitem>
+</itemizedlist>
+<para>
+Network servers and network clients are both referred to as network 
+workers.
+</para><para>
+Iometer starts a single manager, on the same machine as Iometer, when it 
+starts up.
+</para><para>
+By clicking on a worker, manager, or All Managers you are able to see and 
+change its settings in the Disk Targets, Network Targets, and Access 
+Specifications tabs.
+</para><para>
+If you click on a worker, targets (disks or network interfaces) selected 
+in the Disk Targets or Network Targets tab are used by that worker. The 
+other controls in the Disk Targets, Network Targets, and Access 
+Specifications tabs show current settings for that worker; any changes are 
+applied to that worker.
+</para><para>
+If you click on a manager, targets selected in the Disk Targets or 
+Network Targets tab are distributed in a round-robin fashion among the 
+manager's disk or network workers (as appropriate). The other controls in 
+the Disk Targets, Network Targets, and Access Specifications tabs display 
+the common settings of all the manager's workers of the appropriate 
+type (a value is shown if all workers have the same value, or the control 
+is blank if not all workers have the same value). Any changes you make are 
+applied to all the manager's workers of the appropriate type.
+</para><para>
+If you click on All Managers, no targets are shown in the Disk Targets or 
+Network Targets tab, because managers target lists may be different.  
+The other controls in the Disk Targets, Network Targets, and Access 
+Specifications tabs display the common settings of all workers of the 
+appropriate type; any changes you make are applied to all workers of the 
+appropriate type.
+</para><para>
+Double-click on a manager or All Managers to hide or display its children
+</para><para>
+By draging a worker, manager, or All Managers to a bar chart in 
+the Results Display tab, you are able to see its results as the test is 
+running.
+</para><para>
+To add a manager on the same machine as Iometer, press the 
+Start New Manager button on the toolbar.
+</para><para>
+To add a manager on another machine, start Dynamo on the desired machine, 
+providing the name of the machine running Iometer as a command-line 
+argument (as described under *****Running Iometer above); additional 
+managers can be started before or after Iometer. 
+</para><para>
+To remove a manager, click on the manager and press the Disconnect button 
+on the toolbar; this terminates the specified Dynamo process.
+</para><para>
+To remove all managers, click on <emphasis>All Managers</emphasis> and 
+press the Disconnect button on the toolbar.
+</para><para>
+By default, each manager starts off with one disk worker for each 
+processor on the manager's machine. To add a worker to a manager, click 
+on the manager or any of its workers and press the Start Disk Worker or 
+Start Network Worker button on the toolbar. 
+</para><para>
+To remove a worker, click on the worker and press the Disconnect 
+button on the toolbar.
+</para><para>
+By default, each manager has the same name as the machine on which it is 
+running, and each worker has the name <emphasis>Worker n.</emphasis> You 
+can change the name of a manager or worker by clicking on the name when 
+the manager or worker is selected (you will have to wait a moment for the 
+name to highlight). The name of <emphasis>All Managers</emphasis> cannot 
+be changed.
+</para><para>
+At most one list item (manager, worker, or All Managers) can be 
+selected at a time.
+</para><para>
+The settings for the selected worker or the selected manager's or 
+managers' workers are shown in the Disk Targets, Network Targets, and 
+Access Specifications tabs.
+</para><para>
+Right-clicking on a manager pops up a menu with one item: 
+<emphasis>Refresh Target Lists.</emphasis>
+</para><para>
+Selecting this item causes the manager to update its lists of disks and 
+network interfaces. You can use this to update Iometer's view of the 
+manager if the target status for a manager changes (for example, if you 
+create an iobw.tst file or mount a logical disk).
+</para>
+</sect2>

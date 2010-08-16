@@ -1,0 +1,16 @@
+Iometer XML Docs
+----------------
+
+The files here are for use of making the Iometer Documentation.
+
+Makefile - Used for generating docs from xsltproc
+
+iom.xml - Main xml file.
+
+*.xml - XML content called from iom.xml
+
+style.css - HTML sytle sheet
+
+images/ - Image files for doc.
+	|
+	|-> iometer.jpg - IOMeter Logo Pic

@@ -1,0 +1,27 @@
+* What is iomtr_kstat?
+iomtr_kstat is a kernel module that exports a virtual character device interface
+and exchange data with user space application via ioctl interface. It can 
+reports various information like number of cpu, cpu speed, and performance
+data.
+
+* Why do we need iomtr_kstat?
+You can run iometer WITHOUT iomtr_kstat. Iomtr_kstat is only an option. Because
+on Linux, whenever it wants to gather any performance related data including CPU,
+NI, TCP data, it has to open and read certain file from /proc file system, parse
+the file content. This is not a big deal on current fast speed CPU. But when you
+want to run IoMeter more precisely, or run dynamo on some low speed embedded CPU,
+then you have to think about this. With iomtr_kstat, any data acquire only needs
+one system call overhead.
+
+* How to use the iomtr_kstat?
+Please see INSTALL under the same directory.
+
+* Which platforms does iomtr_kstat run on?
+Currently it only support Linux.
+
+* Which cpu architecture does iomtr_kstat run on?
+Currently it only support IOP321, and IOP331.
+
+* Who I should blame if I meet problem?
+Ming Zhang (mingz@ele.uri.edu).
+

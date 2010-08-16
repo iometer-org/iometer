@@ -1,0 +1,216 @@
+<sect2 id="toolbar">
+<title>The Toolbar</title>
+<mediaobject>
+<imageobject role="html">
+<imagedata fileref="images/toolbar.jpg" format="JPG" align="center"/>
+</imageobject>
+<imageobject role="fo">
+<imagedata fileref="images/toolbar.jpg" format="JPG" align="center"/>
+</imageobject>
+</mediaobject>
+<para>
+The toolbar icons allow access to the most commonly used commands in 
+Iometer.
+</para>
+<itemizedlist>
+<listitem>
+<formalpara><title><inlinemediaobject>
+<imageobject role="html">
+<imagedata fileref="images/tlbopen.jpg" format="JPG" align="left"/>
+</imageobject>
+<imageobject role="fo">
+<imagedata fileref="images/tlbopen.jpg" format="JPG" align="left"/>
+</imageobject>
+</inlinemediaobject>
+Open Test Configuration File:</title><para>
+Restores a previously-saved set of test configuration parameters from a 
+file.
+</para></formalpara></listitem>
+<listitem>
+<formalpara><title><inlinemediaobject>
+<imageobject role="html">
+<imagedata fileref="images/tlbsave.jpg" format="JPG" align="left"/>
+</imageobject>
+<imageobject role="fo">
+<imagedata fileref="images/tlbsave.jpg" format="JPG" align="left"/>
+</imageobject>
+</inlinemediaobject>
+Save Test Configuration File:</title><para>
+Saves the current test configuration parameters to a file.
+</para></formalpara></listitem>
+<listitem>
+<formalpara><title><inlinemediaobject>
+<imageobject role="html">
+<imagedata fileref="images/tlb3.jpg" format="JPG" align="left"/>
+</imageobject>
+<imageobject role="fo">
+<imagedata fileref="images/tlb3.jpg" format="JPG" align="left"/>
+</imageobject>
+</inlinemediaobject>
+Start New Manager:</title><para>
+Starts a new manager (copy of Dynamo) on the machine Iometer is running 
+on. The new manager has the same name as the machine on
+which it is running. The number and type of workers in the new manager is
+determined by the Number of Workers to Spawn Automatically control in the
+Test Setup tab.
+</para></formalpara></listitem>
+<listitem>
+
+<formalpara><title><inlinemediaobject>
+<imageobject role="html">
+<imagedata fileref="images/tlb4.jpg" format="JPG" align="left"/>
+</imageobject>
+<imageobject role="fo">
+<imagedata fileref="images/tlb4.jpg" format="JPG" align="left"/>
+</imageobject>
+</inlinemediaobject>Start Disk Worker:</title><para>
+Starts a new disk worker (thread) in the manager selected in the Topology 
+panel. Each new worker is named <emphasis>Worker n</emphasis>, where n 
+is the next available number, and has the default configuration (e.g. no 
+disks selected). This button is disabled unless a manager or worker is 
+selected in the Topology panel.
+</para></formalpara></listitem>
+<listitem>
+<formalpara><title><inlinemediaobject>
+<imageobject role="html">
+<imagedata fileref="images/tlb5.jpg" format="JPG" align="left"/>
+</imageobject>
+<imageobject role="fo">
+<imagedata fileref="images/tlb5.jpg" format="JPG" align="left"/>
+</imageobject>
+</inlinemediaobject>
+Start Network Worker:</title><para>
+Starts a new network server (thread) in the manager selected in the 
+Topology panel. Apart from the worker type, this button works the same as 
+the Start Disk Worker button.
+</para></formalpara></listitem>
+<listitem>
+<formalpara><title><inlinemediaobject>
+<imageobject role="html">
+<imagedata fileref="images/tlb6.jpg" format="JPG" align="left"/>
+</imageobject>
+<imageobject role="fo">
+<imagedata fileref="images/tlb6.jpg" format="JPG" align="left"/>
+</imageobject>
+</inlinemediaobject>
+Duplicate Selected Worker:</title><para>
+Duplicates the selected worker by creating a
+new worker thread of the same type (disk worker or network server) on the
+same manager. The new worker has the same name and configuration as the
+selected worker. If the selected worker is a network server, its 
+corresponding client (if any) is also duplicated. This button is disabled 
+unless a disk worker or network server is selected in the Topology panel.
+</para></formalpara></listitem>
+<listitem>
+<formalpara><title><inlinemediaobject>
+<imageobject role="html">
+<imagedata fileref="images/tlb7.jpg" format="JPG" align="left"/>
+</imageobject>
+<imageobject role="fo">
+<imagedata fileref="images/tlb7.jpg" format="JPG" align="left"/>
+</imageobject>
+</inlinemediaobject>
+Start Tests:</title><para>
+Starts a series of tests (as specified by the current settings in the 
+Access Specifications and Test Setup tabs). Before any tests are run, you 
+will be presented with a standard Save File dialog to specify where the 
+results of the tests are to be saved (default results.csv in the current 
+directory). (If the Record Results control is set to "None", no results 
+are saved, and a Save File dialog does not appear.) If you specify a new 
+file, the results are saved to that file. If you specify an existing file, 
+the results are appended to that file. If you press Cancel, the tests are 
+still started, but the results are not saved.
+</para></formalpara></listitem>
+<listitem>
+<formalpara><title><inlinemediaobject>
+<imageobject role="html">
+<imagedata fileref="images/tlb8.jpg" format="JPG" align="left"/>
+</imageobject>
+<imageobject role="fo">
+<imagedata fileref="images/tlb8.jpg" format="JPG" align="left"/>
+</imageobject>
+</inlinemediaobject>
+Stop Current Test and Save Results:</title><para>
+Stops the currently-running test, saving its results, and begins running 
+the next test in the current series, if any.
+</para></formalpara></listitem>
+<listitem>
+<formalpara><title><inlinemediaobject>
+<imageobject role="html">
+<imagedata fileref="images/tlb9.jpg" format="JPG" align="left"/>
+</imageobject>
+<imageobject role="fo">
+<imagedata fileref="images/tlb9.jpg" format="JPG" align="left"/>
+</imageobject>
+</inlinemediaobject>
+Abort All Tests:</title><para>
+Stops the currently-running test and discards its results, writing a 
+<emphasis>test aborted</emphasis> record to the results file. No more 
+tests are run, but the results of any tests completed before the current 
+test started are still written to the results file.
+</para></formalpara></listitem>
+<listitem>
+<formalpara><title><inlinemediaobject>
+<imageobject role="html">
+<imagedata fileref="images/tlb10.jpg" format="JPG" align="left"/>
+</imageobject>
+<imageobject role="fo">
+<imagedata fileref="images/tlb10.jpg" format="JPG" align="left"/>
+</imageobject>
+</inlinemediaobject>
+Reset Workers:</title><para>
+Resets the worker configuration of all managers to the default state. All 
+existing worker threads are terminated, and their configurations are lost; 
+each manager is then given the default number of workers, each with the 
+default configuration.
+</para></formalpara></listitem>
+<listitem>
+<formalpara><title><inlinemediaobject>
+<imageobject role="html">
+<imagedata fileref="images/tlb11.jpg" format="JPG" align="left"/>
+</imageobject>
+<imageobject role="fo">
+<imagedata fileref="images/tlb11.jpg" format="JPG" align="left"/>
+</imageobject>
+</inlinemediaobject>
+Disconnect Selected Worker or Manager:</title><para>
+If <emphasis>All Managers</emphasis> is selected in the Topology panel, 
+terminates all Dynamo processes and all their threads. If a manager is 
+selected, terminates the corresponding Dynamo process and all its threads. 
+If a worker is selected, terminates the corresponding thread. The 
+configuration of the terminated worker(s) or manager(s) is lost.
+</para></formalpara></listitem>
+<listitem>
+<formalpara><title><inlinemediaobject>
+<imageobject role="html">
+<imagedata fileref="images/tlb12.jpg" format="JPG" align="left"/>
+</imageobject>
+<imageobject role="fo">
+<imagedata fileref="images/tlb12.jpg" format="JPG" align="left"/>
+</imageobject>
+</inlinemediaobject>
+Exit</title><para>
+Terminates Iometer and all connected Dynamo processes.
+</para></formalpara></listitem>
+<listitem>
+<formalpara><title><inlinemediaobject>
+<imageobject role="html">
+<imagedata fileref="images/tlb13.jpg" format="JPG" align="left"/>
+</imageobject>
+<imageobject role="fo">
+<imagedata fileref="images/tlb13.jpg" format="JPG" align="left"/>
+</imageobject>
+</inlinemediaobject>
+About Iometer:</title><para>
+Displays version and copyright information for Iometer.
+</para></formalpara></listitem>
+</itemizedlist>
+<para>
+All buttons except Open, Save, Start New Manager, Exit, and About Iometer 
+are grayed out if there are no managers in the Topology panel. All buttons 
+except Stop, Abort, Exit, and About Iometer are grayed out when a test is 
+running. The Stop and Abort buttons are grayed out when no test is 
+running.
+</para>
+</sect2>
+

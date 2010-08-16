@@ -1,0 +1,995 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// German (Germany) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
+#ifdef _WIN32
+LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "#if defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#endif\r\n"
+    "#include ""res\\Iometer.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""         // Standard components\r\n"
+    "#endif\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "res\\Galileo.ico"
+IDR_GALILETYPE          ICON                    "res\\GalileoDoc.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDR_MAINFRAME           BITMAP                  "res\\Toolbar.bmp"
+IDB_LED                 BITMAP                  "res\\LED.bmp"
+IDB_WORKER_ICONS        BITMAP                  "res\\wicons.bmp"
+IDB_TARGET_ICONS        BITMAP                  "res\\ticons.bmp"
+IDB_ACCESS_ICONS        BITMAP                  "res\\access.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Toolbar
+//
+
+IDR_MAINFRAME TOOLBAR  31, 31
+BEGIN
+    BUTTON      ID_FILE_OPEN
+    BUTTON      ID_FILE_SAVE
+    SEPARATOR
+    BUTTON      BNewDynamo
+    BUTTON      BNewDiskWorker
+    BUTTON      BNewNetWorker
+    BUTTON      BCopyWorker
+    SEPARATOR
+    BUTTON      BStart
+    BUTTON      BStop
+    BUTTON      BStopAll
+    SEPARATOR
+    BUTTON      BReset
+    SEPARATOR
+    BUTTON      BExitOne
+    BUTTON      ID_APP_EXIT
+    SEPARATOR
+    BUTTON      ID_APP_ABOUT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_MAINFRAME ACCELERATORS 
+BEGIN
+    "N",            ID_FILE_NEW,            VIRTKEY, CONTROL
+    "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL
+    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL
+    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL
+    "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL
+    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL
+    "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL
+    VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT
+    VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT
+    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL
+    VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT
+    VK_F6,          ID_NEXT_PANE,           VIRTKEY 
+    VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ACCESS DIALOGEX 0, 0, 383, 210
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Access Specifications"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    CONTROL         "List1",LAssignedAccess,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_NOCOLUMNHEADER | WS_TABSTOP,7,11,121,176,WS_EX_CLIENTEDGE
+    CONTROL         "List1",LGlobalAccess,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_NOCOLUMNHEADER | WS_TABSTOP,199,11,121,193,WS_EX_CLIENTEDGE
+    PUSHBUTTON      "New",BNew,325,11,50,14,BS_CENTER | BS_VCENTER
+    PUSHBUTTON      "Edit",BEdit,325,28,50,14
+    PUSHBUTTON      "Delete",BDelete,325,62,50,14,BS_CENTER | BS_VCENTER
+    PUSHBUTTON      "<< Add",BAdd,139,89,50,14
+    PUSHBUTTON      "Remove >>",BRemove,139,106,50,14
+    PUSHBUTTON      "Move Up",BUp,16,190,50,14
+    PUSHBUTTON      "Move Down",BDown,70,190,50,14
+    GROUPBOX        "Global Access Specifications",GGlobalFrame,194,2,187,206
+    GROUPBOX        "Assigned Access Specifications",GAssignedFrame,2,2,132,206
+    PUSHBUTTON      "Edit Copy",BEditCopy,325,45,50,14
+END
+
+IDD_DISKS DIALOGEX 0, 0, 383, 210
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Disk Targets"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    GROUPBOX        "Targets",IDC_STATIC,0,0,379,206
+    CONTROL         "Tree1",TTargets,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_DISABLEDRAGDROP | WS_DISABLED | WS_BORDER | WS_HSCROLL | WS_TABSTOP,7,11,133,193
+    GROUPBOX        "Test Connection Rate",IDC_STATIC,150,144,160,29
+    CONTROL         "",CConnectionRate,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,157,158,11,8
+    EDITTEXT        EConnectionRate,170,155,40,14,ES_AUTOHSCROLL | ES_NUMBER | WS_DISABLED
+    CONTROL         "Spin1",SConnectionRate,"msctls_updown32",UDS_WRAP | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,206,155,11,13
+    LTEXT           "Transactions per connection",IDC_STATIC,214,158,91,8
+    GROUPBOX        "Maximum Disk Size",IDC_STATIC,150,11,103,29
+    EDITTEXT        EDiskSize,155,22,40,14,ES_AUTOHSCROLL
+    LTEXT           "Sectors",IDC_STATIC,200,25,34,8
+    GROUPBOX        "Starting Disk Sector",IDC_STATIC,150,45,103,29
+    EDITTEXT        EDiskStart,155,55,40,14,ES_AUTOHSCROLL
+    GROUPBOX        "# of Outstanding I/Os",IDC_STATIC,150,78,103,29
+    EDITTEXT        EQueueDepth,155,89,40,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "per target",IDC_STATIC,200,90,35,10
+    GROUPBOX        "Write IO Data Pattern",IDC_STATIC,150,174,160,29
+    COMBOBOX        CDataPattern,157,185,81,78,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "Use Fixed Seed",IDC_STATIC,150,114,160,29
+    CONTROL         "",CUseFixedSeed,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,157,128,11,8
+    EDITTEXT        EFixedSeed,170,125,40,14,ES_AUTOHSCROLL | ES_NUMBER | WS_DISABLED
+    LTEXT           "Fixed Seed Value",IDC_STATIC,214,128,56,8
+END
+
+IDD_DISPLAY DIALOG  0, 0, 383, 210
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Results Display"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "Start of Test",RAvgWholeTest,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,135,14,52,10
+    CONTROL         "Last Update",RAvgLastUpdate,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,135,27,53,10
+    CONTROL         "Slider1",SUpdateDelay,"msctls_trackbar32",TBS_AUTOTICKS | WS_GROUP | WS_TABSTOP,197,10,181,18
+    CHECKBOX        "BResultType1",BResultType1,11,61,115,12,BS_LEFT | BS_PUSHLIKE | WS_GROUP
+    CHECKBOX        "BResultType2",BResultType2,11,87,115,12,BS_LEFT | BS_PUSHLIKE
+    CHECKBOX        "BResultType3",BResultType3,11,112,115,12,BS_LEFT | BS_PUSHLIKE
+    CHECKBOX        "BResultType4",BResultType4,11,136,115,12,BS_LEFT | BS_PUSHLIKE
+    CHECKBOX        "BResultType5",BResultType5,11,162,115,12,BS_LEFT | BS_PUSHLIKE
+    CHECKBOX        "BResultType6",BResultType6,11,187,115,12,BS_LEFT | BS_PUSHLIKE
+    PUSHBUTTON      ">",BBigMeter1,367,61,10,12
+    PUSHBUTTON      ">",BBigMeter2,367,87,10,12
+    PUSHBUTTON      ">",BBigMeter3,367,112,10,12
+    PUSHBUTTON      ">",BBigMeter4,367,136,10,12
+    PUSHBUTTON      ">",BBigMeter5,367,162,10,12
+    PUSHBUTTON      ">",BBigMeter6,367,187,10,12
+    CTEXT           "1",IDC_STATIC,201,30,10,8
+    CTEXT           "2",IDC_STATIC,217,30,9,8
+    CTEXT           "3",IDC_STATIC,233,30,11,8
+    CTEXT           "4",IDC_STATIC,251,30,9,8
+    CTEXT           "5",IDC_STATIC,267,30,9,8
+    CTEXT           "10",IDC_STATIC,279,30,15,8
+    CTEXT           "15",IDC_STATIC,297,30,13,8
+    CTEXT           "30",IDC_STATIC,313,30,13,8
+    CTEXT           "45",IDC_STATIC,329,30,13,8
+    CTEXT           "60",IDC_STATIC,345,30,14,8
+    CONTROL         "Progress1",PRate1,"msctls_progress32",PBS_SMOOTH | WS_BORDER,130,61,234,13
+    CONTROL         "Progress1",PRate2,"msctls_progress32",PBS_SMOOTH | WS_BORDER,130,87,234,13
+    LTEXT           "All Managers",TWorker1,130,53,63,8,SS_NOTIFY
+    LTEXT           "All Managers",TWorker2,130,79,63,8,SS_NOTIFY
+    RTEXT           "oo",IDC_STATIC,359,29,13,8,NOT WS_GROUP
+    CTEXT           "Worker1Rate",TRate1,223,53,48,8
+    RTEXT           "Wrk1MAX",TRate1MAX,329,53,34,8
+    CTEXT           "Worker2Rate",TRate2,223,79,48,8
+    RTEXT           "Wrk2MAX",TRate2MAX,329,79,34,8
+    GROUPBOX        "Update Frequency (seconds)",IDC_STATIC,195,2,186,40
+    GROUPBOX        "Display",IDC_STATIC,2,45,379,163
+    CONTROL         "Progress1",PRate3,"msctls_progress32",PBS_SMOOTH | WS_BORDER,130,112,234,13
+    LTEXT           "All Managers",TWorker3,130,104,63,8,SS_NOTIFY
+    CTEXT           "Worker3Rate",TRate3,223,104,48,8
+    RTEXT           "Wrk3MAX",TRate3MAX,329,104,34,8
+    CONTROL         "Progress1",PRate4,"msctls_progress32",PBS_SMOOTH | WS_BORDER,130,136,234,13
+    LTEXT           "All Managers",TWorker4,130,128,63,8,SS_NOTIFY
+    CTEXT           "Worker4Rate",TRate4,223,128,48,8
+    RTEXT           "Wrk4MAX",TRate4MAX,329,128,34,8
+    CONTROL         "Progress1",PRate5,"msctls_progress32",PBS_SMOOTH | WS_BORDER,130,162,234,13
+    LTEXT           "All Managers",TWorker5,130,154,63,8,SS_NOTIFY
+    CTEXT           "Worker5Rate",TRate5,223,154,48,8
+    RTEXT           "Wrk5MAX",TRate5MAX,329,154,34,8
+    CONTROL         "Progress1",PRate6,"msctls_progress32",PBS_SMOOTH | WS_BORDER,130,187,234,13
+    LTEXT           "All Managers",TWorker6,130,179,63,8,SS_NOTIFY
+    CTEXT           "Worker6Rate",TRate6,223,179,48,8
+    RTEXT           "Wrk6MAX",TRate6MAX,329,179,34,8
+    CTEXT           "Drag managers and workers\nfrom the Topology window\nto the progress bar of your choice. ",IDC_STATIC,12,12,114,26
+    GROUPBOX        "Results Since",IDC_STATIC,129,2,61,40
+END
+
+IDD_ABOUTBOX DIALOG  0, 0, 253, 159
+STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | DS_CENTER | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Iometer Information"
+FONT 8, "MS Sans Serif"
+BEGIN
+    ICON            IDR_MAINFRAME,IDC_STATIC,15,15,20,20
+    CTEXT           "Iometer ",TVersion,54,10,145,8,SS_NOPREFIX
+    CTEXT           "Copyright (c) 1996-1999 Intel Corporation\nEnterprise Server Group\nSean Hefty, David Levine, and Fab Tillier\n\nOpen Source since 2001\nHosted at iometer.org and\nsourceforge.net/projects/iometer",IDC_STATIC,44,23,164,60
+    DEFPUSHBUTTON   "OK",IDOK,21,132,35,14
+    PUSHBUTTON      "Intel Open Source License",BViewEULA,116,132,116,14,BS_CENTER | BS_VCENTER
+    CTEXT           "Iometer is provided ""as-is,"" without warranty or guarantee of any kind.",IDC_STATIC,15,88,224,8
+    CTEXT           "Subscribe and send comments & questions to ""iometer-user@lists.sourceforge.net"".",IDC_STATIC,47,101,159,19
+END
+
+IDD_MANAGER_VIEW DIALOG  0, 0, 106, 222
+STYLE DS_SETFONT | DS_MODALFRAME | DS_SETFOREGROUND | DS_3DLOOK | WS_CHILD | WS_VISIBLE
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "Tree1",TWorkers,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT | TVS_EDITLABELS | TVS_SHOWSELALWAYS | WS_BORDER | WS_TABSTOP,3,16,100,203
+    CTEXT           "Topology",IDC_STATIC,3,0,88,8
+END
+
+IDD_SETUP DIALOG  0, 0, 383, 210
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Test Setup"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Test Description",IDC_STATIC,2,5,52,8
+    EDITTEXT        ETestName,2,14,378,14,ES_AUTOHSCROLL
+    GROUPBOX        "Run Time",IDC_STATIC,2,42,80,60
+    EDITTEXT        ERunTimeHours,10,53,20,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Hours",IDC_STATIC,33,55,29,8
+    EDITTEXT        ERunTimeMinutes,10,68,20,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Minutes",IDC_STATIC,33,70,29,8
+    EDITTEXT        ERunTimeSeconds,10,83,20,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Seconds",IDC_STATIC,33,85,29,8
+    GROUPBOX        "Ramp Up Time",IDC_STATIC,109,42,95,28
+    EDITTEXT        ERampTime,116,53,20,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Seconds",IDC_STATIC,139,55,29,8
+    GROUPBOX        "Record Results",IDC_STATIC,109,74,95,28
+    COMBOBOX        CResultType,116,84,59,62,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "Number of Workers to Spawn Automatically",IDC_STATIC,229,42,151,60
+    GROUPBOX        "Disk",IDC_STATIC,235,52,65,44
+    CONTROL         "# of CPUs",RDiskSpawnCPUs,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,241,65,46,8
+    CONTROL         "",RDiskSpawnUser,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,241,79,8,8
+    EDITTEXT        EDiskWorkerCount,251,77,20,12,ES_AUTOHSCROLL | ES_NUMBER
+    GROUPBOX        "Network",IDC_STATIC,309,52,65,44
+    CONTROL         "# of CPUs",RNetSpawnCPUs,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,318,65,46,8
+    CONTROL         "",RNetSpawnUser,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,318,79,8,8
+    EDITTEXT        ENetWorkerCount,328,77,20,12,ES_AUTOHSCROLL | ES_NUMBER
+    GROUPBOX        "Cycling Options",IDC_STATIC,2,117,379,91
+    COMBOBOX        CTestType,11,128,362,111,CBS_DROPDOWNLIST | WS_TABSTOP
+    GROUPBOX        "Workers",IDC_STATIC,11,143,95,59
+    RTEXT           "Start",IDC_STATIC,16,156,19,8
+    EDITTEXT        EWorkerStart,38,154,20,12,ES_AUTOHSCROLL | ES_NUMBER
+    RTEXT           "Step",TWorkerStep,16,171,19,8
+    EDITTEXT        EWorkerStep,38,169,20,12,ES_AUTOHSCROLL | ES_NUMBER
+    COMBOBOX        CWStepType,16,185,85,71,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "Targets",IDC_STATIC,137,143,95,59
+    RTEXT           "Start",IDC_STATIC,142,156,19,8
+    EDITTEXT        EDiskStart,164,154,20,12,ES_AUTOHSCROLL | ES_NUMBER
+    RTEXT           "Step",TDiskStep,142,171,19,8
+    EDITTEXT        EDiskStep,164,169,20,12,ES_AUTOHSCROLL | ES_NUMBER
+    COMBOBOX        CDStepType,142,185,85,71,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "# of Outstanding I/Os",IDC_STATIC,263,143,95,59
+    RTEXT           "Start",IDC_STATIC,268,156,19,8
+    EDITTEXT        EQueueStart,290,154,20,12,ES_AUTOHSCROLL | ES_NUMBER
+    RTEXT           "End",IDC_STATIC,313,156,16,8
+    EDITTEXT        EQueueEnd,332,154,20,12,ES_AUTOHSCROLL | ES_NUMBER
+    RTEXT           "Step",TQueueStep,268,171,19,8
+    EDITTEXT        EQueueStep,290,169,20,12,ES_AUTOHSCROLL | ES_NUMBER
+    COMBOBOX        CQStepType,268,185,85,71,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_LEGAL DIALOG  0, 0, 390, 287
+STYLE DS_SETFONT | DS_MODALFRAME | DS_SETFOREGROUND | DS_3DLOOK | DS_CENTER | WS_POPUP
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "I Agree",IDOK,169,244,50,14
+    PUSHBUTTON      "Forget It",IDCANCEL,169,266,50,14
+    EDITTEXT        ELegal,7,7,376,229,ES_MULTILINE | ES_READONLY | ES_WANTRETURN | WS_VSCROLL
+END
+
+IDD_ACCESSDLG DIALOGEX 0, 0, 483, 311
+STYLE DS_LOCALEDIT | DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | DS_CENTER | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Edit Access Specification"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    GROUPBOX        "Name",IDC_STATIC,10,5,221,28
+    EDITTEXT        EName,15,15,210,12,ES_AUTOHSCROLL
+    GROUPBOX        "Default Assignment",IDC_STATIC,236,5,91,28
+    COMBOBOX        CDefaultAssignment,241,14,81,78,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "List1",LAccess,"SysListView32",LVS_REPORT | LVS_SHAREIMAGELISTS | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,10,38,401,103,WS_EX_CLIENTEDGE
+    PUSHBUTTON      "Insert Before",BInsertBefore,423,38,50,14,BS_CENTER | BS_VCENTER
+    PUSHBUTTON      "Insert After",BInsertAfter,423,58,50,14,BS_CENTER | BS_VCENTER
+    PUSHBUTTON      "Delete",BDelete,423,78,50,14,BS_CENTER | BS_VCENTER
+    GROUPBOX        "Transfer Request Size",IDC_STATIC,10,148,140,46
+    EDITTEXT        EMegabytes,19,164,34,12,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "Spin1",SMegabytes,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,47,161,11,17
+    EDITTEXT        EKilobytes,63,164,34,12,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "Spin1",SKilobytes,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,91,161,11,17
+    EDITTEXT        EBytes,107,164,34,12,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "Spin1",SBytes,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,135,161,11,17
+    CTEXT           "Megabytes",TMegabytes,17,180,37,8
+    CTEXT           "Kilobytes",TKilobytes,61,180,37,8
+    CTEXT           "Bytes",TBytes,105,180,37,8
+    GROUPBOX        "Percent of Access Specification",IDC_STATIC,170,148,140,46
+    CONTROL         "Slider1",SAccess,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,177,158,130,15
+    CTEXT           "100 Percent",TAccess,214,180,56,8
+    GROUPBOX        "Percent Read/Write Distribution",IDC_STATIC,333,148,140,46
+    CONTROL         "Slider1",SRead,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,339,159,130,15
+    LTEXT           "0%\nWrite",TWrite,345,174,22,17
+    RTEXT           "100%\nRead",TRead,441,174,22,17
+    GROUPBOX        "Percent Random/Sequential Distribution",IDC_STATIC,10,203,140,46
+    CONTROL         "Slider1",SRandom,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,15,214,130,15
+    LTEXT           "0%\nSequential",TSequential,21,230,34,17
+    RTEXT           "100%\nRandom",TRandom,105,230,34,17
+    GROUPBOX        "Burstiness",IDC_STATIC,170,203,140,46
+    GROUPBOX        "Transfer Delay",IDC_STATIC,176,217,60,27
+    EDITTEXT        EDelayTime,181,225,37,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "ms",IDC_STATIC,221,228,10,8
+    GROUPBOX        "Burst Length",IDC_STATIC,240,217,65,27
+    EDITTEXT        EBurstLength,246,225,37,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "I/Os",IDC_STATIC,286,228,15,8
+    GROUPBOX        "Align I/Os on",IDC_STATIC,333,203,140,46
+    CONTROL         "Sector Boundaries",RAlignSector,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,340,214,90,8
+    CONTROL         "",RAlignBytes,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,340,227,10,8
+    EDITTEXT        EAlignMegabytes,352,225,34,12,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "Spin1",SAlignMegabytes,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,380,222,11,17
+    EDITTEXT        EAlignKilobytes,391,225,34,12,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "Spin1",SAlignKilobytes,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,419,222,11,17
+    EDITTEXT        EAlignBytes,430,225,34,12,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "Spin1",SAlignBytes,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,458,222,11,17
+    CTEXT           "Megabytes",TAlignMegabytes,350,238,37,8
+    CTEXT           "Kilobytes",TAlignKilobytes,390,238,37,8
+    CTEXT           "Bytes",TAlignBytes,429,238,37,8
+    GROUPBOX        "Reply Size",IDC_STATIC,10,258,140,46
+    CONTROL         "No Reply",RNoReply,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,17,269,90,8
+    CONTROL         "",RReplySize,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,17,282,10,8
+    EDITTEXT        EReplyMegabytes,29,280,34,12,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "Spin1",SReplyMegabytes,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,57,277,11,17
+    EDITTEXT        EReplyKilobytes,68,280,34,12,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "Spin1",SReplyKilobytes,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,96,277,11,17
+    EDITTEXT        EReplyBytes,107,280,34,12,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "Spin1",SReplyBytes,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,135,277,11,17
+    CTEXT           "Megabytes",TReplyMegabytes,27,293,37,8
+    CTEXT           "Kilobytes",TReplyKilobytes,66,293,37,8
+    CTEXT           "Bytes",TReplyBytes,105,293,37,8
+    PUSHBUTTON      "OK",IDOK,368,290,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,425,290,50,14
+    GROUPBOX        "Name",IDC_STATIC,10,5,221,28
+END
+
+IDD_NETWORKS DIALOG  0, 0, 383, 210
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Network Targets"
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "Targets",IDC_STATIC,2,2,379,206
+    CONTROL         "Tree1",TTargets,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_DISABLEDRAGDROP | WS_DISABLED | WS_BORDER | WS_TABSTOP,7,11,133,193
+    GROUPBOX        "Network Interface to Use for Connection",IDC_STATIC,150,12,160,29
+    COMBOBOX        DInterface,155,24,150,178,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "Test Connection Rate",IDC_STATIC,150,135,160,29
+    CONTROL         "",CConnectionRate,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,156,149,11,8
+    EDITTEXT        EConnectionRate,170,146,40,14,ES_AUTOHSCROLL | ES_NUMBER | WS_DISABLED
+    CONTROL         "Spin1",SConnectionRate,"msctls_updown32",UDS_WRAP | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,206,147,11,13
+    LTEXT           "Transactions per connection",IDC_STATIC,214,149,91,8
+    GROUPBOX        "Max # Outstanding Sends",IDC_STATIC,150,45,103,29
+    EDITTEXT        EMaxSends,155,55,40,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "per VI target",IDC_STATIC,200,57,46,10
+END
+
+IDD_BIGMETER DIALOGEX 0, 0, 532, 343
+STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_CONTROLPARENT
+CAPTION "Iometer"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    CONTROL         "Custom1",TDTestInfo,"CTextDisplay",0x0,6,1,519,18
+    CONTROL         "",MMeter,"CMeterCtrl",WS_TABSTOP,124,21,282,228
+    CONTROL         "Custom1",TDResult,"CTextDisplay",0x0,6,251,519,27
+    CONTROL         "Custom1",TDWhichResult,"CTextDisplay",0x0,6,279,519,18
+    GROUPBOX        "Settings",IDC_STATIC,6,297,146,42
+    CTEXT           "Range",IDC_STATIC,10,322,27,12,SS_CENTERIMAGE
+    EDITTEXT        EMaxRange,37,322,50,13,ES_NUMBER
+    CHECKBOX        "",BResultType,12,307,133,12,BS_LEFT | BS_PUSHLIKE
+    GROUPBOX        "Test Controls",IDC_STATIC,398,300,127,37
+    DEFPUSHBUTTON   "",BNext,407,314,50,14
+    PUSHBUTTON      "Stop",BStop,466,314,50,14
+    CONTROL         "Show Trace",CkWatermark,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,94,323,55,10
+END
+
+IDD_FILESAVE_OPTS DIALOGEX 0, 0, 174, 122
+STYLE DS_SETFONT | DS_3DLOOK | DS_CONTROL | DS_CENTER | WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    CONTROL         "Test Setup tab settings",CkTestSetup,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,16,22,150,10
+    CONTROL         "Results Display tab settings",CkResultsDisplay,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,37,150,10
+    CONTROL         "Global Access Specifications",CkGlobalAccessSpec,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,52,150,10
+    CONTROL         "Managers and Workers",CkManagerWorker,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,67,150,10
+    CONTROL         "Access specification assignments",CkAssignAccessSpec,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,26,82,140,10
+    CONTROL         "Target assignments",CkAssignTargets,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,26,97,140,10
+    GROUPBOX        "Settings to save",IDC_STATIC,6,7,162,108
+END
+
+IDD_FILEOPEN_OPTS DIALOGEX 0, 0, 280, 122
+STYLE DS_SETFONT | DS_3DLOOK | DS_CONTROL | DS_CENTER | WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    CONTROL         "Test Setup tab settings",CkTestSetup,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,16,22,150,10
+    CONTROL         "Results Display tab settings",CkResultsDisplay,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,37,150,10
+    CONTROL         "Global Access Specifications",CkGlobalAccessSpec,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,52,150,10
+    CONTROL         "Managers and Workers",CkManagerWorker,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,67,150,10
+    CONTROL         "Access specification assignments",CkAssignAccessSpec,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,26,82,140,10
+    CONTROL         "Target assignments",CkAssignTargets,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,26,97,140,10
+    CONTROL         "Replace current settings with saved settings",ROverwrite,
+                    "Button",BS_AUTORADIOBUTTON | BS_TOP | BS_MULTILINE | WS_TABSTOP,190,35,70,25
+    CONTROL         "Merge saved settings into current settings",RMerge,
+                    "Button",BS_AUTORADIOBUTTON | BS_TOP | BS_MULTILINE | WS_TABSTOP,190,66,70,25
+    GROUPBOX        "Settings to restore",IDC_STATIC,6,7,162,108
+    GROUPBOX        "Current settings",IDC_STATIC,176,7,97,108
+END
+
+IDD_WAITING_FOR_MANAGERS DIALOGEX 0, 0, 204, 105
+STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | DS_CENTER | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_CONTROLPARENT
+CAPTION "Waiting for Managers"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    PUSHBUTTON      "Abort",IDCANCEL,147,84,50,14
+    LTEXT           "TCountdown",TCountdown,7,88,134,8
+    LTEXT           "Still waiting for Dynamo connections from these managers:",IDC_STATIC,7,7,191,8
+    CONTROL         "List2",LManagers,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,7,17,190,60,WS_EX_CLIENTEDGE
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_ACCESS, DIALOG
+    BEGIN
+        LEFTMARGIN, 2
+        RIGHTMARGIN, 381
+        TOPMARGIN, 2
+        BOTTOMMARGIN, 208
+    END
+
+    IDD_DISKS, DIALOG
+    BEGIN
+        LEFTMARGIN, 2
+        RIGHTMARGIN, 380
+        VERTGUIDE, 6
+        VERTGUIDE, 115
+        VERTGUIDE, 120
+        VERTGUIDE, 150
+        VERTGUIDE, 157
+        VERTGUIDE, 195
+        VERTGUIDE, 200
+        VERTGUIDE, 253
+        TOPMARGIN, 2
+        BOTTOMMARGIN, 208
+        HORZGUIDE, 11
+        HORZGUIDE, 27
+        HORZGUIDE, 45
+        HORZGUIDE, 135
+        HORZGUIDE, 204
+    END
+
+    IDD_DISPLAY, DIALOG
+    BEGIN
+        LEFTMARGIN, 5
+        RIGHTMARGIN, 378
+        VERTGUIDE, 12
+        VERTGUIDE, 126
+        VERTGUIDE, 358
+        BOTTOMMARGIN, 207
+        HORZGUIDE, 5
+        HORZGUIDE, 25
+        HORZGUIDE, 45
+        HORZGUIDE, 50
+        HORZGUIDE, 75
+        HORZGUIDE, 100
+        HORZGUIDE, 125
+        HORZGUIDE, 150
+        HORZGUIDE, 175
+        HORZGUIDE, 200
+    END
+
+    IDD_MANAGER_VIEW, DIALOG
+    BEGIN
+        LEFTMARGIN, 3
+        RIGHTMARGIN, 103
+        BOTTOMMARGIN, 219
+        HORZGUIDE, 10
+        HORZGUIDE, 16
+    END
+
+    IDD_SETUP, DIALOG
+    BEGIN
+        RIGHTMARGIN, 380
+        VERTGUIDE, 3
+    END
+
+    IDD_LEGAL, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 383
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 280
+    END
+
+    IDD_ACCESSDLG, DIALOG
+    BEGIN
+        LEFTMARGIN, 10
+        RIGHTMARGIN, 473
+        VERTGUIDE, 170
+        VERTGUIDE, 333
+        TOPMARGIN, 5
+        BOTTOMMARGIN, 304
+        HORZGUIDE, 148
+        HORZGUIDE, 203
+        HORZGUIDE, 258
+    END
+
+    IDD_NETWORKS, DIALOG
+    BEGIN
+        LEFTMARGIN, 2
+        RIGHTMARGIN, 380
+        VERTGUIDE, 6
+        VERTGUIDE, 115
+        VERTGUIDE, 120
+        VERTGUIDE, 150
+        VERTGUIDE, 195
+        VERTGUIDE, 200
+        VERTGUIDE, 253
+        TOPMARGIN, 2
+        BOTTOMMARGIN, 208
+        HORZGUIDE, 11
+        HORZGUIDE, 27
+        HORZGUIDE, 45
+        HORZGUIDE, 135
+        HORZGUIDE, 204
+    END
+
+    IDD_BIGMETER, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 525
+        VERTGUIDE, 15
+        VERTGUIDE, 424
+        VERTGUIDE, 516
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 336
+        HORZGUIDE, 297
+        HORZGUIDE, 318
+    END
+
+    IDD_FILESAVE_OPTS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 167
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 115
+    END
+
+    IDD_FILEOPEN_OPTS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 273
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 115
+    END
+
+    IDD_WAITING_FOR_MANAGERS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 197
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 98
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MAINFRAME MENU 
+BEGIN
+    MENUITEM "E&xit",                       65535
+END
+
+CG_IDR_POPUP_WORKER_VIEW MENU 
+BEGIN
+    POPUP "_POPUP_"
+    BEGIN
+        MENUITEM "Refresh Target Lists",        MRefresh
+    END
+END
+
+IDR_POPUP_DISPLAY_LIST MENU 
+BEGIN
+    POPUP "_POPUP"
+    BEGIN
+        POPUP "Operations per Second"
+        BEGIN
+            MENUITEM "Total I/Os per Second",       MDisplayOpsIOPS
+            MENUITEM "Read I/Os per Second",        MDisplayOpsRIOPS
+            MENUITEM "Write I/Os per Second",       MDisplayOpsWIOPS
+            MENUITEM SEPARATOR
+            MENUITEM "Transactions per Second",     MDisplayOpsTransPS
+            MENUITEM "Connections per Second",      MDisplayOpsConPS
+        END
+        POPUP "Megabytes per Second"
+        BEGIN
+            MENUITEM "Total MBs per Second (Decimal)", MDisplayMBsMBPSDec
+            MENUITEM "Read MBs per Second (Decimal)", MDisplayMBsRMBPSDec
+            MENUITEM "Write MBs per Second (Decimal)", MDisplayMBsWMBPSDec
+            MENUITEM SEPARATOR
+            MENUITEM "Total MBs per Second (Binary)", MDisplayMBsMBPSBin
+            MENUITEM "Read MBs per Second (Binary)", MDisplayMBsRMBPSBin
+            MENUITEM "Write MBs per Second (Binary)", MDisplayMBsWMBPSBin
+        END
+        POPUP "Average Latency"
+        BEGIN
+            MENUITEM "Average I/O Response Time (ms)", MDisplayAvgIO
+            MENUITEM "Avg. Read Response Time (ms)", MDisplayAvgRIO
+            MENUITEM "Avg. Write Response Time (ms)", MDisplayAvgWIO
+            MENUITEM SEPARATOR
+            MENUITEM "Avg. Transaction Time (ms)",  MDisplayAvgTrans
+            MENUITEM "Avg. Connection Time (ms)",   MDisplayAvgCon
+        END
+        POPUP "Maximum Latency"
+        BEGIN
+            MENUITEM "Maximum I/O Response Time (ms)", MDisplayMaxIO
+            MENUITEM "Max. Read Response Time (ms)", MDisplayMaxRIO
+            MENUITEM "Max. Write Response Time (ms)", MDisplayMaxWIO
+            MENUITEM "",                            1
+            MENUITEM "Max. Transaction Time (ms)",  MDisplayMaxTrans
+            MENUITEM "Max. Connection Time (ms)",   MDisplayMaxCon
+        END
+        POPUP "CPU"
+        BEGIN
+            MENUITEM "% CPU Utilization (total)",   MDisplayCPUUtilization
+            MENUITEM "% User Time",                 MDisplayCPUUser
+            MENUITEM "% Privileged Time",           MDisplayCPUPrivileged
+            MENUITEM "% DPC Time",                  MDisplayCPUDPC
+            MENUITEM "% Interrupt Time",            MDisplayCPUInterruptTime
+            MENUITEM SEPARATOR
+            MENUITEM "Interrupts per Second",       MDisplayCPUInterruptsPS
+            MENUITEM "CPU Effectiveness",           MDisplayCPUEffectiveness
+        END
+        POPUP "Network"
+        BEGIN
+            MENUITEM "Network Packets per Second",  MDisplayNetPacketsPS
+            MENUITEM SEPARATOR
+            MENUITEM "Packet Errors",               MDisplayNetPacketErrors
+            MENUITEM "TCP Segments Retrans. per Sec.", MDisplayNetRetransPS
+        END
+        POPUP "Errors"
+        BEGIN
+            MENUITEM "Total Error Count",           MDisplayErrIO
+            MENUITEM "Read Error Count",            MDisplayErrRIO
+            MENUITEM "Write Error Count",           MDisplayErrWIO
+        END
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_SETUP DLGINIT
+BEGIN
+    CResultType, 0x403, 4, 0
+0x6c41, 0x006c, 
+    CResultType, 0x403, 11, 0
+0x6f4e, 0x5420, 0x7261, 0x6567, 0x7374, "\000" 
+    CResultType, 0x403, 11, 0
+0x6f4e, 0x5720, 0x726f, 0x656b, 0x7372, "\000" 
+    CResultType, 0x403, 12, 0
+0x6f4e, 0x4d20, 0x6e61, 0x6761, 0x7265, 0x0073, 
+    CResultType, 0x403, 5, 0
+0x6f4e, 0x656e, "\000" 
+    CTestType, 0x403, 52, 0
+0x6f4e, 0x6d72, 0x6c61, 0x2d20, 0x202d, 0x7572, 0x206e, 0x6c61, 0x206c, 
+0x6573, 0x656c, 0x7463, 0x6465, 0x7420, 0x7261, 0x6567, 0x7374, 0x6620, 
+0x726f, 0x6120, 0x6c6c, 0x7720, 0x726f, 0x656b, 0x7372, 0x002e, 
+    CTestType, 0x403, 61, 0
+0x7943, 0x6c63, 0x2065, 0x6154, 0x6772, 0x7465, 0x2073, 0x2d2d, 0x6120, 
+0x6464, 0x7320, 0x6574, 0x2070, 0x6174, 0x6772, 0x7465, 0x2073, 0x6f66, 
+0x2072, 0x6c61, 0x206c, 0x6f77, 0x6b72, 0x7265, 0x2073, 0x7461, 0x6120, 
+0x7420, 0x6d69, 0x2e65, "\000" 
+    CTestType, 0x403, 72, 0
+0x7943, 0x6c63, 0x2065, 0x6f57, 0x6b72, 0x7265, 0x2073, 0x2d2d, 0x6120, 
+0x6464, 0x7320, 0x6574, 0x2070, 0x6f77, 0x6b72, 0x7265, 0x2073, 0x7375, 
+0x6e69, 0x2067, 0x6c61, 0x206c, 0x6573, 0x656c, 0x7463, 0x6465, 0x7420, 
+0x7261, 0x6567, 0x7374, 0x6120, 0x2074, 0x2061, 0x6974, 0x656d, 0x002e, 
+
+    CTestType, 0x403, 74, 0
+0x6e49, 0x7263, 0x6d65, 0x6e65, 0x2074, 0x6154, 0x6772, 0x7465, 0x2073, 
+0x6150, 0x6172, 0x6c6c, 0x6c65, 0x2d20, 0x202d, 0x6461, 0x2064, 0x7473, 
+0x7065, 0x7420, 0x7261, 0x6567, 0x7374, 0x7420, 0x206f, 0x6c61, 0x206c, 
+0x616d, 0x616e, 0x6567, 0x7372, 0x6120, 0x2074, 0x2061, 0x6974, 0x656d, 
+0x002e, 
+    CTestType, 0x403, 55, 0
+0x6e49, 0x7263, 0x6d65, 0x6e65, 0x2074, 0x6154, 0x6772, 0x7465, 0x2073, 
+0x6553, 0x6972, 0x6c61, 0x2d20, 0x202d, 0x6461, 0x2064, 0x7473, 0x7065, 
+0x7420, 0x7261, 0x6567, 0x7374, 0x6120, 0x2074, 0x2061, 0x6974, 0x656d, 
+"\000" 
+    CTestType, 0x403, 79, 0
+0x7943, 0x6c63, 0x2065, 0x6154, 0x6772, 0x7465, 0x2073, 0x6e61, 0x2064, 
+0x6f57, 0x6b72, 0x7265, 0x2073, 0x2d2d, 0x6120, 0x6464, 0x7320, 0x6574, 
+0x2070, 0x6174, 0x6772, 0x7465, 0x2073, 0x7461, 0x6120, 0x7420, 0x6d69, 
+0x2065, 0x7073, 0x6572, 0x6461, 0x6120, 0x7263, 0x736f, 0x2073, 0x6f77, 
+0x6b72, 0x7265, 0x2e73, "\000" 
+    CTestType, 0x403, 78, 0
+0x7943, 0x6c63, 0x2065, 0x2023, 0x754f, 0x7374, 0x6174, 0x646e, 0x6e69, 
+0x2067, 0x2f49, 0x734f, 0x2d20, 0x202d, 0x7572, 0x206e, 0x7473, 0x7065, 
+0x6f20, 0x7475, 0x7473, 0x6e61, 0x6964, 0x676e, 0x4920, 0x4f2f, 0x2073, 
+0x6e6f, 0x6120, 0x6c6c, 0x6420, 0x7369, 0x736b, 0x6120, 0x2074, 0x2061, 
+0x6974, 0x656d, 0x002e, 
+    CTestType, 0x403, 93, 0
+0x7943, 0x6c63, 0x2065, 0x2023, 0x754f, 0x7374, 0x6174, 0x646e, 0x6e69, 
+0x2067, 0x2f49, 0x734f, 0x6120, 0x646e, 0x5420, 0x7261, 0x6567, 0x7374, 
+0x2d20, 0x202d, 0x7572, 0x206e, 0x7473, 0x7065, 0x6f20, 0x7475, 0x7473, 
+0x6e61, 0x6964, 0x676e, 0x4920, 0x4f2f, 0x2073, 0x6e6f, 0x7320, 0x6574, 
+0x2070, 0x6174, 0x6772, 0x7465, 0x2073, 0x7461, 0x6120, 0x7420, 0x6d69, 
+0x2e65, "\000" 
+    CWStepType, 0x403, 16, 0
+0x694c, 0x656e, 0x7261, 0x5320, 0x6574, 0x7070, 0x6e69, 0x0067, 
+    CWStepType, 0x403, 21, 0
+0x7845, 0x6f70, 0x656e, 0x746e, 0x6169, 0x206c, 0x7453, 0x7065, 0x6970, 
+0x676e, "\000" 
+    CDStepType, 0x403, 16, 0
+0x694c, 0x656e, 0x7261, 0x5320, 0x6574, 0x7070, 0x6e69, 0x0067, 
+    CDStepType, 0x403, 21, 0
+0x7845, 0x6f70, 0x656e, 0x746e, 0x6169, 0x206c, 0x7453, 0x7065, 0x6970, 
+0x676e, "\000" 
+    CQStepType, 0x403, 16, 0
+0x694c, 0x656e, 0x7261, 0x5320, 0x6574, 0x7070, 0x6e69, 0x0067, 
+    CQStepType, 0x403, 21, 0
+0x7845, 0x6f70, 0x656e, 0x746e, 0x6169, 0x206c, 0x7453, 0x7065, 0x6970, 
+0x676e, "\000" 
+    0
+END
+
+IDD_ACCESSDLG DLGINIT
+BEGIN
+    CDefaultAssignment, 0x403, 5, 0
+0x6f4e, 0x656e, "\000" 
+    CDefaultAssignment, 0x403, 12, 0
+0x6c41, 0x206c, 0x6f57, 0x6b72, 0x7265, 0x0073, 
+    CDefaultAssignment, 0x403, 13, 0
+0x6944, 0x6b73, 0x5720, 0x726f, 0x656b, 0x7372, "\000" 
+    CDefaultAssignment, 0x403, 16, 0
+0x654e, 0x7774, 0x726f, 0x206b, 0x6f57, 0x6b72, 0x7265, 0x0073, 
+    0
+END
+
+IDD_DISKS DLGINIT
+BEGIN
+    CDataPattern, 0x403, 16, 0
+0x6552, 0x6570, 0x7461, 0x6e69, 0x2067, 0x7962, 0x6574, 0x0073, 
+    CDataPattern, 0x403, 14, 0
+0x7350, 0x7565, 0x6f64, 0x7220, 0x6e61, 0x6f64, 0x006d, 
+    CDataPattern, 0x403, 12, 0
+0x7546, 0x6c6c, 0x7220, 0x6e61, 0x6f64, 0x006d, 
+    0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDR_MAINFRAME           "Iometer\n\nIometer\nIometer Configuration Files (*.icf)\n.icf\nIometer.Document\nIometer Configuration File"
+END
+
+STRINGTABLE 
+BEGIN
+    AFX_IDS_APP_TITLE       "Iometer"
+    AFX_IDS_IDLEMESSAGE     "Ready"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_INDICATOR_EXT        "EXT"
+    ID_INDICATOR_CAPS       "CAP"
+    ID_INDICATOR_NUM        "NUM"
+    ID_INDICATOR_SCRL       "SCRL"
+    ID_INDICATOR_OVR        "OVR"
+    ID_INDICATOR_REC        "REC"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_FILE_NEW             "Create a new document\nNew"
+    ID_FILE_OPEN            "\nOpen Test Configuration File"
+    ID_FILE_CLOSE           "Close the active document\nClose"
+    ID_FILE_SAVE            "\nSave Test Configuration File"
+    ID_FILE_SAVE_AS         "Save the active document with a new name\nSave As"
+    IDS_OPEN_DIALOG_TITLE   "Open Test Configuration File"
+    IDS_SAVE_DIALOG_TITLE   "Save Test Configuration File"
+    IDS_CMDLINE_SYNTAX      "SYNTAX\niometer\niometer /?\niometer config_file [result_file [timeout_value]]\niometer [/c config_file] [/r results_file] [/t timeout_value] [/p port] [/m 1]\n\n    ? - show Iometer version number and command line syntax\n\n    config_file - the name of the Iometer configuration file to restore\n\twhen Iometer starts (must be a valid .icf file)\n\n    results_file - the name of a writable text file to which the test\n\tresults should be appended.  If the file doesn't exist, it will be\n\tcreated.\n\n    timeout_value - the number of seconds to wait for managers to log in\n\twhen restoring a config file.\n\n    port_number - the port number iometer listens on.\n\n    specify /m option will have BigMeter shown automatically.\n\n    If both config_file and results_file are specified, Iometer will\n    attempt to run the test in batch mode, requiring no user intervention\n    to load the config file, start the tests, stop the tests (if a run time\n    was specified in the Test Setup tab), and close Iometer.  Batch mode\n    can be canceled by aborting the manager waiting list dialog or by\n    manually stopping a test while it is running."
+    IDS_VERSION_OUTPUT      "Version %s "
+END
+
+STRINGTABLE 
+BEGIN
+    ID_APP_ABOUT            "Display program information, version number and copyright\nAbout Iometer"
+    ID_APP_EXIT             "Quit the application; prompts to save documents\nExit"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_FILE_MRU_FILE1       "Open this document"
+    ID_FILE_MRU_FILE2       "Open this document"
+    ID_FILE_MRU_FILE3       "Open this document"
+    ID_FILE_MRU_FILE4       "Open this document"
+    ID_FILE_MRU_FILE5       "Open this document"
+    ID_FILE_MRU_FILE6       "Open this document"
+    ID_FILE_MRU_FILE7       "Open this document"
+    ID_FILE_MRU_FILE8       "Open this document"
+    ID_FILE_MRU_FILE9       "Open this document"
+    ID_FILE_MRU_FILE10      "Open this document"
+    ID_FILE_MRU_FILE11      "Open this document"
+    ID_FILE_MRU_FILE12      "Open this document"
+    ID_FILE_MRU_FILE13      "Open this document"
+    ID_FILE_MRU_FILE14      "Open this document"
+    ID_FILE_MRU_FILE15      "Open this document"
+    ID_FILE_MRU_FILE16      "Open this document"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_NEXT_PANE            "Switch to the next window pane\nNext Pane"
+    ID_PREV_PANE            "Switch back to the previous window pane\nPrevious Pane"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_WINDOW_SPLIT         "Split the active window into panes\nSplit"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_EDIT_CLEAR           "Erase the selection\nErase"
+    ID_EDIT_CLEAR_ALL       "Erase everything\nErase All"
+    ID_EDIT_COPY            "Copy the selection and put it on the Clipboard\nCopy"
+    ID_EDIT_CUT             "Refreshes the manager's drive list\nRefresh Drive List"
+    ID_EDIT_FIND            "Find the specified text\nFind"
+    ID_EDIT_PASTE           "Insert Clipboard contents\nPaste"
+    ID_EDIT_REPEAT          "Repeat the last action\nRepeat"
+    ID_EDIT_REPLACE         "Replace specific text with different text\nReplace"
+    ID_EDIT_SELECT_ALL      "Select the entire document\nSelect All"
+    ID_EDIT_UNDO            "Undo the last action\nUndo"
+    ID_EDIT_REDO            "Redo the previously undone action\nRedo"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_VIEW_TOOLBAR         "Show or hide the toolbar\nToggle ToolBar"
+END
+
+STRINGTABLE 
+BEGIN
+    AFX_IDS_SCSIZE          "Change the window size"
+    AFX_IDS_SCMOVE          "Change the window position"
+    AFX_IDS_SCMINIMIZE      "Reduce the window to an icon"
+    AFX_IDS_SCMAXIMIZE      "Enlarge the window to full size"
+    AFX_IDS_SCNEXTWINDOW    "Switch to the next document window"
+    AFX_IDS_SCPREVWINDOW    "Switch to the previous document window"
+    AFX_IDS_SCCLOSE         "Close the active window and prompts to save the documents"
+END
+
+STRINGTABLE 
+BEGIN
+    AFX_IDS_SCRESTORE       "Restore the window to normal size"
+    AFX_IDS_SCTASKLIST      "Activate Task List"
+END
+
+STRINGTABLE 
+BEGIN
+    BStart                  "\nStart Tests"
+    BStop                   "\nStop Current Test and Save Results"
+    BStopAll                "\nAbort All Tests"
+    BReset                  "\nReset Workers"
+    BExitOne                "\nDisconnect Selected Worker or Manager"
+END
+
+STRINGTABLE 
+BEGIN
+    BNewDynamo              "\nStart a New Manager"
+END
+
+STRINGTABLE 
+BEGIN
+    BNewDiskWorker          "\nStart a New Disk Worker on Selected Manager"
+    BNewNetWorker           "\nStart a New Network Worker on Selected Manager"
+    BCopyWorker             "\nStart a Duplicate of This Worker on This Manager"
+END
+
+STRINGTABLE 
+BEGIN
+    IDOK                    "\nClose the Big Meter Display"
+END
+
+#endif    // German (Germany) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#if defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#endif
+#include "res\Iometer.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"         // Standard components
+#endif
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

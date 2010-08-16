@@ -651,30 +651,26 @@ BOOL Grunt::Set_Access(const Test_Spec * spec)
 // The idea is to set each of the worker threads to their own CPU, within the 
 // constraint of any other cpu affinity we have been passed at the cmd line.
 //
-void Grunt::Set_Affinity()
+void Grunt::Set_Affinity(DWORD_PTR affinity)
 {
 	int found_bits = -1; // seed this guy so the first ++ starts at 0 to help with 0-based index
 	int effective_procs = 0;
 	int effective_index = 0;
-	ULONG_PTR effective_affinity = 1;
-	ULONG_PTR affinity = param.cpu_affinity;
-
+	DWORD_PTR effective_affinity = 1, temp_affinity = affinity;
 
 	// Calculate effective_procs, whcih  may be equal to or less 
 	// then actual number of procs, depending on the mask specified
 	// and never greater
-	while (affinity)
+	while (temp_affinity)
 	{
-		if (affinity & 0x1)
+		if (temp_affinity & 0x1)
 			effective_procs++;
-		affinity = affinity >> (ULONG_PTR) 1;
+		temp_affinity = temp_affinity >> (DWORD_PTR) 1;
 	}
 
 	// Both index values are 0-based. Round-robin the threads
 	// if their number exceeds number processors.
 	effective_index = worker_index % effective_procs;
-	
-	affinity = param.cpu_affinity;
 	
 	while (effective_affinity)
 	{
@@ -697,13 +693,13 @@ void Grunt::Set_Affinity()
 #endif
 			break;
 		}
-		effective_affinity = effective_affinity << 0x1;
+		effective_affinity = effective_affinity << (DWORD_PTR) 0x1;
 	}
 }
 #else
-void Grunt::Set_Affinity()
+void Grunt::Set_Affinity(DWORD_PTR affinity)
 {
-	;
+	return;
 }
 #endif //IOMTR_SETTING_CPU_AFFINITY
 //
@@ -1027,7 +1023,8 @@ void CDECL Grunt_Thread_Wrapper(void *grunt)
 			((Grunt *) grunt)->random_offset_multiplier += 1;
 	}
 
-	((Grunt *) grunt)->Set_Affinity();
+	if (param.cpu_affinity) // only if we have been provided an overriding affinity
+		((Grunt *) grunt)->Set_Affinity(param.cpu_affinity);
 
 	// open targets
 	((Grunt *) grunt)->Open_Targets();

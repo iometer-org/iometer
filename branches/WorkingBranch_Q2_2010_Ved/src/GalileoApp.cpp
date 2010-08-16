@@ -88,7 +88,7 @@
 //       [1] = http://msdn.microsoft.com/library/default.asp?url=/library/en-us/vclib/html/_mfc_debug_new.asp
 //
 #if defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)
-#ifdef _DEBUG
+#ifdef IOMTR_SETTING_MFC_MEMALLOC_DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
@@ -516,6 +516,7 @@ BOOL CGalileoApp::OnIdle(LONG lCount)
 	static Data_Message *login_data_msg;
 	static char *login_data_msg_ptr;
 	static DWORD login_data_msg_size;
+	static DWORD start_recv_timer = 0;
 	DWORDLONG result;
 	Message reply_to_dynamo;
 	Manager *manager;
@@ -584,6 +585,7 @@ BOOL CGalileoApp::OnIdle(LONG lCount)
 			login_msg_size = sizeof(Message);
 			login_port->Receive(login_msg_ptr, login_msg_size);	// begin receiving...
 			login_state = receiving;
+			start_recv_timer = GetTickCount();
 			return TRUE;	// go away and try again later
 		} else {
 			// There is no data for us, go back to waiting
@@ -664,6 +666,18 @@ BOOL CGalileoApp::OnIdle(LONG lCount)
 			}
 		} else {
 			// Receive() has not yet completed
+			DWORD current_time = GetTickCount();
+
+			if (current_time < start_recv_timer) start_recv_timer = current_time - 1; // delay a bit if counter wrapped
+			else if (current_time - start_recv_timer >= IOMETER_RECEIVE_TIMEOUT)
+			{
+				// send a warning
+				ErrorMessage("Timed out waiting for dynamo to complete sending the login message. Please check your networking or your dynamo build.");
+				
+				delete login_msg;
+				login_state = accepting;
+			}
+
 			return TRUE;	// go away and try again later
 		}
 		break;
@@ -676,6 +690,7 @@ BOOL CGalileoApp::OnIdle(LONG lCount)
 			login_data_msg_size = sizeof(Data_Message);
 			login_port->Receive(login_data_msg_ptr, login_data_msg_size);	// begin receiving...
 			login_state = receiving_data;
+			start_recv_timer = GetTickCount();
 			return TRUE;	// go away and try again later
 		} else {
 			// There is no data for us, go back to waiting
@@ -758,6 +773,18 @@ BOOL CGalileoApp::OnIdle(LONG lCount)
 			}
 		} else {
 			// Receive() has not yet completed
+			DWORD current_time = GetTickCount();
+
+			if (current_time < start_recv_timer) start_recv_timer = current_time - 1; // delay a bit if counter wrapped
+			else if (current_time - start_recv_timer >= IOMETER_RECEIVE_TIMEOUT)
+			{
+				// send a warning
+				ErrorMessage("Timed out waiting for dynamo to complete sending a data message. Please check your networking or your dynamo build.");
+				
+				delete login_data_msg;
+				login_state = accepting;
+			}
+
 			return TRUE;	// go away and try again later
 		}
 		break;

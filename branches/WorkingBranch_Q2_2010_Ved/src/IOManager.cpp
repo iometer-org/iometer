@@ -228,18 +228,19 @@ BOOL Manager::Login(char* port_name, int login_port_number)
 {
 	Port *login_port;
 	Message msg, reply;
-	Data_Message data_msg;
+	Data_Message *data_msg;
 	size_t name_size = MAX_NETWORK_NAME;
 	int year, month, day;
 
+	data_msg = new Data_Message;
 	// Creating login messages that include the machine name and Dynamo version.
 	// The version number is included in two places for backward compatibility.
 	msg.purpose = LOGIN;
-	strcpy(data_msg.data.manager_info.version, m_pVersionStringWithDebug);
+	strcpy(data_msg->data.manager_info.version, m_pVersionStringWithDebug);
 #ifdef _DEBUG
-	cout << "dynamo version: " << data_msg.data.manager_info.version << ", data_msg size: " << sizeof(data_msg) << endl;
+	cout << "dynamo version: " << data_msg->data.manager_info.version << ", data_msg size: " << sizeof(Data_Message) << endl;
 #endif
-	sscanf(data_msg.data.manager_info.version, "%d.%d.%d", &year, &month, &day);
+	sscanf(data_msg->data.manager_info.version, "%d.%d.%d", &year, &month, &day);
 	msg.data = (year * 10000) + (month * 100) + day;
 
 	if (manager_name[0] != '\0') {
@@ -249,7 +250,7 @@ BOOL Manager::Login(char* port_name, int login_port_number)
 			exit(1);
 		}
 
-		strcpy(data_msg.data.manager_info.names[0], manager_name);
+		strcpy(data_msg->data.manager_info.names[0], manager_name);
 		name_size = strlen(manager_name);
 	} else {
 #if defined(IOMTR_OS_LINUX) || defined(IOMTR_OS_NETWARE) || defined(IOMTR_OS_OSX) || defined(IOMTR_OS_SOLARIS)
@@ -258,19 +259,19 @@ BOOL Manager::Login(char* port_name, int login_port_number)
 			cout << "*** Exiting... gethostname() returned error " << errno << endl;
 			exit(1);
 		}
-		name_size = strlen(data_msg.data.manager_info.names[0]);
+		name_size = strlen(data_msg->data.manager_info.names[0]);
 #elif defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)
 		GetComputerName(manager_name, (LPDWORD) & name_size);
-		data_msg.data.manager_info.timer_resolution = perf_data[WHOLE_TEST_PERF].timer_resolution;
+		data_msg->data.manager_info.timer_resolution = perf_data[WHOLE_TEST_PERF].timer_resolution;
 #else
 #warning ===> WARNING: You have to do some coding here to get the port done!
 #endif
-		strcpy(data_msg.data.manager_info.names[0], manager_name);
+		strcpy(data_msg->data.manager_info.names[0], manager_name);
 	}
-	strcpy(data_msg.data.manager_info.names[1], prt->network_name);
-	data_msg.data.manager_info.port_number = prt->network_port;
-	data_msg.data.manager_info.timer_resolution = perf_data[WHOLE_TEST_PERF].timer_resolution;
-	data_msg.data.manager_info.processors = perf_data[WHOLE_TEST_PERF].processor_count;
+	strcpy(data_msg->data.manager_info.names[1], prt->network_name);
+	data_msg->data.manager_info.port_number = prt->network_port;
+	data_msg->data.manager_info.timer_resolution = perf_data[WHOLE_TEST_PERF].timer_resolution;
+	data_msg->data.manager_info.processors = perf_data[WHOLE_TEST_PERF].processor_count;
 
 #if defined(IOMTR_CPU_SPARC)
 #if defined(IOMTR_OS_SOLARIS)
@@ -312,9 +313,9 @@ BOOL Manager::Login(char* port_name, int login_port_number)
 
 	// Sending login request message.
 	cout << "Sending login request..." << endl;
-	cout << "   " << data_msg.data.manager_info.names[0] << endl;
-	cout << "   " << data_msg.data.manager_info.names[1]
-	    << " (port " << data_msg.data.manager_info.port_number << ")" << endl;
+	cout << "   " << data_msg->data.manager_info.names[0] << endl;
+	cout << "   " << data_msg->data.manager_info.names[1]
+	    << " (port " << data_msg->data.manager_info.port_number << ")" << endl;
 
 	if (prt->type == PORT_TYPE_TCP) {
 		login_port = new PortTCP;
@@ -332,13 +333,15 @@ BOOL Manager::Login(char* port_name, int login_port_number)
 
 	if (IsBigEndian()) {
 		(void)reorder(msg);
-		(void)reorder(data_msg, DATA_MESSAGE_MANAGER_INFO, SEND);
+		(void)reorder(*data_msg, DATA_MESSAGE_MANAGER_INFO, SEND);
 	}
 #if defined (IOMTR_OS_LINUX) && defined (IOMTR_CPU_XSCALE)
-	Manager_Info_double_swap(&data_msg.data.manager_info);
+	Manager_Info_double_swap(&data_msg->data.manager_info);
 #endif
 	login_port->Send(&msg);
-	login_port->Send(&data_msg, DATA_MESSAGE_SIZE);
+	login_port->Send(data_msg, DATA_MESSAGE_SIZE);
+
+	delete data_msg;
 
 	// wait to receive reply to login request, then get the incoming message...
 	if (login_port->Receive(&reply) == PORT_ERROR) {

@@ -113,7 +113,7 @@ class Grunt {
 	void Record_Off();
 	void Stop_Test();
 	void Wait_For_Stop();
-	void Set_Affinity();
+	void Set_Affinity(DWORD_PTR affinity);
 	int Get_Maximum_Sector_Size();
 	BOOL Need_Random_Buffer();
 	//

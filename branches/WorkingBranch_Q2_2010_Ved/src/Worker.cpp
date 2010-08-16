@@ -88,7 +88,7 @@
 //       [1] = http://msdn.microsoft.com/library/default.asp?url=/library/en-us/vclib/html/_mfc_debug_new.asp
 //
 #if defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)
-#ifdef _DEBUG
+#ifdef IOMTR_SETTING_MFC_MEMALLOC_DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
@@ -467,20 +467,22 @@ TargetType Worker::Type()
 BOOL Worker::SetAccess(int access_entry)
 {
 	Message msg;
-	Data_Message data_msg;
+	Data_Message *data_msg;
 
 	// Network clients are set by their server.
 	if (IsType(Type(), GenericClientType))
 		return TRUE;
 
+	data_msg = new Data_Message;
+
 	// If the worker has an access spec for the specified entry, use it.
 	// If there is no entry, send the idle spec.
 	if (access_entry < AccessSpecCount()) {
 		// Copy the spec into a message and send it.
-		memcpy((void *)&(data_msg.data.spec), (void *)(GetAccessSpec(access_entry)), sizeof(Test_Spec));
+		memcpy((void *)&(data_msg->data.spec), (void *)(GetAccessSpec(access_entry)), sizeof(Test_Spec));
 	} else {
 		// Otherwise, send the idle spec.
-		memcpy((void *)&(data_msg.data.spec),
+		memcpy((void *)&(data_msg->data.spec),
 		       (void *)(theApp.access_spec_list.Get(IDLE_SPEC)), sizeof(Test_Spec));
 	}
 
@@ -488,7 +490,7 @@ BOOL Worker::SetAccess(int access_entry)
 	msg.purpose = SET_ACCESS;
 	msg.data = GetIndex();
 	manager->Send(&msg);
-	manager->SendData(&data_msg);
+	manager->SendData(data_msg);
 	manager->Receive(&msg);
 
 	// Set the access spec for the corresponing client, if any.
@@ -496,10 +498,11 @@ BOOL Worker::SetAccess(int access_entry)
 		msg.purpose = SET_ACCESS;
 		msg.data = net_partner->GetIndex();
 		net_partner->manager->Send(&msg);
-		net_partner->manager->SendData(&data_msg);
+		net_partner->manager->SendData(data_msg);
 		net_partner->manager->Receive(&msg);
 	}
 
+	delete data_msg;
 	return msg.data;	// msg.data indicates success.
 }
 
@@ -511,7 +514,7 @@ BOOL Worker::SetTargets()
 {
 	Target *target;
 	Message msg;
-	Data_Message data_msg;
+	Data_Message *data_msg;
 	VI_DISCRIMINATOR_TYPE vi_discriminator;
 	int vi_discriminator_length;
 	VIP_NET_ADDRESS *vi_addr;
@@ -521,7 +524,9 @@ BOOL Worker::SetTargets()
 	if (IsType(Type(), GenericClientType))
 		return TRUE;
 
-	data_msg.count = 0;
+	data_msg = new Data_Message;
+
+	data_msg->count = 0;
 
 	// Loop through all targets and add them to the message if active.
 	target_count = TargetCount(ActiveType);
@@ -568,55 +573,55 @@ BOOL Worker::SetTargets()
 #endif
 		}
 		// Copy active targets into set target data message.
-		memcpy(&data_msg.data.targets[data_msg.count++], &target->spec, sizeof(Target_Spec));
+		memcpy(&data_msg->data.targets[data_msg->count++], &target->spec, sizeof(Target_Spec));
 	}
 
 	// Send the message of targets to set to Dynamo and get the reply.
 	manager->Send(GetIndex(), SET_TARGETS);
-	manager->SendData(&data_msg);
+	manager->SendData(data_msg);
 
 	// Reply message indicates if targets were set successfully along with
 	// additional error data or target settings that can only be determined
 	// by Dynamo (such as TCP port numbers).
 	manager->Receive(&msg);
-	manager->ReceiveData(&data_msg);
+	manager->ReceiveData(data_msg);
 
 	// If a network server set its targets correctly, set its client.
 	// This currently assumes one client per server.
 	if (msg.data && IsType(Type(), GenericServerType) && TargetCount()) {
 		// Set the client's targets if we're not just resetting targets.
-		if (data_msg.count) {
-			data_msg.count = 1;
+		if (data_msg->count) {
+			data_msg->count = 1;
 
 			if (IsType(targets[0]->spec.type, TCPClientType)) {
 				// Record port used by server
-				targets[0]->spec.tcp_info.local_port = data_msg.data.targets[0].tcp_info.local_port;
+				targets[0]->spec.tcp_info.local_port = data_msg->data.targets[0].tcp_info.local_port;
 
 				// Set the server's client to use the server as a target.
-				memcpy(&data_msg.data.targets[0], &targets[0]->spec, sizeof(Target_Spec));
+				memcpy(&data_msg->data.targets[0], &targets[0]->spec, sizeof(Target_Spec));
 
 				// Set the client's remote port to the server's local port
-				data_msg.data.targets[0].tcp_info.remote_port = targets[0]->spec.tcp_info.local_port;
+				data_msg->data.targets[0].tcp_info.remote_port = targets[0]->spec.tcp_info.local_port;
 
 				// Reverse the local and remote addresses for the client.
 				// The *server* is a client's target.
-				strcpy(data_msg.data.targets[0].name, targets[0]->spec.tcp_info.remote_address);
-				strcpy(data_msg.data.targets[0].tcp_info.remote_address, targets[0]->spec.name);
-				data_msg.data.targets[0].type = TCPServerType;
+				strcpy(data_msg->data.targets[0].name, targets[0]->spec.tcp_info.remote_address);
+				strcpy(data_msg->data.targets[0].tcp_info.remote_address, targets[0]->spec.name);
+				data_msg->data.targets[0].type = TCPServerType;
 			} else if (IsType(targets[0]->spec.type, VIClientType)) {
 				// Set the server's client to use the server as the target.
-				memcpy(&data_msg.data.targets[0], &targets[0]->spec, sizeof(Target_Spec));
+				memcpy(&data_msg->data.targets[0], &targets[0]->spec, sizeof(Target_Spec));
 
 				// Reverse the local and remote addresses for the client.
 				// The *server* is a client's target.
 				// Set client's local VI NIC to use.
-				strcpy(data_msg.data.targets[0].name, target->spec.vi_info.remote_nic_name);
+				strcpy(data_msg->data.targets[0].name, target->spec.vi_info.remote_nic_name);
 				// Set address that client should connect to on remote side.
-				memcpy(&data_msg.data.targets[0].vi_info.remote_address,
+				memcpy(&data_msg->data.targets[0].vi_info.remote_address,
 				       &targets[0]->spec.vi_info.local_address, VI_ADDRESS_SIZE);
-				memcpy(&data_msg.data.targets[0].vi_info.local_address,
+				memcpy(&data_msg->data.targets[0].vi_info.local_address,
 				       &targets[0]->spec.vi_info.remote_address, VI_ADDRESS_SIZE);
-				data_msg.data.targets[0].type = VIServerType;
+				data_msg->data.targets[0].type = VIServerType;
 			} else {
 				ErrorMessage("Unsupported client target type in Worker::" "SetTargets().");
 				return FALSE;
@@ -624,12 +629,14 @@ BOOL Worker::SetTargets()
 		}
 		// Send the message of targets to set to Dynamo and get the reply.
 		net_partner->manager->Send(net_partner->GetIndex(), SET_TARGETS);
-		net_partner->manager->SendData(&data_msg);
+		net_partner->manager->SendData(data_msg);
 
 		// Reply message indicates if targets were set successfully.
 		net_partner->manager->Receive(&msg);
-		net_partner->manager->ReceiveData(&data_msg);
+		net_partner->manager->ReceiveData(data_msg);
 	}
+
+	delete data_msg;
 
 	return (msg.data);
 }
@@ -878,7 +885,7 @@ void Worker::SaveResults(ostream * file, int access_index, int result_type)
 //
 void Worker::UpdateResults(int which_perf)
 {
-	Data_Message data_msg;
+	Data_Message *data_msg;
 	double run_time;
 	Worker_Results *new_wkr_results;
 	Results *device_results;	// Results for a specific target.
@@ -889,16 +896,18 @@ void Worker::UpdateResults(int which_perf)
 	if ((which_perf < 0) || (which_perf >= MAX_PERF))
 		return;
 
+	data_msg = new Data_Message;
+
 	// Initializing worker's results.
 	ResetResults(which_perf);
 	timer_resolution = manager->timer_resolution;
 
 	// Receive the update from Dynamo.  The manager should have already made
 	// the request.
-	if (manager->ReceiveData(&data_msg) == PORT_ERROR)
+	if (manager->ReceiveData(data_msg) == PORT_ERROR)
 		return;
 
-	new_wkr_results = &(data_msg.data.worker_results);
+	new_wkr_results = &(data_msg->data.worker_results);
 	raw = &(results[which_perf].raw);
 	raw->counter_time = new_wkr_results->time[LAST_SNAPSHOT] - new_wkr_results->time[FIRST_SNAPSHOT];
 	
@@ -1131,6 +1140,8 @@ void Worker::UpdateResults(int which_perf)
 
 	if (IsType(Type(), GenericClientType))
 		delete device_results;
+
+	delete data_msg;
 }
 
 //

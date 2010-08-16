@@ -955,9 +955,11 @@ BOOL TargetDisk::Set_Sizes(BOOL open_disk)
 		DISK_GEOMETRY_EX disk_geo_info_ex;
 
 		SetLastError(0);
-		
+
+#ifdef USE_NEW_DISCOVERY_MECHANISM
 		spec.disk_info.has_partitions = FALSE;
-		
+#endif
+
 		// Try the EX version first
 		if (DeviceIoControl(disk_file, IOCTL_DISK_GET_DRIVE_LAYOUT_EX, NULL, 0,
 				disk_layout_info_ex, sizeof(disk_layout_info_ex), &disk_info_size, NULL)){

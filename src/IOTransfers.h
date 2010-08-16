@@ -64,14 +64,10 @@
 #ifndef IO_TRANSFERS_DEFINED
 #define IO_TRANSFERS_DEFINED
 
-#if defined(IOMTR_OSFAMILY_NETWARE) || defined(IOMTR_OSFAMILY_UNIX)
 #include "IOCommon.h"
-#endif
 #include "vipl.h"
 
-#ifdef FORCE_STRUCT_ALIGN
 #include "pack8.h"
-#endif
 
 //
 // Generic structure to hold information that may be passed to a thread.
@@ -80,7 +76,7 @@ struct Thread_Info {
 	int id;			// Thread's identification.  Used by thread to
 	// determine what work it is to do, such as which disk to access.
 	void *parent;		// Pointer used to get parent object.
-};
+} STRUCT_ALIGN_8;
 
 //
 // Information about a single transaction performed by a thread.  Note that a 
@@ -113,9 +109,8 @@ struct Transaction {
 	// not when it is queued
 	int remaining_requests;	// PING (number of requests remaining in this transaction)
 	int remaining_replies;	// PONG (number of replies remaining in this transaction)
-};
-#ifdef FORCE_STRUCT_ALIGN
+} STRUCT_ALIGN_8;
+
 #include "unpack8.h"
-#endif
 
 #endif

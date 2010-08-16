@@ -468,7 +468,7 @@ int Manager::Report_Disks( Target_Spec* disk_spec )
 		//
 		// Allocate temporary storage in which we will store our newly sorted list of target_specs
 		// including additional raw disks for hte optional allocating dummy volumes (see below).
-		Target_Spec *new_disks = new Target_Spec[device_count + raw_count];
+		Target_Spec *new_disks = new Target_Spec[device_count + raw_count + 1]; // is the +1 really necessary?
 
 		//
 		// Sort the whole thing based on storage number, tagging each item for tree view 

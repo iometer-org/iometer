@@ -288,6 +288,7 @@ using namespace std;
 
 #if defined(IOMTR_OSFAMILY_WINDOWS)
 #define snprintf _snprintf
+#define IOMETER_RECEIVE_TIMEOUT		10000 // in miliseconds
 #endif
 
 // ----------------------------------------------------------------------------
@@ -580,8 +581,22 @@ enum {
 // ----------------------------------------------------------------------------
 
 #ifdef FORCE_STRUCT_ALIGN
+#ifdef GCC_ATTRIBUTE_ALIGN // unix alternative to pragma pack
+#if defined(IOMTR_OSFAMILY_UNIX)
+#define STRUCT_ALIGN(Bytes) __attribute__ ((aligned (Bytes)))
+#define STRUCT_ALIGN_8 STRUCT_ALIGN(8)
+#endif // IOMTR_OSFAMILY_UNIX
+#else
+#define STRUCT_ALIGN(Bytes)
+#define STRUCT_ALIGN_8
+#endif // GCC_ATTRIBUTE_ALIGN
+
+#else
+#define STRUCT_ALIGN(Bytes)
+#define STRUCT_ALIGN_8
+#endif // FORCE_STRUCT_ALIGN
+
 #include "pack8.h"
-#endif
 
 struct Manager_Info
 {
@@ -595,7 +610,7 @@ struct Manager_Info
 #endif 
 	int	       processors;
 	double	       timer_resolution;
-};
+} STRUCT_ALIGN_8;
 // Basic result information stored by worker threads.
 struct Raw_Result
 {
@@ -616,7 +631,7 @@ struct Raw_Result
 	DWORDLONG    transaction_latency_sum;
 	DWORDLONG    connection_latency_sum;   // Application latencies for a Connection.
 	__int64	     counter_time;	       // Difference between ending and starting counter time stamps.
-};
+} STRUCT_ALIGN_8;
 // Storing results for all targets in a single structure.
 struct Target_Results
 {
@@ -625,13 +640,13 @@ struct Target_Results
 	char	   pad[4];   // padding
 #endif
 	Raw_Result result[MAX_TARGETS];
-};
+} STRUCT_ALIGN_8;
 // Storing results for a worker.  This includes the worker's target results.
 struct Worker_Results
 {
 	DWORDLONG      time[MAX_SNAPSHOTS];   // Processor based counters to provide time stamps.
 	Target_Results target_results;
-};
+} STRUCT_ALIGN_8;
 // All CPU related results are stored in a single structure.
 struct CPU_Results
 {
@@ -640,7 +655,7 @@ struct CPU_Results
 	char   pad[4];   // padding
 #endif
 	double CPU_utilization[MAX_CPUS][CPU_RESULTS];
-};
+} STRUCT_ALIGN_8;
 // All network related results are stored in a single structure.
 struct Net_Results
 {
@@ -650,14 +665,14 @@ struct Net_Results
 	char   pad[4];     // padding
 #endif
 	double ni_stats[MAX_NUM_INTERFACES][NI_RESULTS];
-};
+} STRUCT_ALIGN_8;
 // Results SPECIFIC to a single system.  This is NOT compiled system results.
 struct Manager_Results
 {
 	__int64	    time_counter[MAX_SNAPSHOTS];
 	CPU_Results cpu_results;
 	Net_Results net_results;
-};
+} STRUCT_ALIGN_8;
 // Result structure used by the manager list, managers, and workers to store
 // results that will be saved.
 struct Results
@@ -690,11 +705,9 @@ struct Results
 	double	     connections_per_second;
 	double	     ave_connection_latency;
 	double	     max_connection_latency;
-};
+} STRUCT_ALIGN_8;
 
-#ifdef FORCE_STRUCT_ALIGN
 #include "unpack8.h"
-#endif
 
 // ----------------------------------------------------------------------------
 #if defined(IOMTR_OSFAMILY_UNIX) || defined(IOMTR_OSFAMILY_NETWARE)

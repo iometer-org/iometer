@@ -53,8 +53,21 @@
 // Anything included after this file will have the following byte alignment
 //
 
-#if (defined(IOMTR_OSFAMILY_WINDOWS) || defined(IOMTR_OSFAMILY_UNIX))
+#ifdef FORCE_STRUCT_ALIGN
+
+#if defined(IOMTR_OSFAMILY_WINDOWS)
 #pragma pack(push, 8)
-#else
+
+#elif defined(IOMTR_OSFAMILY_UNIX)
+
+#ifndef GCC_ATTRIBUTE_ALIGN
+#pragma pack(push, 8)
+#endif //GCC_ATTRIBUTE_ALIGN
+
+// Look for GCC_ATTRIBUTE_ALIGN in iocommon.h for this definition
+
+#else // other os
 #error ===> You must include an 8-byte structure packing/alignment directive.
 #endif
+
+#endif //FORCE_STRUCT_ALIGN

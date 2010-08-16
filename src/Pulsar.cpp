@@ -285,16 +285,37 @@ static int iomtr_set_cpu_affinity(ULONG_PTR affinity_mask)
 #endif
 	}
 
-#elif defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)
-	if (!affinity_mask) {
-		affinity_mask = 1;
-	}
-	res = SetProcessAffinityMask(GetCurrentProcess(), affinity_mask);
-	if (!res) {
+#elif defined(IOMTR_OSFAMILY_WINDOWS)
+	//SYSTEM_INFO system_info;
+	//GetSystemInfo(&system_info);
+	DWORD_PTR processAffinity, systemAffinity;
+
+	res = GetProcessAffinityMask(GetCurrentProcess(), &processAffinity,  &systemAffinity);
+
+	if (!res) 
+	{
 		res = GetLastError();
-		cout << "Set cpu affinity failed with" << res << endl;
-		// Do nothing if errors
+		cout << "Could not obtain process affinity. GetProcessAffinityMask() failed with error=" 
+			 << GetLastError() << endl;
+		
+		return 0;
 	}
+
+	if (affinity_mask)
+	{
+		if (affinity_mask != processAffinity && ((affinity_mask & systemAffinity) == affinity_mask))
+		{
+			res = SetProcessAffinityMask(GetCurrentProcess(), affinity_mask);
+			if (!res) 
+			{
+				res = GetLastError();
+				cout << "Set cpu affinity failed with error=" << GetLastError() << endl;
+				return 0;
+			}
+		}
+	}
+	// else // do nothing
+
 #elif defined(IOMTR_OS_NETWARE) || defined(IOMTR_OS_SOLARIS)
 	// nop  
 #else
@@ -317,8 +338,9 @@ static int iomtr_set_cpu_affinity(unsigned long affinity_mask)
 
 int CDECL main(int argc, char *argv[])
 {
-	Manager manager;
+	Manager *manager;
 	char iometer[MAX_NETWORK_NAME];
+	int error = 0;
 	// struct dynamo_param param; //move up to global scope
 
 #if defined(IOMTR_OS_LINUX)
@@ -336,34 +358,22 @@ int CDECL main(int argc, char *argv[])
 #endif
 #endif
 
+	manager = new Manager;
+
 	iometer[0] = 0;
-	manager.manager_name[0] = 0;
-	manager.exclude_filesys[0] = 0;
+	manager->manager_name[0] = 0;
+	manager->exclude_filesys[0] = 0;
 
 	//provide a temporary global ptr to the version string for Syntax() to use
-	g_pVersionStringWithDebug = manager.GetVersionString(TRUE);
+	g_pVersionStringWithDebug = manager->GetVersionString(TRUE);
 
 	param.iometer = iometer;
-	param.manager_name = manager.manager_name;
-	param.manager_computer_name = manager.prt->network_name;
-	param.manager_exclude_fs = manager.exclude_filesys;
-	param.blkdevlist = &manager.blkdevlist;
+	param.manager_name = manager->manager_name;
+	param.manager_computer_name = manager->prt->network_name;
+	param.manager_exclude_fs = manager->exclude_filesys;
+	param.blkdevlist = &manager->blkdevlist;
 	param.login_port_number = 0;
-
-#if defined(IOMTR_SETTING_CPU_AFFINITY)
-#if defined(IOMTR_OSFAMILY_WINDOWS)
-	SYSTEM_INFO system_info;
-	GetSystemInfo(&system_info);
-
-	// Set the affinity mask to all processors by default
-	param.cpu_affinity = system_info.dwActiveProcessorMask;
-#else
-#error ===> ERROR: You have to set default affinity values here
-	// TODO for non-Windows
-	param.cpu_affinity = 1; // get the current process affinity mask
-#endif
-#endif // IOMTR_SETTING_CPU_AFFINITY
-
+	param.cpu_affinity = 0; // not specified or default
 	param.timer_type = TIMER_UNDEFINED; // use the default
 	param.disk_control = RAWDISK_VIEW_NOPART; // do not show raw disks with partitions
 
@@ -374,21 +384,21 @@ int CDECL main(int argc, char *argv[])
 	iomtr_set_cpu_affinity(param.cpu_affinity);
 
 	// If there were command line parameters, indicate that they were recognized.
-	if (iometer[0] || manager.manager_name[0]) {
+	if (iometer[0] || manager->manager_name[0]) {
 		cout << "\nCommand line parameter(s):" << endl;
 
 		if (iometer[0]) {
 			cout << "   Looking for Iometer on \"" << iometer << "\"" << endl;
 		}
-		if (manager.manager_name[0]) {
-			cout << "   New manager name is \"" << manager.manager_name << "\"" << endl;
+		if (manager->manager_name[0]) {
+			cout << "   New manager name is \"" << manager->manager_name << "\"" << endl;
 		}
 	}
-	if (manager.exclude_filesys[0]) {
+	if (manager->exclude_filesys[0]) {
 		cout << "\nExcluding the following filesystem types:" << endl;
-		cout << "   \"" << manager.exclude_filesys << "\"" << endl;
+		cout << "   \"" << manager->exclude_filesys << "\"" << endl;
 	} else {
-		strcpy(manager.exclude_filesys, DEFAULT_EXCLUDE_FILESYS);
+		strcpy(manager->exclude_filesys, DEFAULT_EXCLUDE_FILESYS);
 	}
 	cout << endl;
 
@@ -404,7 +414,9 @@ int CDECL main(int argc, char *argv[])
 	// Initialize the lock on UNIX platforms.
 	if (pthread_mutex_init(&lock_mt, NULL)) {
 		cout << "unable to init the lock" << endl;
-		exit(1);
+		error = 1;
+		goto CleanUp;
+		//exit(1);
 	}
 	// Block SIGPIPE signal. Needed to ensure that Network worker
 	// threads don't exit due to a broken pipe signal.
@@ -462,7 +474,9 @@ int CDECL main(int argc, char *argv[])
 	// Initialize the lock on NetWare platforms.
 	if (pthread_mutex_init(&lock_mt, NULL)) {
 		cout << "unable to init the lock" << endl;
-		exit(1);
+		error = 1;
+		goto CleanUp;
+		//exit(1);
 	}
 #endif
 
@@ -470,17 +484,19 @@ int CDECL main(int argc, char *argv[])
 	if ((IsBigEndian() != 0) && (IsBigEndian() != 1)) {
 		cout << "===> ERROR: Endian type of the CPU couldn't be detected." << endl;
 		cout << "     [main() in " << __FILE__ << " line " << __LINE__ << "]" << endl;
-		exit(1);
+		error = 1;
+		goto CleanUp;
+		//exit(1);
 	}
 	// Entering infinite loop to allow Dynamo to run multiple tests.  Outer while loop allows
 	// Dynamo to be reset from Iometer.  If everything works smoothly, resets should be rare.
 	while (TRUE) {
 		// Initializing worker and logging into Iometer director.
-		if (!manager.Login(iometer, param.login_port_number))
+		if (!manager->Login(iometer, param.login_port_number))
 			break;
 
 		// Manager will continue to run until an error, or stopped by Iometer.
-		if (!manager.Run())
+		if (!manager->Run())
 			break;	// Stop running when the manager is done.
 	}
 	cout << "Ending execution." << endl;
@@ -492,6 +508,12 @@ int CDECL main(int argc, char *argv[])
 	CleanupCCNTInterface(ccntfd);
 #endif
 #endif
+
+	//return (0);
+
+CleanUp:
+	if (manager) delete manager;
+	if (error) exit(error);
 	return (0);
 }
 
@@ -785,7 +807,7 @@ static void ParseParam(int argc, char *argv[], struct dynamo_param *param)
 			if (argv[I])
 			{
 				// Lets use sscanf below to support hex input
-				ULONG_PTR tempMask;
+				ULONG_PTR tempMask = 0;
 				
 				// Handle both hex and decimal values. Abstract format spec syntax (in iocommon.h)
 				if (argv[I][0] == '0' && argv[I][1] == 'x')
@@ -803,8 +825,8 @@ static void ParseParam(int argc, char *argv[], struct dynamo_param *param)
 					cerr << "Value nust be within: 0x" << hex << param->cpu_affinity << endl;
 				}
 				else
-#endif
 					param->cpu_affinity = tempMask;
+#endif
 			}
 			break;
 #endif

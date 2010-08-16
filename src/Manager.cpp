@@ -83,7 +83,7 @@
 //       [1] = http://msdn.microsoft.com/library/default.asp?url=/library/en-us/vclib/html/_mfc_debug_new.asp
 //
 #if defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)
-#ifdef _DEBUG
+#ifdef IOMTR_SETTING_MFC_MEMALLOC_DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
@@ -509,16 +509,18 @@ void Manager::UpdateTargetLists()
 void Manager::InitTargetList(CTypedPtrArray < CPtrArray, Target_Spec * >*targets)
 {
 	int i;
-	Data_Message data_msg;
+	Data_Message *data_msg;
 	Target_Spec *target_spec;
 
+	data_msg = new Data_Message;
+
 	// Receive the target specifications in a data message.
-	ReceiveData(&data_msg);
+	ReceiveData(data_msg);
 
 	// Add the targets to the specified array.
-	for (i = 0; i < data_msg.count; i++) {
+	for (i = 0; i < data_msg->count; i++) {
 		target_spec = new Target_Spec;
-		memcpy(target_spec, &data_msg.data.targets[i], sizeof(Target_Spec));
+		memcpy(target_spec, &data_msg->data.targets[i], sizeof(Target_Spec));
 
 		// Initialize the target specs to the default settings.
 		target_spec->queue_depth = 1;
@@ -527,6 +529,8 @@ void Manager::InitTargetList(CTypedPtrArray < CPtrArray, Target_Spec * >*targets
 
 		targets->Add(target_spec);
 	}
+
+	delete data_msg;
 }
 
 //
@@ -698,7 +702,7 @@ void Manager::SaveResults(ostream * file, int access_index, int result_type)
 void Manager::UpdateResults(int which_perf)
 {
 	Worker *worker;
-	Data_Message data_msg;
+	Data_Message *data_msg;
 	CPU_Results *cpu_results;
 	Net_Results *net_results;
 	_int64 start_perf_time, end_perf_time;
@@ -721,14 +725,19 @@ void Manager::UpdateResults(int which_perf)
 			return;
 	}
 
-	// Get results from manager.
-	if (ReceiveData(&data_msg) == PORT_ERROR)
-		return;
+	data_msg = new Data_Message;
 
-	cpu_results = &(data_msg.data.manager_results.cpu_results);
-	net_results = &(data_msg.data.manager_results.net_results);
-	start_perf_time = data_msg.data.manager_results.time_counter[FIRST_SNAPSHOT];
-	end_perf_time = data_msg.data.manager_results.time_counter[LAST_SNAPSHOT];
+	// Get results from manager.
+	if (ReceiveData(data_msg) == PORT_ERROR)
+	{
+		delete data_msg;
+		return;
+	}
+
+	cpu_results = &(data_msg->data.manager_results.cpu_results);
+	net_results = &(data_msg->data.manager_results.net_results);
+	start_perf_time = data_msg->data.manager_results.time_counter[FIRST_SNAPSHOT];
+	end_perf_time = data_msg->data.manager_results.time_counter[LAST_SNAPSHOT];
 
 	// Reset aggregate related utilizations.
 	for (stat = 0; stat < CPU_RESULTS; stat++)
@@ -903,6 +912,8 @@ void Manager::UpdateResults(int which_perf)
 	} else {
 		results[which_perf].ave_connection_latency = (double)0;
 	}
+
+	delete data_msg;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

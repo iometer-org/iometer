@@ -115,9 +115,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifdef FORCE_STRUCT_ALIGN
 #include "pack8.h"
-#endif
 
 // Different data a message can contain.
 union Message_Data {
@@ -137,13 +135,13 @@ union Message_Data {
 	Manager_Results manager_results;
 	// Results for worker threads, including target results.
 	Worker_Results worker_results;
-};
+} STRUCT_ALIGN_8;
 
 // Format of informative and data messages.
 struct Message {
 	int purpose;		// Reason message was sent.  See constants above.
 	int data;		// Brief amount of data sent with the message.
-};
+} STRUCT_ALIGN_8;
 
 struct Data_Message {
 	int count;		// Number of data items in the message.
@@ -151,11 +149,9 @@ struct Data_Message {
 	char pad[4];		// coz of Solaris - NT differences
 #endif
 	Message_Data data;	// Detailed data sent with the data message.
-};
+} STRUCT_ALIGN_8;
 
-#ifdef FORCE_STRUCT_ALIGN
 #include "unpack8.h"
-#endif
 
 #define MESSAGE_SIZE		sizeof( Message )
 #define DATA_MESSAGE_SIZE	sizeof( Data_Message )

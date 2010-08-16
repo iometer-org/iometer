@@ -32,7 +32,8 @@ TARGETLIBS=$(SDK_LIB_PATH)\COMCTL32.LIB	\
 	$(SDK_LIB_PATH)\WSOCK32.LIB	\
 	$(SDK_LIB_PATH)\WS2_32.LIB
 
-LINKER_STACKSIZE=-stack:0x200000,0x100000
+# Not needed after the Aug 2010 release 
+# LINKER_STACKSIZE=-stack:0x200000,0x100000
 
 SOURCES=..\AccessDialog.cpp		\
 	..\AccessSpecList.cpp		\
@@ -66,3 +67,7 @@ SOURCES=..\AccessDialog.cpp		\
 	..\Worker.cpp			\
 	..\WorkerView.cpp		\
 	..\Galileo.rc
+
+SXS_APPLICATION_MANIFEST=iometer.manifest
+SXS_ASSEMBLY_NAME=iometer
+SXS_ASSEMBLY_LANGUAGE=0000

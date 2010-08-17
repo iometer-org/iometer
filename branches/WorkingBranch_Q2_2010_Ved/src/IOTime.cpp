@@ -268,7 +268,7 @@ ULONGLONG rdtsc()
 #elif defined(IOMTR_OS_WIN64) && defined(IOMTR_CPU_IA64)
 
 // Define the default timer
-timer_type TimerType = TIMER_RDTSC;
+timer_type TimerType = TIMER_OSHPC;
 
 //
 // DDK definitions for ITC intrinsics and ia64 registers...
@@ -321,7 +321,7 @@ DWORDLONG rdtsc()
 #elif defined(IOMTR_OS_WIN64) && defined(IOMTR_CPU_X86_64)
 
 // Define the default timer
-timer_type TimerType = TIMER_RDTSC;
+timer_type TimerType = TIMER_OSHPC;
 
 #pragma intrinsic(__rdtsc)
 
@@ -439,7 +439,7 @@ DWORDLONG timer_value()
 // The main problem is that TSC/ITC frequency may not match the internal 
 // processor clock, so we derive it here based on another known counter--
 // oshpc() in this case. The default counter required for all this to work.
-// While ding that, we can also detect speed stepping but not 100% reliably.
+// While doing that, we can also detect speed stepping but not 100% reliably.
 //
 // Note: -assumes we are running on one processor; caller should affinitize. 
 //       -oshpc() is used to measure the TSC/ITC since we know its period. 

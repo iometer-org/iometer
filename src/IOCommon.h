@@ -288,7 +288,7 @@ using namespace std;
 
 #if defined(IOMTR_OSFAMILY_WINDOWS)
 #define snprintf _snprintf
-#define IOMETER_RECEIVE_TIMEOUT		10000 // in miliseconds
+#define IOMETER_RECEIVE_TIMEOUT		10000 // 10 seconds in miliseconds
 #endif
 
 // ----------------------------------------------------------------------------
@@ -456,7 +456,7 @@ using namespace std;
                                    // the Solaris 2.6 man page for swapctl(2)
 #define	MAX_CPUS	      64
 #define	MAX_WORKERS	      128
-#define MAX_TARGETS	      512
+#define MAX_TARGETS	      2048
 #define MAX_NETWORK_NAME      128
 #define MAX_NUM_INTERFACES    64
 #define MAX_WORKER_NAME	      128

@@ -139,11 +139,11 @@ BEGIN_MESSAGE_MAP(CPageDisk, CPropertyPage)
     ON_NOTIFY(NM_SETFOCUS, TTargets, OnSetfocusTTargets)
 ON_NOTIFY(TVN_SELCHANGING, TTargets, OnSelchangingTTargets)
     //}}AFX_MSG_MAP
-	ON_EN_CHANGE(EDiskSize, &CPageDisk::OnEnChangeEdisksize)
-	ON_EN_CHANGE(EDiskStart, &CPageDisk::OnEnChangeEdiskstart)
-	ON_EN_KILLFOCUS(EFixedSeed, &CPageDisk::OnKillfocusEFixedSeed)
-	ON_BN_CLICKED(CUseFixedSeed, &CPageDisk::OnCUseFixedSeed)
-	ON_EN_SETFOCUS(EFixedSeed, &CPageDisk::OnSetfocusEFixedSeed)
+	ON_EN_CHANGE(EDiskSize, OnEnChangeEdisksize) // removed &CPageDisk::XYZ syntax -- WDK does not like it
+	ON_EN_CHANGE(EDiskStart, OnEnChangeEdiskstart)
+	ON_EN_KILLFOCUS(EFixedSeed, OnKillfocusEFixedSeed)
+	ON_BN_CLICKED(CUseFixedSeed, OnCUseFixedSeed)
+	ON_EN_SETFOCUS(EFixedSeed, OnSetfocusEFixedSeed)
 END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CPageDisk message handlers

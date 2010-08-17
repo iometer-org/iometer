@@ -297,19 +297,6 @@ PGET_VOLUME_PATHNAMES_FOR_VOLUMENAME pGetVolumePathNamesForVolumeName = NULL;
 
 //////////////////////////////////////////LOCAL VARIABLES//////////////////////////////////////
 
-// Used for scanning the DosDevices name spacs
-struct DosDeviceEntry
-{
-	char link[_MAX_FNAME];
-	char target[_MAX_FNAME];
-};
-
-struct DosDeviceList
-{
-	int num_entries;
-	DosDeviceEntry *list; // caller must deallocates, see notes below
-};
-
 /////////////////////////////////////// LOCAL FUNCTION PROTOTYPES//////////////////////////////
 int Report_Volumes1(Target_Spec *disk_spec, int start_count);
 int Report_Volumes2(Target_Spec *disk_spec, int start_count, bool force_all);
@@ -1193,7 +1180,6 @@ int Report_RawDisks( Target_Spec *disk_spec, int start_count, int view_type )
 	int	drive_number = 0, number_skipped = 0;
 	int count = start_count;
 	TargetDisk d;
-	DosDeviceList dev_list = {0,0};
 
 	cout << "Reporting raw disk information..." << endl;
 
@@ -1286,8 +1272,6 @@ DoHoleCheck:
 		if (++number_skipped == PHYS_DISK_HOLE_SIZE) 
 			break;
 	}
-
-	delete [] dev_list.list;
 
 	cout << "Found: " << (count - start_count) << endl;
 	return count;

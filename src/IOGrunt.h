@@ -127,7 +127,7 @@ class Grunt {
 	// These functions are run by threads which perform the actual I/O transfers.
 	// They are intentially monolithic in nature for performance reasons.
 	//
-	void Prepare_Disk(int disk_id);
+	void Prepare_Disk(int disk_id, unsigned char* _random_data_buffer, long long _random_data_buffer_size);
 	//
 	// the three functions called by Grunt_Thread_Wrapper()
 	void Open_Targets();

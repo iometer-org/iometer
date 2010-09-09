@@ -1182,7 +1182,7 @@ void TargetDisk::Set_Sector_Info()
 // returns only when all queued I/Os have completed.  
 // Return value is TRUE for success, FALSE if any error occurred.
 //
-BOOL TargetDisk::Prepare(void *buffer, DWORDLONG * prepare_offset, DWORD bytes, volatile TestState * test_state)
+BOOL TargetDisk::Prepare(DWORDLONG * prepare_offset, volatile TestState * test_state, int sector_size, unsigned char* _random_data_buffer, long long _random_datat_buffer_size)
 {
 	BOOL write_ok;
 	int num_outstanding;
@@ -1191,6 +1191,30 @@ BOOL TargetDisk::Prepare(void *buffer, DWORDLONG * prepare_offset, DWORD bytes, 
 	BOOL busy[PREPARE_QDEPTH];
 	BOOL retval;
 	int i;
+	void *buffer = NULL;
+	DWORD bytes;
+	long long random_offset_multiplier;
+
+	// Allocate a large (64k for 512 byte sector size) buffer for the preparation.
+	bytes = sector_size * 128;
+#if defined(IOMTR_OSFAMILY_NETWARE)
+	NXMemFree(buffer);
+	errno = 0;
+	if (!(buffer = NXMemAlloc(buffer_size, 1)))
+#elif defined(IOMTR_OSFAMILY_UNIX)
+	free(buffer);
+	errno = 0;
+	if (!(buffer = valloc(buffer_size)))
+#elif defined(IOMTR_OSFAMILY_WINDOWS)
+	VirtualFree(buffer, 0, MEM_RELEASE);
+	if (!(buffer = VirtualAlloc(NULL, bytes, MEM_COMMIT, PAGE_READWRITE)))
+#else
+#warning ===> WARNING: You have to do some coding here to get the port done!
+#endif
+	{
+		cout << "*** Could not allocate buffer to prepare disk." << endl;
+		return FALSE;
+	}
 
 	switch (spec.DataPattern) {
 		case DATA_PATTERN_REPEATING_BYTES:
@@ -1201,8 +1225,18 @@ BOOL TargetDisk::Prepare(void *buffer, DWORDLONG * prepare_offset, DWORD bytes, 
 				((unsigned char*)buffer)[x] = (unsigned char)Rand(0xff);
 			break;
 		case DATA_PATTERN_FULL_RANDOM:
-			cout << "   Generating random data..." << endl;
+			long long rand_max = RAND_MAX;
+			//calculate maximum sector-aligned offset using two random integers
+			long long max_random_sector_aligned_number = (rand_max * rand_max * (long long)sector_size);
+
+			//come up with a divisor to keep offset in the 16MB region
+			random_offset_multiplier = max_random_sector_aligned_number / _random_datat_buffer_size;
+
+			//increment if remainder
+			if(max_random_sector_aligned_number % _random_datat_buffer_size)
+				random_offset_multiplier += 1;
 			//random data used for writes
+/*
 #if defined(IOMTR_OSFAMILY_NETWARE)
 		randomDataBuffer = NXMemAlloc(RANDOM_BUFFER_SIZE, 1);
 
@@ -1238,7 +1272,7 @@ BOOL TargetDisk::Prepare(void *buffer, DWORDLONG * prepare_offset, DWORD bytes, 
 				// Could not allocate a larger buffer.  Signal failure.
 				cout << "   Error allocating random data buffer..." << endl;
 			}
-
+*/
 			break;
 	}
 
@@ -1328,6 +1362,8 @@ BOOL TargetDisk::Prepare(void *buffer, DWORDLONG * prepare_offset, DWORD bytes, 
 						case DATA_PATTERN_PSEUDO_RANDOM:
 							break; // Nothing to do here, buffer was set above
 						case DATA_PATTERN_FULL_RANDOM:
+							long long offset = ((long long)rand() * (long long)rand() / random_offset_multiplier) * (long long)sector_size ;
+							buffer = &_random_data_buffer[offset];
 							break; // Nothing to do here, buffer was set above
 					}
 
@@ -1453,22 +1489,6 @@ BOOL TargetDisk::Prepare(void *buffer, DWORDLONG * prepare_offset, DWORD bytes, 
 	cout << "out of member function TargetDisk::Prepare()" << endl;
 #endif
 
-	// If we did full random data, clean up the buffer
-	if(spec.DataPattern == DATA_PATTERN_FULL_RANDOM)
-	{
-#if defined(IOMTR_OS_LINUX) || defined(IOMTR_OS_OSX) || defined(IOMTR_OS_SOLARIS)
-		free(randomDataBuffer);
-
-#elif defined(IOMTR_OS_NETWARE)
-		NXMemFree(randomDataBuffer);
-
-#elif defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)
-		VirtualFree(randomDataBuffer, 0, MEM_RELEASE);
-	
-#else
-#warning ===> WARNING: You have to do some coding here to get the port done!
-#endif
-	}
 	return retval;
 }
 

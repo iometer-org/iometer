@@ -74,8 +74,10 @@
 //
 struct Thread_Info {
 	int id;			// Thread's identification.  Used by thread to
-	// determine what work it is to do, such as which disk to access.
-	void *parent;		// Pointer used to get parent object.
+					// determine what work it is to do, such as which disk to access.
+	void *parent;	// Pointer used to get parent object.
+	unsigned char* _random_data_buffer;		// The random data buffer to use for preparing the drive
+	long long _random_data_buffer_size;		// The random data buffer size
 } STRUCT_ALIGN_8;
 
 //

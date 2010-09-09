@@ -632,6 +632,14 @@ void CGalileoView::Go()
 	run_index = 0;
 	InitAccessSpecRun();
 
+	// Generate the random data pattern
+	SetActiveTargets();
+	if (!SetAccess() || !SetTargets()) {
+		TestDone(ReturnError);
+		return;
+	}
+	GenerateRandomData();
+
 	// Make sure that all drives are prepared before running the test.
 	// If any are not, they will be prepared, and the test will start after
 	// they complete.
@@ -641,7 +649,7 @@ void CGalileoView::Go()
 		return;
 
 	// Start running the tests.
-	SetActiveTargets();
+	//SetActiveTargets();
 	SaveAccessSpecs();
 	StartTest();
 }
@@ -786,14 +794,24 @@ void CGalileoView::RestoreSettings()
 }
 
 //
+// Communicates with all managers to tell them to generate random data to be used for the test run
+//
+void CGalileoView::GenerateRandomData()
+{
+	SetStatusBarText(m_pPageSetup->test_name, "Generating random data");
+	theApp.manager_list.SendManagers(GENERATE_RANDOM_DATA);
+	//theApp.manager_list.SendActiveManagers(GENERATE_RANDOM_DATA);
+}
+
+//
 // Starting all testing.  This signals all Dynamos to begin performing I/Os.
 //
 void CGalileoView::StartTest()
 {
-	if (!SetAccess() || !SetTargets()) {
-		TestDone(ReturnError);
-		return;
-	}
+	//if (!SetAccess() || !SetTargets()) {
+	//	TestDone(ReturnError);
+	//	return;
+	//}
 
 	theApp.test_state = TestRampingUp;
 	run_index++;

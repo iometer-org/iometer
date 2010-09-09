@@ -706,7 +706,7 @@ void Grunt::Set_Affinity(DWORD_PTR affinity)
 // Starting threads to prepare disks for tests.  Returning TRUE if we
 // successfully started the disk preparation.
 //
-BOOL Grunt::Prepare_Disks()
+BOOL Grunt::Prepare_Disks(unsigned char* _random_data_buffer, long long _random_data_buffer_size)
 {
 #if defined(IOMTR_OSFAMILY_NETWARE) || defined(IOMTR_OSFAMILY_UNIX)
 	pthread_t newThread;
@@ -716,6 +716,7 @@ BOOL Grunt::Prepare_Disks()
 #warning ===> WARNING: You have to do some coding here to get the port done!
 #endif
 
+	_random_data_buffer = 0;
 	grunt_state = TestPreparing;
 	InterlockedExchange(IOMTR_MACRO_INTERLOCK_CAST(long)&not_ready, (long)target_count);
 

@@ -716,7 +716,6 @@ BOOL Grunt::Prepare_Disks(unsigned char* _random_data_buffer, long long _random_
 #warning ===> WARNING: You have to do some coding here to get the port done!
 #endif
 
-	_random_data_buffer = 0;
 	grunt_state = TestPreparing;
 	InterlockedExchange(IOMTR_MACRO_INTERLOCK_CAST(long)&not_ready, (long)target_count);
 
@@ -739,6 +738,8 @@ BOOL Grunt::Prepare_Disks(unsigned char* _random_data_buffer, long long _random_
 		if (IsType(targets[i]->spec.type, LogicalDiskType)) {
 			prepare_thread[i].parent = this;
 			prepare_thread[i].id = i;
+			prepare_thread[i]._random_data_buffer = _random_data_buffer;
+			prepare_thread[i]._random_data_buffer_size = _random_data_buffer_size;
 			cout << "   " << targets[i]->spec.name << " preparing." << endl;
 #if defined(IOMTR_OSFAMILY_NETWARE) || defined(IOMTR_OSFAMILY_UNIX)
 			// Assuming that thr_create call will not fail !!!
@@ -764,14 +765,14 @@ void CDECL Prepare_Disk_Wrapper(void *disk_thread_info)
 	Grunt *grunt = (Grunt *) (((Thread_Info *) disk_thread_info)->parent);
 	int disk_id = ((Thread_Info *) disk_thread_info)->id;
 
-	grunt->Prepare_Disk(disk_id);
+	grunt->Prepare_Disk(disk_id, ((Thread_Info *)disk_thread_info)->_random_data_buffer, ((Thread_Info *)disk_thread_info)->_random_data_buffer_size);
 }
 
 //
 // Preparing a disk for access by a worker thread.  The disk must have been 
 // previously initialized.
 //
-void Grunt::Prepare_Disk(int disk_id)
+void Grunt::Prepare_Disk(int disk_id, unsigned char* _random_data_buffer, long long _random_data_buffer_size)
 {
 	void *buffer = NULL;
 	DWORD buffer_size;
@@ -779,7 +780,7 @@ void Grunt::Prepare_Disk(int disk_id)
 	TargetDisk *disk = (TargetDisk *) targets[disk_id];
 
 	critical_error = FALSE;
-
+/*
 	// Allocate a large (64k for 512 byte sector size) buffer for the preparation.
 	buffer_size = disk->spec.disk_info.sector_size * 128;
 #if defined(IOMTR_OSFAMILY_NETWARE)
@@ -803,7 +804,7 @@ void Grunt::Prepare_Disk(int disk_id)
 
 		return;
 	}
-
+*/
 	// Open the disk for preparation.
 #if defined(IOMTR_OSFAMILY_NETWARE) || defined(IOMTR_OSFAMILY_UNIX)
 	// The disk::prepare() operation writes to a file iobw.tst till it uses up
@@ -830,8 +831,7 @@ void Grunt::Prepare_Disk(int disk_id)
 	}
 	else {
 		// Prepare the disk, first with large block sizes, then with single sectors.
-		if (!disk->Prepare(buffer, &prepare_offset, buffer_size, &grunt_state) ||
-		    !disk->Prepare(buffer, &prepare_offset, disk->spec.disk_info.sector_size, &grunt_state)) {
+		if (!disk->Prepare(&prepare_offset, &grunt_state, disk->spec.disk_info.sector_size, _random_data_buffer, _random_data_buffer_size)) {
 			cout << "*** An error occurred while preparing the disk." << endl;
 			critical_error = TRUE;
 		}

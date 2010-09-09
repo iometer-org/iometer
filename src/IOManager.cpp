@@ -604,7 +604,7 @@ void Manager::Prepare_Disks(int target)
 		// amount of coordination on the part of Iometer to ensure that the
 		// grunts do not prepare the same drives.
 		for (i = 0; i < grunt_count; i++) {
-			if (!grunts[i]->Prepare_Disks()) {
+			if (!grunts[i]->Prepare_Disks(randomDataBuffer,RANDOM_BUFFER_SIZE)) {
 				// Send failure message back to Iometer.
 				msg.data = 0;
 				if (IsBigEndian()) {
@@ -618,7 +618,7 @@ void Manager::Prepare_Disks(int target)
 		loop_finish = grunt_count;
 	} else {
 		// Preparing a single grunt.
-		if (!grunts[target]->Prepare_Disks()) {
+		if (!grunts[target]->Prepare_Disks(randomDataBuffer,RANDOM_BUFFER_SIZE)) {
 			// Send failure message back to Iometer.
 			msg.data = 0;
 			if (IsBigEndian()) {
@@ -875,6 +875,15 @@ BOOL Manager::Process_Message()
 #endif
 		Prepare_Disks(msg.data);
 		break;
+
+		// Preparing drives for access.
+	case GENERATE_RANDOM_DATA:
+#if _DETAILS
+		cout << "in Process_Message() : GENERATE_RANDOM_DATA" << endl;
+#endif
+		GenerateRandomData();
+		break;
+
 		// Signalling to stop disk preparation.
 	case STOP_PREPARE:
 #if _DETAILS
@@ -1034,7 +1043,18 @@ void Manager::Start_Test(int target)
 
 void Manager::GenerateRandomData() 
 {
-	if(IsWrite) {
+	BOOL NeedRandomData = FALSE;
+
+	for (int i=0;i<grunt_count;i++)
+	{
+		if (grunts[i]->Need_Random_Buffer() == TRUE)
+		{
+			NeedRandomData = TRUE;
+			break;
+		}
+	}
+
+	if(IsWrite && NeedRandomData) {
 
 		cout << "   Generating random data..." << endl;
 
@@ -1209,9 +1229,10 @@ void Manager::Remove_Workers(int target)
 //
 BOOL Manager::Set_Targets(int worker_no, int count, Target_Spec * target_specs)
 {
-	if(target_specs->DataPattern == DATA_PATTERN_FULL_RANDOM) {
-		GenerateRandomData();
-	}
+	//if(target_specs->DataPattern == DATA_PATTERN_FULL_RANDOM) {
+	//	GenerateRandomData();
+	//}
+
 
 	if (worker_no == ALL_WORKERS) {
 		for (int i = 0; i < grunt_count; i++) {

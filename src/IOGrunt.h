@@ -120,7 +120,7 @@ class Grunt {
 	///////////////////////////////////////////////////////////////////////////
 
 	// Function to prepare logical drives for access.
-	BOOL Prepare_Disks();
+	BOOL Prepare_Disks(unsigned char* _random_data_buffer, long long _random_data_buffer_size);
 
 	///////////////////////////////////////////////////////////////////////////
 	// Functions to access the targets (called via _Wrapper() interfaces)

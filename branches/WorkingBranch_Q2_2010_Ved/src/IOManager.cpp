@@ -1090,7 +1090,7 @@ void Manager::GenerateRandomData()
 			if(grunts[i]->target_count > 0)
 			{
 				SeedVal = grunts[i]->Get_Target_Spec_Random_Value(0);
-				cout << "   Seeding Random Data Random Number Generator from Target Spec to:" << SeedVal << endl;
+				cout << "   Seeding Random Data Random Number Generator from Target Spec to:" << (unsigned int)SeedVal << endl;
 				srand(SeedVal);
 				NeedSrand = FALSE;
 				break;

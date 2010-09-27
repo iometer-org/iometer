@@ -116,6 +116,7 @@ class Grunt {
 	void Set_Affinity(DWORD_PTR affinity);
 	int Get_Maximum_Sector_Size();
 	BOOL Need_Random_Buffer();
+	DWORDLONG Get_Target_Spec_Random_Value(int target_index);
 	//
 	///////////////////////////////////////////////////////////////////////////
 

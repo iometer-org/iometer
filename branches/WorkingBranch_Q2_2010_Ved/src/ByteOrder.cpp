@@ -341,6 +341,8 @@ void reorder(Data_Message & var, int uniontype, int send_recv)
 				reorder(var.data.targets[i].disk_info.maximum_size);
 				reorder(var.data.targets[i].disk_info.starting_sector);
 				reorder(var.data.targets[i].DataPattern);
+				reorder(var.data.targets[i].use_fixed_seed);
+				reorder(var.data.targets[i].fixed_seed_value);
 			}
 
 			if (IsType(var.data.targets[i].type, GenericNetType)) {

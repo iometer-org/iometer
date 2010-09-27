@@ -1080,7 +1080,28 @@ void Manager::GenerateRandomData()
 #warning ===> WARNING: You have to do some coding here to get the port done!
 #endif
 
-		srand(time(NULL));
+
+		
+		//Find the first grunt with a target and use the spec.random from it to seed the PRNG
+		BOOL NeedSrand = TRUE;
+		DWORDLONG SeedVal;
+		for (int i=0;i<grunt_count;i++)
+		{
+			if(grunts[i]->target_count > 0)
+			{
+				SeedVal = grunts[i]->Get_Target_Spec_Random_Value(0);
+				cout << "   Seeding Random Data Random Number Generator from Target Spec to:" << SeedVal << endl;
+				srand(SeedVal);
+				NeedSrand = FALSE;
+				break;
+			}
+		}
+		if(NeedSrand)
+		{
+			cout << "   Seeding Random Data Random Number Generator from Time" << endl;
+			srand(time(NULL));
+		}
+
 
 		if (randomDataBuffer != NULL)
 		{

@@ -212,6 +212,10 @@ BOOL Grunt::Need_Random_Buffer() {
 	return need_random_buffer;
 }
 
+DWORDLONG Grunt::Get_Target_Spec_Random_Value(int target_index){
+	return targets[target_index]->spec.random;
+}
+
 //
 // Setting the size of the target array to hold the number and type of 
 // targets specified.  If the requested number of targets is 0, the 

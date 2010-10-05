@@ -183,6 +183,23 @@ Manager::~Manager()
 	prt->Close();
 	delete prt;
 
+	if (randomDataBuffer != NULL)
+	{
+#if defined(IOMTR_OS_LINUX) || defined(IOMTR_OS_OSX) || defined(IOMTR_OS_SOLARIS)
+		free(randomDataBuffer);
+
+#elif defined(IOMTR_OS_NETWARE)
+		NXMemFree(randomDataBuffer);
+
+#elif defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)
+		VirtualFree(randomDataBuffer, 0, MEM_RELEASE);
+	
+#else
+#warning ===> WARNING: You have to do some coding here to get the port done!
+#endif
+
+	}
+
 #if defined(IOMTR_OS_LINUX) || defined(IOMTR_OS_OSX) || defined(IOMTR_OS_SOLARIS)
 	if (data != NULL)
 		free(data);
@@ -1179,22 +1196,6 @@ void Manager::Stop_Test(int target)
 		grunts[target]->Wait_For_Stop();
 	}
 
-	if (randomDataBuffer != NULL)
-	{
-#if defined(IOMTR_OS_LINUX) || defined(IOMTR_OS_OSX) || defined(IOMTR_OS_SOLARIS)
-		free(randomDataBuffer);
-
-#elif defined(IOMTR_OS_NETWARE)
-		NXMemFree(randomDataBuffer);
-
-#elif defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)
-		VirtualFree(randomDataBuffer, 0, MEM_RELEASE);
-	
-#else
-#warning ===> WARNING: You have to do some coding here to get the port done!
-#endif
-
-	}
 	cout << "   Stopped." << endl << flush;
 
 	// Reply that test has stopped.

@@ -920,7 +920,7 @@ DWORD PortTCP::Peek()
 			//otherwise, there are no bytes available, this prevents recv() from blocking
 			bytes_available = 0;
 		}
-		success = ((long)bytes_available != SOCKET_ERROR);
+		success = (bytes_available != SOCKET_ERROR); // was (long)bytes_available ...
 	}
 #if defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)
 	else {

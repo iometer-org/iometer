@@ -795,11 +795,11 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\pack8.h"
+				RelativePath="..\pack.h"
 				>
 			</File>
 			<File
-				RelativePath="..\unpack8.h"
+				RelativePath="..\unpack.h"
 				>
 			</File>
 			<File

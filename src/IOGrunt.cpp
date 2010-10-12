@@ -779,7 +779,7 @@ void CDECL Prepare_Disk_Wrapper(void *disk_thread_info)
 void Grunt::Prepare_Disk(int disk_id, unsigned char* _random_data_buffer, long long _random_data_buffer_size)
 {
 	void *buffer = NULL;
-	DWORD buffer_size;
+	//DWORD buffer_size;
 	DWORDLONG prepare_offset = 0;
 	TargetDisk *disk = (TargetDisk *) targets[disk_id];
 

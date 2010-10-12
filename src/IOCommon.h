@@ -288,7 +288,18 @@ using namespace std;
 
 #if defined(IOMTR_OSFAMILY_WINDOWS)
 #define snprintf _snprintf
+#define stricmp  _stricmp
 #define IOMETER_RECEIVE_TIMEOUT		10000 // 10 seconds in miliseconds
+
+// All references to types
+typedef          __int64  int64_t;
+typedef unsigned __int64 uint64_t;
+typedef          __int32  int32_t;
+typedef unsigned __int32 uint32_t;
+typedef          __int16  int16_t;
+typedef unsigned __int16 uint16_t;
+typedef          __int8    int8_t;
+typedef unsigned __int8   uint8_t;
 #endif
 
 // ----------------------------------------------------------------------------
@@ -317,6 +328,26 @@ using namespace std;
  //typedef long long	       LARGE_INTEGER; 
  typedef unsigned long long    DWORDLONG;
 
+ typedef union _LARGE_INTEGER 
+ {
+	struct 
+    {
+        uint32_t LowPart;
+        int32_t  HighPart;
+    };
+   int64_t QuadPart;
+ } LARGE_INTEGER, *PLARGE_INTEGER;
+
+  typedef union _ULARGE_INTEGER 
+  {
+	  struct 
+	  {
+		  uint32_t LowPart;
+          uint32_t HighPart;
+      };
+      uint64_t QuadPart;
+ } ULARGE_INTEGER, *PULARGE_INTEGER;
+
  #if defined(IOMTR_OSFAMILY_NETWARE)
   #ifndef LONG
    #define LONG	unsigned long
@@ -328,9 +359,10 @@ using namespace std;
   // This is OK for x86-64 processors because LONG is only used in Netware or
   // in MeterCtrl.cpp.or safely internally in IOTargetDisk.cpp.
   // It could cause problems because in the x86-64 environment long is 64 bits.
-  typedef long		       LONG;
+  //typedef long		       LONG; // careful, on windows long is 32bits -- see above
   #if defined(IOMTR_OS_OSX)
    #define off64_t	off_t  
+   #define stricmp strcasecmp
   #endif 
  #else
   #warning ===> WARNING: You have to do some coding here to get the port done!
@@ -339,12 +371,14 @@ using namespace std;
  #if defined(IOMTR_SETTING_GCC_M64)
   // DWORD is supposed to be an unsigned 32 bit number.
   typedef unsigned int	       DWORD;
+  typedef DWORD				   LONG;
   typedef unsigned __int64     ULONG_PTR, *PULONG_PTR;
   typedef ULONG_PTR            DWORD_PTR;
   typedef __int64			   LONG_PTR;
   #define IOMTR_FORMAT_SPEC_64BIT	"L" 
 #else
   typedef unsigned long			DWORD;
+  typedef DWORD					LONG;
   typedef unsigned long			ULONG_PTR, *PULONG_PTR;
   typedef ULONG_PTR				DWORD_PTR;
   typedef int					LONG_PTR;
@@ -410,6 +444,13 @@ using namespace std;
 
 #define IOMTR_FORMAT_SPEC_64BIT	"I64"
 #endif 
+
+#if defined(IOMTR_OS_WIN32)
+ #define IOMTR_FORMAT_SPEC_POINTER
+#else
+ #define IOMTR_FORMAT_SPEC_POINTER	IOMTR_FORMAT_SPEC_64BIT
+#endif
+
 // ----------------------------------------------------------------------------
 
 // Because of some of the memory over writing issues in the 64 bit environment
@@ -580,23 +621,36 @@ enum {
 };
 // ----------------------------------------------------------------------------
 
+// FORCE_STRUCT_ALIGN forces compiler controlled structure alignment. This seems
+// tough to get right between Windows and Unix. So far, the GCC_ATTRIBUTE_ALIGN 
+// does not produce the proper Windows packing. The only way it seems to work 
+// right is with a pragma pack of 1.
 #ifdef FORCE_STRUCT_ALIGN
-#ifdef GCC_ATTRIBUTE_ALIGN // unix alternative to pragma pack
+
+// The intent of GCC_STRUCT_ALIGN is only to be used on UNIX/GCC as an 
+// alternative to pragma pack. With the 2010 IOmeter release, this is not being
+// not be used, but its here for future...
+#ifdef GCC_ATTRIBUTE_ALIGN
 #if defined(IOMTR_OSFAMILY_UNIX)
-#define STRUCT_ALIGN(Bytes) __attribute__ ((aligned (Bytes)))
-#define STRUCT_ALIGN_8 STRUCT_ALIGN(8)
+
+// Other __attribute__ options: packed, ms_struct
+#define STRUCT_ALIGN(Bytes)  __attribute__ ((aligned (Bytes)))    
+
+// If GCC_ATTRIBUTE_ALIGN is defines, the STRUCT_ALIGN argument 
+// must match the pragma pack value in pack.h
+#define STRUCT_ALIGN_IOMETER STRUCT_ALIGN(1)  
+
 #endif // IOMTR_OSFAMILY_UNIX
+
 #else
-#define STRUCT_ALIGN(Bytes)
-#define STRUCT_ALIGN_8
+#define STRUCT_ALIGN_IOMETER
 #endif // GCC_ATTRIBUTE_ALIGN
 
 #else
-#define STRUCT_ALIGN(Bytes)
-#define STRUCT_ALIGN_8
+#define STRUCT_ALIGN_IOMETER
 #endif // FORCE_STRUCT_ALIGN
 
-#include "pack8.h"
+#include "pack.h"
 
 struct Manager_Info
 {
@@ -610,7 +664,7 @@ struct Manager_Info
 #endif 
 	int	       processors;
 	double	       timer_resolution;
-} STRUCT_ALIGN_8;
+} STRUCT_ALIGN_IOMETER;
 // Basic result information stored by worker threads.
 struct Raw_Result
 {
@@ -631,7 +685,7 @@ struct Raw_Result
 	DWORDLONG    transaction_latency_sum;
 	DWORDLONG    connection_latency_sum;   // Application latencies for a Connection.
 	__int64	     counter_time;	       // Difference between ending and starting counter time stamps.
-} STRUCT_ALIGN_8;
+} STRUCT_ALIGN_IOMETER;
 // Storing results for all targets in a single structure.
 struct Target_Results
 {
@@ -640,13 +694,13 @@ struct Target_Results
 	char	   pad[4];   // padding
 #endif
 	Raw_Result result[MAX_TARGETS];
-} STRUCT_ALIGN_8;
+} STRUCT_ALIGN_IOMETER;
 // Storing results for a worker.  This includes the worker's target results.
 struct Worker_Results
 {
 	DWORDLONG      time[MAX_SNAPSHOTS];   // Processor based counters to provide time stamps.
 	Target_Results target_results;
-} STRUCT_ALIGN_8;
+} STRUCT_ALIGN_IOMETER;
 // All CPU related results are stored in a single structure.
 struct CPU_Results
 {
@@ -655,7 +709,7 @@ struct CPU_Results
 	char   pad[4];   // padding
 #endif
 	double CPU_utilization[MAX_CPUS][CPU_RESULTS];
-} STRUCT_ALIGN_8;
+} STRUCT_ALIGN_IOMETER;
 // All network related results are stored in a single structure.
 struct Net_Results
 {
@@ -665,14 +719,14 @@ struct Net_Results
 	char   pad[4];     // padding
 #endif
 	double ni_stats[MAX_NUM_INTERFACES][NI_RESULTS];
-} STRUCT_ALIGN_8;
+} STRUCT_ALIGN_IOMETER;
 // Results SPECIFIC to a single system.  This is NOT compiled system results.
 struct Manager_Results
 {
 	__int64	    time_counter[MAX_SNAPSHOTS];
 	CPU_Results cpu_results;
 	Net_Results net_results;
-} STRUCT_ALIGN_8;
+} STRUCT_ALIGN_IOMETER;
 // Result structure used by the manager list, managers, and workers to store
 // results that will be saved.
 struct Results
@@ -705,9 +759,9 @@ struct Results
 	double	     connections_per_second;
 	double	     ave_connection_latency;
 	double	     max_connection_latency;
-} STRUCT_ALIGN_8;
+} STRUCT_ALIGN_IOMETER;
 
-#include "unpack8.h"
+#include "unpack.h"
 
 // ----------------------------------------------------------------------------
 #if defined(IOMTR_OSFAMILY_UNIX) || defined(IOMTR_OSFAMILY_NETWARE)
@@ -748,10 +802,10 @@ struct Results
 	DWORD  OffsetHigh;
 	HANDLE hEvent;
  } OVERLAPPED, *LPOVERLAPPED;
- typedef struct _LARGE_INTEGER {
-	long LowPart;
-	long HighPart;
- } LARGE_INTEGER;
+// typedef struct _LARGE_INTEGER {
+//	long LowPart;
+//	long HighPart;
+// } LARGE_INTEGER;
  struct CQ_Element {
 	struct  aiocb64 aiocbp;
 	void   *data;
@@ -1034,14 +1088,24 @@ inline int IsBigEndian(void)
 
  extern DWORDLONG timer_value(void); 
 #endif
+
+#if defined(IOMTR_OSFAMILY_WINDOWS) 
+ #define sleep_milisec(_time) Sleep(_time);
+#elif defined(IOMTR_OSFAMILY_UNIX)
+ #define sleep_milisec(_time) usleep(_time * 1000);
+#else
+ #error You have some work to do here to implemenent sleep_milisec()
+#endif
+
 // ----------------------------------------------------------------------------
-#if defined(IOMTR_OS_OSX) || defined(IOMTR_OS_SOLARIS)
+//#if defined(IOMTR_OS_OSX) || defined(IOMTR_OS_SOLARIS)
+#if defined(IOMTR_OS_SOLARIS)
  extern "C" DWORDLONG timer_value();
 #endif
 // ----------------------------------------------------------------------------
-#if defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)
- extern ULONGLONG timer_value();
- extern double timer_frequency();
+#if defined(IOMTR_OSFAMILY_WINDOWS) || defined(IOMTR_OS_OSX)
+ extern "C" uint64_t timer_value();
+ extern "C" double timer_frequency();
 #endif
 // ----------------------------------------------------------------------------
 

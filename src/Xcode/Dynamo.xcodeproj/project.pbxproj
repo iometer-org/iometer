@@ -1,0 +1,470 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 45;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0B6355A2122B827C00F3CD89 /* ByteOrder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B63558D122B827C00F3CD89 /* ByteOrder.cpp */; };
+		0B6355A3122B827C00F3CD89 /* IOAccess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B63558E122B827C00F3CD89 /* IOAccess.cpp */; };
+		0B6355A4122B827C00F3CD89 /* IOCompletionQ.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B63558F122B827C00F3CD89 /* IOCompletionQ.cpp */; };
+		0B6355A5122B827C00F3CD89 /* IOCQAIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B635590122B827C00F3CD89 /* IOCQAIO.cpp */; };
+		0B6355A6122B827C00F3CD89 /* IOGlobals.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B635591122B827C00F3CD89 /* IOGlobals.cpp */; };
+		0B6355A7122B827C00F3CD89 /* IOGrunt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B635592122B827C00F3CD89 /* IOGrunt.cpp */; };
+		0B6355A8122B827C00F3CD89 /* IOManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B635593122B827C00F3CD89 /* IOManager.cpp */; };
+		0B6355A9122B827C00F3CD89 /* IOManagerLinux.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B635594122B827C00F3CD89 /* IOManagerLinux.cpp */; };
+		0B6355AA122B827C00F3CD89 /* IOManagerOSX.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B635595122B827C00F3CD89 /* IOManagerOSX.cpp */; };
+		0B6355AB122B827C00F3CD89 /* IOManagerSolaris.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B635596122B827C00F3CD89 /* IOManagerSolaris.cpp */; };
+		0B6355AC122B827C00F3CD89 /* IOPerformance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B635597122B827C00F3CD89 /* IOPerformance.cpp */; };
+		0B6355AD122B827C00F3CD89 /* IOPerformanceOSX.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B635598122B827C00F3CD89 /* IOPerformanceOSX.cpp */; };
+		0B6355AE122B827C00F3CD89 /* IOPort.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B635599122B827C00F3CD89 /* IOPort.cpp */; };
+		0B6355AF122B827C00F3CD89 /* IOPortTCP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B63559A122B827C00F3CD89 /* IOPortTCP.cpp */; };
+		0B6355B0122B827C00F3CD89 /* IOTarget.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B63559B122B827C00F3CD89 /* IOTarget.cpp */; };
+		0B6355B1122B827C00F3CD89 /* IOTargetDisk.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B63559C122B827C00F3CD89 /* IOTargetDisk.cpp */; };
+		0B6355B2122B827C00F3CD89 /* IOTargetTCP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B63559D122B827C00F3CD89 /* IOTargetTCP.cpp */; };
+		0B6355B3122B827C00F3CD89 /* IOTime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B63559E122B827C00F3CD89 /* IOTime.cpp */; };
+		0B6355B4122B827C00F3CD89 /* NetTCP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B63559F122B827C00F3CD89 /* NetTCP.cpp */; };
+		0B6355B5122B827C00F3CD89 /* Network.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B6355A0122B827C00F3CD89 /* Network.cpp */; };
+		0B6355B6122B827C00F3CD89 /* Pulsar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B6355A1122B827C00F3CD89 /* Pulsar.cpp */; };
+		8DD76F6A0486A84900D96B5E /* Dynamo.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = C6859E8B029090EE04C91782 /* Dynamo.1 */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		8DD76F690486A84900D96B5E /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 8;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+				8DD76F6A0486A84900D96B5E /* Dynamo.1 in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		0B63558D122B827C00F3CD89 /* ByteOrder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ByteOrder.cpp; path = ../ByteOrder.cpp; sourceTree = SOURCE_ROOT; };
+		0B63558E122B827C00F3CD89 /* IOAccess.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IOAccess.cpp; path = ../IOAccess.cpp; sourceTree = SOURCE_ROOT; };
+		0B63558F122B827C00F3CD89 /* IOCompletionQ.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IOCompletionQ.cpp; path = ../IOCompletionQ.cpp; sourceTree = SOURCE_ROOT; };
+		0B635590122B827C00F3CD89 /* IOCQAIO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IOCQAIO.cpp; path = ../IOCQAIO.cpp; sourceTree = SOURCE_ROOT; };
+		0B635591122B827C00F3CD89 /* IOGlobals.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IOGlobals.cpp; path = ../IOGlobals.cpp; sourceTree = SOURCE_ROOT; };
+		0B635592122B827C00F3CD89 /* IOGrunt.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IOGrunt.cpp; path = ../IOGrunt.cpp; sourceTree = SOURCE_ROOT; };
+		0B635593122B827C00F3CD89 /* IOManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IOManager.cpp; path = ../IOManager.cpp; sourceTree = SOURCE_ROOT; };
+		0B635594122B827C00F3CD89 /* IOManagerLinux.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IOManagerLinux.cpp; path = ../IOManagerLinux.cpp; sourceTree = SOURCE_ROOT; };
+		0B635595122B827C00F3CD89 /* IOManagerOSX.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IOManagerOSX.cpp; path = ../IOManagerOSX.cpp; sourceTree = SOURCE_ROOT; };
+		0B635596122B827C00F3CD89 /* IOManagerSolaris.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IOManagerSolaris.cpp; path = ../IOManagerSolaris.cpp; sourceTree = SOURCE_ROOT; };
+		0B635597122B827C00F3CD89 /* IOPerformance.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IOPerformance.cpp; path = ../IOPerformance.cpp; sourceTree = SOURCE_ROOT; };
+		0B635598122B827C00F3CD89 /* IOPerformanceOSX.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IOPerformanceOSX.cpp; path = ../IOPerformanceOSX.cpp; sourceTree = SOURCE_ROOT; };
+		0B635599122B827C00F3CD89 /* IOPort.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IOPort.cpp; path = ../IOPort.cpp; sourceTree = SOURCE_ROOT; };
+		0B63559A122B827C00F3CD89 /* IOPortTCP.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IOPortTCP.cpp; path = ../IOPortTCP.cpp; sourceTree = SOURCE_ROOT; };
+		0B63559B122B827C00F3CD89 /* IOTarget.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IOTarget.cpp; path = ../IOTarget.cpp; sourceTree = SOURCE_ROOT; };
+		0B63559C122B827C00F3CD89 /* IOTargetDisk.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IOTargetDisk.cpp; path = ../IOTargetDisk.cpp; sourceTree = SOURCE_ROOT; };
+		0B63559D122B827C00F3CD89 /* IOTargetTCP.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IOTargetTCP.cpp; path = ../IOTargetTCP.cpp; sourceTree = SOURCE_ROOT; };
+		0B63559E122B827C00F3CD89 /* IOTime.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IOTime.cpp; path = ../IOTime.cpp; sourceTree = SOURCE_ROOT; };
+		0B63559F122B827C00F3CD89 /* NetTCP.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NetTCP.cpp; path = ../NetTCP.cpp; sourceTree = SOURCE_ROOT; };
+		0B6355A0122B827C00F3CD89 /* Network.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Network.cpp; path = ../Network.cpp; sourceTree = SOURCE_ROOT; };
+		0B6355A1122B827C00F3CD89 /* Pulsar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Pulsar.cpp; path = ../Pulsar.cpp; sourceTree = SOURCE_ROOT; };
+		8DD76F6C0486A84900D96B5E /* Dynamo */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Dynamo; sourceTree = BUILT_PRODUCTS_DIR; };
+		C6859E8B029090EE04C91782 /* Dynamo.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = Dynamo.1; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8DD76F660486A84900D96B5E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		08FB7794FE84155DC02AAC07 /* Dynamo */ = {
+			isa = PBXGroup;
+			children = (
+				08FB7795FE84155DC02AAC07 /* Source */,
+				C6859E8C029090F304C91782 /* Documentation */,
+				1AB674ADFE9D54B511CA2CBB /* Products */,
+			);
+			name = Dynamo;
+			sourceTree = "<group>";
+		};
+		08FB7795FE84155DC02AAC07 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				0B63558D122B827C00F3CD89 /* ByteOrder.cpp */,
+				0B63558E122B827C00F3CD89 /* IOAccess.cpp */,
+				0B63558F122B827C00F3CD89 /* IOCompletionQ.cpp */,
+				0B635590122B827C00F3CD89 /* IOCQAIO.cpp */,
+				0B635591122B827C00F3CD89 /* IOGlobals.cpp */,
+				0B635592122B827C00F3CD89 /* IOGrunt.cpp */,
+				0B635593122B827C00F3CD89 /* IOManager.cpp */,
+				0B635594122B827C00F3CD89 /* IOManagerLinux.cpp */,
+				0B635595122B827C00F3CD89 /* IOManagerOSX.cpp */,
+				0B635596122B827C00F3CD89 /* IOManagerSolaris.cpp */,
+				0B635597122B827C00F3CD89 /* IOPerformance.cpp */,
+				0B635598122B827C00F3CD89 /* IOPerformanceOSX.cpp */,
+				0B635599122B827C00F3CD89 /* IOPort.cpp */,
+				0B63559A122B827C00F3CD89 /* IOPortTCP.cpp */,
+				0B63559B122B827C00F3CD89 /* IOTarget.cpp */,
+				0B63559C122B827C00F3CD89 /* IOTargetDisk.cpp */,
+				0B63559D122B827C00F3CD89 /* IOTargetTCP.cpp */,
+				0B63559E122B827C00F3CD89 /* IOTime.cpp */,
+				0B63559F122B827C00F3CD89 /* NetTCP.cpp */,
+				0B6355A0122B827C00F3CD89 /* Network.cpp */,
+				0B6355A1122B827C00F3CD89 /* Pulsar.cpp */,
+			);
+			name = Source;
+			sourceTree = "<group>";
+		};
+		1AB674ADFE9D54B511CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				8DD76F6C0486A84900D96B5E /* Dynamo */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C6859E8C029090F304C91782 /* Documentation */ = {
+			isa = PBXGroup;
+			children = (
+				C6859E8B029090EE04C91782 /* Dynamo.1 */,
+			);
+			name = Documentation;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		8DD76F620486A84900D96B5E /* Dynamo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1DEB923108733DC60010E9CD /* Build configuration list for PBXNativeTarget "Dynamo" */;
+			buildPhases = (
+				8DD76F640486A84900D96B5E /* Sources */,
+				8DD76F660486A84900D96B5E /* Frameworks */,
+				8DD76F690486A84900D96B5E /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Dynamo;
+			productInstallPath = "$(HOME)/bin";
+			productName = Dynamo;
+			productReference = 8DD76F6C0486A84900D96B5E /* Dynamo */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		08FB7793FE84155DC02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 1DEB923508733DC60010E9CD /* Build configuration list for PBXProject "Dynamo" */;
+			compatibilityVersion = "Xcode 3.1";
+			hasScannedForEncodings = 1;
+			mainGroup = 08FB7794FE84155DC02AAC07 /* Dynamo */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				8DD76F620486A84900D96B5E /* Dynamo */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8DD76F640486A84900D96B5E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0B6355A2122B827C00F3CD89 /* ByteOrder.cpp in Sources */,
+				0B6355A3122B827C00F3CD89 /* IOAccess.cpp in Sources */,
+				0B6355A4122B827C00F3CD89 /* IOCompletionQ.cpp in Sources */,
+				0B6355A5122B827C00F3CD89 /* IOCQAIO.cpp in Sources */,
+				0B6355A6122B827C00F3CD89 /* IOGlobals.cpp in Sources */,
+				0B6355A7122B827C00F3CD89 /* IOGrunt.cpp in Sources */,
+				0B6355A8122B827C00F3CD89 /* IOManager.cpp in Sources */,
+				0B6355A9122B827C00F3CD89 /* IOManagerLinux.cpp in Sources */,
+				0B6355AA122B827C00F3CD89 /* IOManagerOSX.cpp in Sources */,
+				0B6355AB122B827C00F3CD89 /* IOManagerSolaris.cpp in Sources */,
+				0B6355AC122B827C00F3CD89 /* IOPerformance.cpp in Sources */,
+				0B6355AD122B827C00F3CD89 /* IOPerformanceOSX.cpp in Sources */,
+				0B6355AE122B827C00F3CD89 /* IOPort.cpp in Sources */,
+				0B6355AF122B827C00F3CD89 /* IOPortTCP.cpp in Sources */,
+				0B6355B0122B827C00F3CD89 /* IOTarget.cpp in Sources */,
+				0B6355B1122B827C00F3CD89 /* IOTargetDisk.cpp in Sources */,
+				0B6355B2122B827C00F3CD89 /* IOTargetTCP.cpp in Sources */,
+				0B6355B3122B827C00F3CD89 /* IOTime.cpp in Sources */,
+				0B6355B4122B827C00F3CD89 /* NetTCP.cpp in Sources */,
+				0B6355B5122B827C00F3CD89 /* Network.cpp in Sources */,
+				0B6355B6122B827C00F3CD89 /* Pulsar.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		0B63561D122B8D6C00F3CD89 /* Debug 64bit */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					NOMINMAX,
+					_REENTRANT,
+					IOMTR_OSFAMILY_UNIX,
+					IOMTR_OS_OSX,
+					IOMTR_CPU_I386,
+					IOMTR_SETTING_GCC_M64,
+					NO_DYNAMO_VI,
+					USE_NEW_DISCOVERY_MECHANISM,
+					FORCE_STRUCT_ALIGN,
+					_DEBUG,
+					"_DETAILS=1",
+				);
+				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = (
+					NOMINMAX,
+					_REENTRANT,
+					IOMTR_OSFAMILY_UNIX,
+					IOMTR_OS_OSX,
+					IOMTR_CPU_I386,
+					IOMTR_SETTING_GCC_M64,
+					NO_DYNAMO_VI,
+					USE_NEW_DISCOVERY_MECHANISM,
+					FORCE_STRUCT_ALIGN,
+					_DEBUG,
+					"_DETAILS=1",
+				);
+				GCC_VERSION = 4.0;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = (
+					"-lpthread",
+					"-framework",
+					Carbon,
+					"-framework",
+					IOKit,
+				);
+				PREBINDING = NO;
+				SDKROOT = macosx10.5;
+			};
+			name = "Debug 64bit";
+		};
+		0B63561E122B8D6C00F3CD89 /* Debug 64bit */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"_GLIBCXX_DEBUG=1",
+					"_GLIBCXX_DEBUG_PEDANTIC=1",
+				);
+				INSTALL_PATH = /usr/local/bin;
+				PRODUCT_NAME = Dynamo;
+			};
+			name = "Debug 64bit";
+		};
+		0B63561F122B8D7900F3CD89 /* Release 64bit */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					NOMINMAX,
+					_REENTRANT,
+					IOMTR_OSFAMILY_UNIX,
+					IOMTR_OS_OSX,
+					IOMTR_CPU_I386,
+					IOMTR_SETTING_GCC_M64,
+					NO_DYNAMO_VI,
+					USE_NEW_DISCOVERY_MECHANISM,
+					FORCE_STRUCT_ALIGN,
+				);
+				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = (
+					NOMINMAX,
+					_REENTRANT,
+					IOMTR_OSFAMILY_UNIX,
+					IOMTR_OS_OSX,
+					IOMTR_CPU_I386,
+					IOMTR_SETTING_GCC_M64,
+					NO_DYNAMO_VI,
+					USE_NEW_DISCOVERY_MECHANISM,
+					FORCE_STRUCT_ALIGN,
+				);
+				GCC_VERSION = 4.0;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				OTHER_LDFLAGS = (
+					"-lpthread",
+					"-framework",
+					Carbon,
+					"-framework",
+					IOKit,
+				);
+				PREBINDING = NO;
+				SDKROOT = macosx10.5;
+			};
+			name = "Release 64bit";
+		};
+		0B635620122B8D7900F3CD89 /* Release 64bit */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				PRODUCT_NAME = Dynamo;
+			};
+			name = "Release 64bit";
+		};
+		1DEB923208733DC60010E9CD /* Debug 32bit */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"_GLIBCXX_DEBUG=1",
+					"_GLIBCXX_DEBUG_PEDANTIC=1",
+				);
+				INSTALL_PATH = /usr/local/bin;
+				PRODUCT_NAME = Dynamo;
+			};
+			name = "Debug 32bit";
+		};
+		1DEB923308733DC60010E9CD /* Release 32bit */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				PRODUCT_NAME = Dynamo;
+			};
+			name = "Release 32bit";
+		};
+		1DEB923608733DC60010E9CD /* Debug 32bit */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					NOMINMAX,
+					_REENTRANT,
+					IOMTR_OSFAMILY_UNIX,
+					IOMTR_OS_OSX,
+					IOMTR_CPU_I386,
+					NO_DYNAMO_VI,
+					USE_NEW_DISCOVERY_MECHANISM,
+					FORCE_STRUCT_ALIGN,
+					_DEBUG,
+					"_DETAILS=1",
+				);
+				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = (
+					NOMINMAX,
+					_REENTRANT,
+					IOMTR_OSFAMILY_UNIX,
+					IOMTR_OS_OSX,
+					IOMTR_CPU_I386,
+					NO_DYNAMO_VI,
+					USE_NEW_DISCOVERY_MECHANISM,
+					FORCE_STRUCT_ALIGN,
+					_DEBUG,
+					"_DETAILS=1",
+				);
+				GCC_VERSION = 4.0;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = (
+					"-lpthread",
+					"-framework",
+					Carbon,
+					"-framework",
+					IOKit,
+				);
+				PREBINDING = NO;
+				SDKROOT = macosx10.5;
+			};
+			name = "Debug 32bit";
+		};
+		1DEB923708733DC60010E9CD /* Release 32bit */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					NOMINMAX,
+					_REENTRANT,
+					IOMTR_OSFAMILY_UNIX,
+					IOMTR_OS_OSX,
+					IOMTR_CPU_I386,
+					NO_DYNAMO_VI,
+					USE_NEW_DISCOVERY_MECHANISM,
+					FORCE_STRUCT_ALIGN,
+				);
+				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = (
+					NOMINMAX,
+					_REENTRANT,
+					IOMTR_OSFAMILY_UNIX,
+					IOMTR_OS_OSX,
+					IOMTR_CPU_I386,
+					NO_DYNAMO_VI,
+					USE_NEW_DISCOVERY_MECHANISM,
+					FORCE_STRUCT_ALIGN,
+				);
+				GCC_VERSION = 4.0;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				OTHER_LDFLAGS = (
+					"-lpthread",
+					"-framework",
+					Carbon,
+					"-framework",
+					IOKit,
+				);
+				PREBINDING = NO;
+				SDKROOT = macosx10.5;
+			};
+			name = "Release 32bit";
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1DEB923108733DC60010E9CD /* Build configuration list for PBXNativeTarget "Dynamo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB923208733DC60010E9CD /* Debug 32bit */,
+				0B63561E122B8D6C00F3CD89 /* Debug 64bit */,
+				1DEB923308733DC60010E9CD /* Release 32bit */,
+				0B635620122B8D7900F3CD89 /* Release 64bit */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = "Release 32bit";
+		};
+		1DEB923508733DC60010E9CD /* Build configuration list for PBXProject "Dynamo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB923608733DC60010E9CD /* Debug 32bit */,
+				0B63561D122B8D6C00F3CD89 /* Debug 64bit */,
+				1DEB923708733DC60010E9CD /* Release 32bit */,
+				0B63561F122B8D7900F3CD89 /* Release 64bit */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = "Release 32bit";
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 08FB7793FE84155DC02AAC07 /* Project object */;
+}

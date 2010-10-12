@@ -168,6 +168,8 @@ static void Syntax(const char *errmsg = NULL);
 
 static void ParseParam(int argc, char *argv[], struct dynamo_param *param);
 
+static void Banner();
+
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 
@@ -286,8 +288,6 @@ static int iomtr_set_cpu_affinity(ULONG_PTR affinity_mask)
 	}
 
 #elif defined(IOMTR_OSFAMILY_WINDOWS)
-	//SYSTEM_INFO system_info;
-	//GetSystemInfo(&system_info);
 	DWORD_PTR processAffinity, systemAffinity;
 
 	res = GetProcessAffinityMask(GetCurrentProcess(), &processAffinity,  &systemAffinity);
@@ -312,6 +312,10 @@ static int iomtr_set_cpu_affinity(ULONG_PTR affinity_mask)
 				cout << "Set cpu affinity failed with error=" << GetLastError() << endl;
 				return 0;
 			}
+		}
+		else
+		{
+			cout << "Warning: ignoring affinity mask due to redundant or invalid value." << endl;
 		}
 	}
 	// else // do nothing
@@ -358,8 +362,58 @@ int CDECL main(int argc, char *argv[])
 #endif
 #endif
 
+	Banner();
+
+#if !defined(DO_NOT_PARSE_BEFORE_MANAGER)
+
+	// In order to allow command line parameters to influence default values of
+	// the Manager class members, we need to parse parameters before instantiating
+	// the Manager, but to do this, we need to:
+
+	// Setup local storage -- could just be in the global param structure???
+	char blkdevlist[MAX_TARGETS][MAX_NAME];
+	char manager_name[MAX_WORKER_NAME];
+	char network_name[MAX_NETWORK_NAME];
+	char exclude_filesys[MAX_EXCLUDE_FILESYS];
+
+	// Init the local storage to match the original code
+	iometer[0] = 0;
+	manager_name[0] = 0;
+	exclude_filesys[0] = 0;
+	network_name[0] = 0;
+
+	// Setup the param structure to defaults and to point to buffers above
+	param.iometer = iometer;
+	param.manager_name = manager_name;
+	param.manager_computer_name = network_name;
+	param.manager_exclude_fs = exclude_filesys;
+	param.blkdevlist = &blkdevlist;
+	param.login_port_number = 0;
+	param.cpu_affinity = 0; // not specified or default
+	param.timer_type = TIMER_UNDEFINED; // use the default
+	param.disk_control = RAWDISK_VIEW_NOPART; // do not show raw disks with partitions
+
+	// The manager's GetVersionString method is not available yet since it does not exist, 
+	// so we do away with the variable and have ParseParam rely directly on the source of 
+	// the strings in ioversion.h. Not too clean but functional...
+	// g_pVersionStringWithDebug = NULL; // not needed
+
+	// Parse params and then instantiate the manager next...
+	ParseParam(argc, argv, &param);
+
+#endif
+
 	manager = new Manager;
 
+#if !defined(DO_NOT_PARSE_BEFORE_MANAGER)
+	// Restore the param globals retrieved above back to the manager
+	// since the manager buffers were not available prior to the parse call.
+	memcpy(manager->manager_name, manager_name, sizeof(manager_name));
+	memcpy(manager->prt->network_name, network_name, sizeof(network_name));
+	memcpy(manager->exclude_filesys, exclude_filesys, sizeof(exclude_filesys));
+	memcpy(manager->blkdevlist, blkdevlist, sizeof(blkdevlist));
+
+#else // defined(DO_NOT_PARSE_BEFORE_MANAGER) // the original code
 	iometer[0] = 0;
 	manager->manager_name[0] = 0;
 	manager->exclude_filesys[0] = 0;
@@ -381,6 +435,7 @@ int CDECL main(int argc, char *argv[])
 
 	g_pVersionStringWithDebug = NULL;	//should use manager object after this...
 
+#endif
 	iomtr_set_cpu_affinity(param.cpu_affinity);
 
 	// If there were command line parameters, indicate that they were recognized.
@@ -480,6 +535,39 @@ int CDECL main(int argc, char *argv[])
 	}
 #endif
 
+#if defined(IOMTR_OSFAMILY_WINDOWS)
+	// IOmeter/Dynamo now utilizes Windows UAC for privilege elevation,
+	// but on version of Windows in which that is not supported we
+	// match the UNIX output above.
+
+	BOOL bReturned;
+	SID_IDENTIFIER_AUTHORITY NtAuthority = SECURITY_NT_AUTHORITY;
+	PSID AdminGroup; 
+
+	bReturned = AllocateAndInitializeSid(
+		&NtAuthority,
+		2,
+		SECURITY_BUILTIN_DOMAIN_RID,
+		DOMAIN_ALIAS_RID_ADMINS,
+		0, 0, 0, 0, 0, 0,
+		&AdminGroup); 
+
+	if(bReturned) 
+	{
+		CheckTokenMembership( NULL, AdminGroup, &bReturned);
+
+		if (!bReturned)
+		{
+			cout << "Dynamo not running as an administrators." << endl;
+			cout << "       All available disks might not be reported " << endl;
+			//cout << "       Cannot get TCP statistics from the kernel " << endl;
+			cout << endl;
+		} 
+		FreeSid(AdminGroup); 
+	}
+
+#endif
+
 	// Ensure, that the endian type of the CPU is detectable
 	if ((IsBigEndian() != 0) && (IsBigEndian() != 1)) {
 		cout << "===> ERROR: Endian type of the CPU couldn't be detected." << endl;
@@ -517,6 +605,48 @@ CleanUp:
 	return (0);
 }
 
+void Banner()
+{
+	//cout << "Version " << g_pVersionStringWithDebug << endl;
+	cout << "Dynamo version " << IOVER_FILEVERSION << VERSION_DEBUG ; 
+
+#if defined(IOMTR_OSFAMILY_WINDOWS)
+ #if defined(_M_IX86)
+	cout << ", Intel x86 32bit";
+ #elif defined(_M_IA64)
+	cout << ", Intel Itanium 64bit";
+ #elif defined(_M_X64)
+	cout << ", Intel/AMD x64 64bit";
+ #else
+	cout << ", unknown architecture and bitness";
+ #endif
+
+#elif defined(IOMTR_OS_LINUX)
+
+#elif defined(IOMTR_OS_OSX)
+ #if defined(__ppc__)
+	cout << ", PowerPC 32bit";
+ #elif defined(__ppc64__)
+	cout << ", PowerPC 64bit";
+ #elif defined(__i386__)
+	cout << ", Intel x86 32bit";
+ #elif defined(__x86_64__)
+	cout << ", Intel x86_64 64bit";
+ #else
+	cout << ", unknown architecture and bitness";
+ #endif
+  
+ #if defined(__BIG__ENDIAN__)
+	cout << ", big-endian";
+ #endif
+#endif 
+
+	cout << endl;
+	cout << "Built: " << __DATE__ << " " << __TIME__ << endl;
+	cout << endl;
+}
+
+
 /* ######################################################################### */
 /* ##                                                                     ## */
 /* ##   S Y N T A X ( )                                                   ## */
@@ -531,8 +661,9 @@ void Syntax(const char *errmsg /*=NULL*/ )
 	}
 
 	cout << endl;
-	cout << "Version " << g_pVersionStringWithDebug << endl;
-	cout << endl;
+
+	//Banner();
+
 	cout << "SYNTAX" << endl;
 	cout << endl;
 
@@ -551,14 +682,18 @@ void Syntax(const char *errmsg /*=NULL*/ )
 	cout << "dynamo [-i iometer_computer_name -m manager_computer_name] [-n manager_name]" << endl;
 	cout << "       [-x excluded_fs_type] [-d extra_device] [-f extra_device_file] [-l]" << endl;
 	cout << "       [-c cpu_affinity] [-p login_port_number]" << endl;
-#elif defined(IOMTR_OS_OSX) || defined(IOMTR_OS_SOLARIS)
+#elif defined (IOMTR_OS_SOLARIS)
 	cout << "dynamo [-i iometer_computer_name -m manager_computer_name] [-n manager_name]" << endl;
 	cout << "       [-x excluded_fs_type] [-d extra_device] [-f extra_device_file] [-l]" << endl;
 	cout << "       [-p login_port_number]" << endl;
+#elif defined(IOMTR_OS_OSX)
+	cout << "dynamo [-i iometer_computer_name -m manager_computer_name] [-n manager_name]" << endl;
+	cout << "       [-x excluded_fs_type] [-d extra_device] [-f extra_device_file] [-l]" << endl;
+	cout << "       [-p login_port_number]  [use_rdtsc]" << endl;
 #elif defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)
 	cout << "dynamo [/i iometer_computer_name /m manager_computer_name] [/n manager_name]" << endl;
 	cout << "       [/c cpu_affinity] [/p login_port_number]" << endl;
-	cout << "       [force_raw] [no_rdtsc]" << endl;
+	cout << "       [use_rdtsc] [force_raw] " << endl;
 #elif defined(IOMTR_OS_NETWARE)
 	cout << "dynamo [/i iometer_computer_name /m manager_computer_name] [/n manager_name]" << endl;
 	cout << "       [/x excluded_volumes] [/c cpu_affinity] [/p login_port_number]" << endl;
@@ -623,13 +758,15 @@ void Syntax(const char *errmsg /*=NULL*/ )
 	cout << endl;
 #endif
 
-#if defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)
+#if defined(IOMTR_OSFAMILY_WINDOWS) || defined(IOMTR_OS_OSX)
+	cout << "   use_rdtsc - enables explicit rdtsc use in favor of other OS API" << endl;
+	cout << "      for measuring I/O performance." << endl;
+	cout << endl;
+#endif
+
+#if defined(IOMTR_OSFAMILY_WINDOWS)
 	cout << "   force_raw - forces dynamo to report all raw disks regardless of partitions" << endl;
 	cout << "      contained within them. " << endl;
-	cout << endl;
-	cout << "   no_rdtsc - disables explicit rdtsc use in favor of QueryPeformanceCounter" << endl;
-	cout << "      for measuring I/O performance." << endl;
-	cout << "      Only applies to ia64. x86/x64 default to QueryPeformanceCounter."<< endl;
 	cout << endl;
 #endif
 
@@ -670,19 +807,23 @@ static void ParseParam(int argc, char *argv[], struct dynamo_param *param)
 		}
 
 		if (strlen(argv[I]) != 2) {
+
 #if defined(IOMTR_OSFAMILY_WINDOWS)
 			// TODO for non-Windows
 			//
 			// This should be turned on for all OSes, but I am not sure about the underscode in _stricmp
 			//
-			if (!_stricmp(&argv[I][1], "force_raw"))
+			if (!stricmp(&argv[I][1], "force_raw"))
 			{
 				param->disk_control = RAWDISK_VIEW_FULL;
 				continue;
-			}
-			else if (!_stricmp(&argv[I][1], "no_rdtsc"))
+			} 
+			else
+#endif
+#if defined(IOMTR_OSFAMILY_WINDOWS) || defined(IOMTR_OS_OSX)
+			if (!stricmp(&argv[I][1], "use_rdtsc"))
 			{
-				param->timer_type = TIMER_OSHPC;
+				param->timer_type = TIMER_RDTSC;
 
 				//
 				// Kludge, we don't really need the above param->timer_type since we can 
@@ -690,7 +831,10 @@ static void ParseParam(int argc, char *argv[], struct dynamo_param *param)
 				// be cleaned up better.
 				//
 				if (param->timer_type != TIMER_UNDEFINED && param->timer_type < TIMER_TYPE_MAX)
+				{
 					TimerType = (timer_type) param->timer_type;
+					cout << "Dynamo will attempt to use the TSC/ITC CPU timer." << endl;
+				}
 
 				continue;
 			}
@@ -814,19 +958,6 @@ static void ParseParam(int argc, char *argv[], struct dynamo_param *param)
 					sscanf(argv[I],"0x%" IOMTR_FORMAT_SPEC_64BIT "x", &tempMask);
 				else
 					sscanf(argv[I],"%" IOMTR_FORMAT_SPEC_64BIT "d", &tempMask);
-
-#if defined (IOMTR_SETTING_CPU_AFFINITY)
-
-				// TODO for non-Windows
-				// This will not work if you ignored initializing cpu_affinity above
-				if ((tempMask & param->cpu_affinity) != tempMask)
-				{
-					cerr << "Warning: Invalid cpu_affinity mask specified, ignoring." << endl;
-					cerr << "Value nust be within: 0x" << hex << param->cpu_affinity << endl;
-				}
-				else
-					param->cpu_affinity = tempMask;
-#endif
 			}
 			break;
 #endif

@@ -373,10 +373,24 @@ LONGLONG oshpc_freq()
 
 // ----------------------------------------------------------------------------
 #elif defined(IOMTR_OS_OSX)
+
+timer_type TimerType = TIMER_OSHPC;
+
 #if defined(IOMTR_CPU_PPC)
+
+// NOTE:
+// This is the orginal code converted to the new timer format, but it 
+// should not really be used. Despite the architecture specfic macro, there
+// is really no code differece between x86, x64 and PPC -- see more comments 
+// below.
+
+// This does not seem like a verry efficient method of getting clock cycles
+// since it involves unnecessary math. I think this can be removed in favor of
+// the x86 version below -- need to test.
+
 #include <Carbon/Carbon.h>
 double processor_speed_to_nsecs;	// declared as extern double in IOCommon.h
-DWORDLONG timer_value()
+DWORDLONG oshpc() //timer_value()
 {
 	DWORDLONG temp;
 	AbsoluteTime now;
@@ -392,8 +406,95 @@ DWORDLONG timer_value()
 	// temp * processor_speed_to_nsecs = timestamp in cpu cycles
 	return (DWORDLONG) (temp * processor_speed_to_nsecs);
 }
+
+double oshpc_freq()
+{
+	return 1e9;
+}
+
+uint64_t rdtsc()
+{
+	ULARGE_INTEGER uli;
+    uint32_t better_not_change;
+    do {
+          __asm__ __volatile__ ("mftbu %0" : "=r"(uli.HighPart));
+          __asm__ __volatile__ ("mftb %0"  : "=r"(uli.LowPart) );
+          __asm__ __volatile__ ("mftbu %0" : "=r"(better_not_change));
+     } while (uli.HighPart != better_not_change);
+
+   return uli.QuadPart; 
+}
+
 #else
-#error ===> ERROR: You have to do some coding here to get the port done!
+
+// NOTE for PPC builds:
+// The else here is supposed to apply to the Intel architecture only based on 
+// the macro alone, but it is safe to use it for PPC too. The intrinsic macros
+// that the OSX environment provides are used below to implement the arch
+// specific timestamp counter code.
+
+#include <mach/mach_time.h>
+#include <sys/sysctl.h>
+
+uint64_t oshpc()
+{
+	return mach_absolute_time();
+}
+
+double oshpc_freq()
+{
+	mach_timebase_info_data_t info;  
+	
+
+	// Note:
+	// Mach_timebase_info seems to report 1/1, thus, the mach_absolute_time is 
+	// already in nanosecs??
+	mach_timebase_info(&info); // retrieve the time base
+		
+	// Invert the timebase values to get frequency, which will be used later 
+	// 1e9 is hard coded based on the units being in nanoseconds -- but this
+	// could change???
+
+#if _DEBUG
+	if (info.denom != 1 || info.numer != 1)
+	{
+		cout << "Warning: mach_timebase_info() has reported non-1 values --"
+			 << "contact the IOmeter team, numerator: " << info.numer 
+			 << " denominator: " << info.denom << "." << endl;
+	}
+#endif
+	return ((double) info.denom * 1e9 / info.numer);
+}
+
+// 
+// There are no other functional differences in the code between PPC and x86, 
+// so use the IOMTR_CPU_I386 definition is there just to satisfy iocommon.h 
+// requirements and can be safely used to build all architectures....
+//
+#if defined(__ppc__) || defined(__ppc64__)
+uint64_t rdtsc()
+{
+	ULARGE_INTEGER uli;
+    uint32_t better_not_change;
+    do {
+          __asm__ __volatile__ ("mftbu %0" : "=r"(uli.HighPart));
+          __asm__ __volatile__ ("mftb %0"  : "=r"(uli.LowPart) );
+          __asm__ __volatile__ ("mftbu %0" : "=r"(better_not_change));
+     } while (uli.HighPart != better_not_change);
+
+   return uli.QuadPart; 
+}
+#else // all other x86 architectures
+uint64_t rdtsc()
+{
+	ULARGE_INTEGER uli;
+	
+	__asm volatile("rdtsc" : "=d" (uli.HighPart), "=a" (uli.LowPart));
+	
+	return uli.QuadPart;
+}
+#endif // if ppc or ppc64
+
 #endif
 // ----------------------------------------------------------------------------
 #else
@@ -407,7 +508,7 @@ DWORDLONG timer_value()
 //
 
 // !!!!Delete/modify this ifdef once other OSes have implemented similar fuctionality!!!
-#if defined(IOMTR_OSFAMILY_WINDOWS)
+#if defined(IOMTR_OSFAMILY_WINDOWS) || defined(IOMTR_OS_OSX)
 // !!!!Delete/modify this ifdef once other OSes have implemented similar fuctionality!!!
 
 //
@@ -446,16 +547,16 @@ DWORDLONG timer_value()
 //		 -falls back to oshpc_freq() in case we find speed stepping.
 //		 -abstracted for non-windows OS (at least those that support rdtsc)
 
-LONGLONG rdtsc_freq()
+int64_t rdtsc_freq()
 {
 	enum {SLEEP_CASE=0, SPIN_CASE=1, MAX_CASE=2};
-	ULONG types = MAX_CASE;
-	LONGLONG start_count, end_count;
-	LONGLONG stop_count, spin_count;
-	LONGLONG start_stamp, end_stamp;
-	LONGLONG new_freq[MAX_CASE];
-	LONGLONG perf_freq;
-	LONGLONG frequency = 0;
+	uint32_t types = MAX_CASE;
+	int64_t start_count, end_count;
+	int64_t stop_count, spin_count;
+	int64_t start_stamp, end_stamp;
+	int64_t new_freq[MAX_CASE];
+	int64_t perf_freq;
+	int64_t frequency = 0;
 
 	// This is the frequency that QueryPerformanceCounter() is based on
 	perf_freq = oshpc_freq();
@@ -482,8 +583,9 @@ LONGLONG rdtsc_freq()
 		start_count = oshpc();
 
 		if (types == SLEEP_CASE)
-			Sleep(1000);
-
+		{
+			sleep_milisec(1000);
+		}
 		else if (types == SPIN_CASE)
 		{
 			stop_count = start_count + perf_freq;  // freq is cycles in 1 second
@@ -513,8 +615,13 @@ LONGLONG rdtsc_freq()
 		cout << " Detected speed-stepping CPU. Disable power saving mode when using IOmeter." << endl;
 		cout << "##########################################################################" << endl;
 
+#if _DEBUG
+		cout << " Measured spin freq: " << new_freq[SPIN_CASE]/1000000 << 
+			    "MHz, sleep freq: " <<  new_freq[SLEEP_CASE]/1000000 << "MHz. " << endl;
+#endif
+
 		// Fallback to OSHPC?
-		cout << " Using performance counter frequency: " << (perf_freq / 1000000.00) << "MHz." << endl;
+		cout << " Reverting to performance counter with frequency: " << (perf_freq / 1000000.00) << "MHz." << endl;
 
 		TimerType = TIMER_OSHPC;
 		frequency = perf_freq; 
@@ -524,20 +631,22 @@ LONGLONG rdtsc_freq()
 				   max(new_freq[SPIN_CASE], perf_freq) > 5.0)
 	{
 		// if it's not close, we use the new spin frequency
-		cout << "Using RDTSC frequency: " << (new_freq[0] / 1000000.00) << "MHz." << endl;
+		cout << " Using RDTSC frequency: " << (new_freq[0] / 1000000.00) << "MHz." << endl;
 		frequency = new_freq[SPIN_CASE];
 	}
 	else
 	{
 		// if it's close, lets trust the original perf frequency
-		cout << " Using performance counter frequency: " << (perf_freq / 1000000.00) << "MHz." << endl;
+		cout << " Measured frequency matches performance counter frequency, using latter: " << (perf_freq / 1000000.00) << "MHz." << endl;
 		frequency = perf_freq;
 	}
 
 	return frequency;
 }
+#endif
 
-DWORDLONG timer_value()
+#if defined(IOMTR_OSFAMILY_WINDOWS) || defined(IOMTR_OS_OSX)
+uint64_t timer_value()
 {
 	switch(TimerType) // global
 	{
@@ -568,7 +677,7 @@ double timer_frequency()
 		default:
 			timerFreq = (double) oshpc_freq();
 
-			if (timerFreq == 1)
+			if (timerFreq == 1.0)
 			{
 				// This call really has to work!
 				cerr << "Could not obtain peformance frequency, exiting." << endl;
@@ -582,3 +691,4 @@ double timer_frequency()
 }
 
 #endif
+

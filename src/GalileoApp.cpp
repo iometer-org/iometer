@@ -687,7 +687,7 @@ BOOL CGalileoApp::OnIdle(LONG lCount)
 			// There is data waiting for us!
 			login_data_msg = new Data_Message;
 			login_data_msg_ptr = (char *)login_data_msg;
-			login_data_msg_size = sizeof(Data_Message);
+			login_data_msg_size = DATA_MESSAGE_SIZE;
 			login_port->Receive(login_data_msg_ptr, login_data_msg_size);	// begin receiving...
 			login_state = receiving_data;
 			start_recv_timer = GetTickCount();
@@ -703,6 +703,17 @@ BOOL CGalileoApp::OnIdle(LONG lCount)
 		if (login_port->IsReceiveComplete()) {
 			// Yes!  Have all requested bytes been received?
 			result = login_port->GetReceiveResult();
+
+			// The first member is the size and had better not have any alignment problems!
+			if ((result >= sizeof(login_data_msg->size)) && (DATA_MESSAGE_SIZE != login_data_msg->size))
+			{
+				ErrorMessage("Receiving data failed -- invalid Data_Message size encountered. Check structure packing on dynamo build!");
+				login_port->Close();
+				login_state = failed;
+				delete login_data_msg;
+				return FALSE;
+			}
+
 			if (result == login_data_msg_size) {
 				// Keep track of whether this manager is logging in during
 				// a file restore operation.  Once the manager is added to

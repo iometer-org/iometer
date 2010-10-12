@@ -990,13 +990,13 @@ Report_Volumes2( Target_Spec* disk_spec, int start_count, bool force_all )
 		{
 			// display non-fixed disk type
 			if (drive_type == DRIVE_REMOVABLE)
-				strcat (disk_spec[count].name, " (RMV");
+				strcat (disk_spec[count].name, " (REMOVABLE");
 			else if (drive_type == DRIVE_CDROM)
 				strcat (disk_spec[count].name, " (ROM");
 			else if (drive_type == DRIVE_RAMDISK)
 				strcat (disk_spec[count].name, " (RAM");
 			else 
-				strcat (disk_spec[count].name, " (UNK");
+				strcat (disk_spec[count].name, " (UNKNOWN");
 
 			// display read_only flag
 			if (disk_spec[count].read_only)

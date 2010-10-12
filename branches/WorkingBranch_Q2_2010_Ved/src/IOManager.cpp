@@ -254,9 +254,8 @@ BOOL Manager::Login(char* port_name, int login_port_number)
 	// The version number is included in two places for backward compatibility.
 	msg.purpose = LOGIN;
 	strcpy(data_msg->data.manager_info.version, m_pVersionStringWithDebug);
-#ifdef _DEBUG
-	cout << "dynamo version: " << data_msg->data.manager_info.version << ", data_msg size: " << sizeof(Data_Message) << endl;
-#endif
+	data_msg->size = DATA_MESSAGE_SIZE;
+
 	sscanf(data_msg->data.manager_info.version, "%d.%d.%d", &year, &month, &day);
 	msg.data = (year * 10000) + (month * 100) + day;
 
@@ -314,14 +313,21 @@ BOOL Manager::Login(char* port_name, int login_port_number)
 
 #if _DEBUG
 	{
-		printf("Debugging data_msg size...\n");
-		printf("Sizes: int=%d, long=%d, dword=%d, ulonglong=%d, dwordlong=%d\n", 
-			sizeof(int), sizeof(LONG), sizeof(DWORD), sizeof(unsigned long long), sizeof(DWORDLONG));
-		printf("Sizes: Message_Data=%d, Manager_Info=%d, Target_Spec=%d, Test_Spec=%d, Manager_Results=%d, Worker_Results=%d\n",
-			sizeof(Message_Data), sizeof(Manager_Info), sizeof(Target_Spec), sizeof(Test_Spec),
+		Test_Spec ts;
+
+		printf("Debugging structure sizes...\n");
+		printf(" Sizes: data_msg=%d\n",sizeof(Data_Message) );
+		printf(" Sizes: bool=%d, int=%d, long=%d, dword=%d, ulonglong=%d, dwordlong=%d, long*=%d\n", 
+			sizeof (BOOL), sizeof(int), sizeof(LONG), sizeof(DWORD), sizeof(unsigned long long), sizeof(DWORDLONG), sizeof(LONG*));
+		printf(" Sizes: Message_Data=%d, Manager_Info=%d, Target_Spec=%d, Access_Spec=%d,\n"
+			   "        Test_Spec=%d, Manager_Results=%d, Worker_Results=%d\n",
+			sizeof(Message_Data), sizeof(Manager_Info), sizeof(Target_Spec), sizeof(Access_Spec), sizeof(Test_Spec),
 			sizeof(Manager_Results), sizeof(Worker_Results));
 
-		printf("Sizes: Disk_Spec=%d, TCP_Spec=%d, VI_Spec=%d\n", sizeof(Disk_Spec), sizeof(TCP_Spec), sizeof(VI_Spec));
+		printf(" Test_Spec member offsets: def_assign=%" IOMTR_FORMAT_SPEC_POINTER "d, name=%" IOMTR_FORMAT_SPEC_POINTER "d, access=%" IOMTR_FORMAT_SPEC_POINTER "d\n",
+				(DWORD_PTR) ((unsigned char *) &ts.default_assignment - (unsigned char *) &ts), (DWORD_PTR) ((unsigned char *) &ts.name - (unsigned char *) &ts), (DWORD_PTR) ((unsigned char *)&ts.access - (unsigned char *) &ts));
+
+		printf(" Sizes: Disk_Spec=%d, TCP_Spec=%d, VI_Spec=%d\n", sizeof(Disk_Spec), sizeof(TCP_Spec), sizeof(VI_Spec));
 	}
 #endif
 
@@ -1084,7 +1090,7 @@ void Manager::GenerateRandomData()
 		posix_memalign((void **)&randomDataBuffer, sysconf(_SC_PAGESIZE), RANDOM_BUFFER_SIZE);
 
 #elif defined(IOMTR_OS_SOLARIS) || defined(IOMTR_OS_OSX)
-		randomDataBuffer = valloc(RANDOM_BUFFER_SIZE);
+		randomDataBuffer = (unsigned char *) valloc(RANDOM_BUFFER_SIZE);
 
 #else
 #warning ===> WARNING: You have to do some coding here to get the port done! 

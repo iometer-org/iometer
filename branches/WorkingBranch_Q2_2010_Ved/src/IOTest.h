@@ -79,7 +79,7 @@
 
 #define PHYSICAL_DRIVE_PREFIX	"PHYSICALDRIVE:"
 
-#include "pack8.h"
+#include "pack.h"
 
 //
 // Specifications for a single test for one worker.
@@ -88,7 +88,7 @@ struct Test_Spec {
 	char name[MAX_WORKER_NAME];
 	int default_assignment;
 	Access_Spec access[MAX_ACCESS_SPECS];
-} STRUCT_ALIGN_8;
+} STRUCT_ALIGN_IOMETER;
 
 //
 // Different type of I/O targets and workers.
@@ -171,7 +171,7 @@ struct Disk_Spec {
 	int sector_size;
 	DWORDLONG maximum_size;
 	DWORDLONG starting_sector;
-} STRUCT_ALIGN_8;
+} STRUCT_ALIGN_IOMETER;
 
 //
 // TCP specific specifications for TCP networks accessed during a test.
@@ -182,7 +182,7 @@ struct TCP_Spec {
 
 	char remote_address[MAX_NAME];
 	unsigned int remote_port;
-} STRUCT_ALIGN_8;
+} STRUCT_ALIGN_IOMETER;
 
 #define VI_ADDRESS_SIZE				16
 // (Note that current VI hardware only supports a 4 byte 
@@ -218,7 +218,7 @@ struct VI_Spec {
 #endif
 #endif
 
-} STRUCT_ALIGN_8;
+} STRUCT_ALIGN_IOMETER;
 
 //
 // Possible specifications for a generic target to have.
@@ -263,8 +263,8 @@ struct Target_Spec {
 	// Variables for Using Fixed Seed for RNG
 	BOOL use_fixed_seed;
 	DWORDLONG fixed_seed_value;
-} STRUCT_ALIGN_8;
+} STRUCT_ALIGN_IOMETER;
 
-#include "unpack8.h"
+#include "unpack.h"
 
 #endif

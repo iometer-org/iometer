@@ -1,10 +1,14 @@
 /* ######################################################################### */
 /* ##                                                                     ## */
-/* ##  (IOmeter & Dynamo) / IOAccess.h                                    ## */
+/* ##  pack.h		                                                  ## */
 /* ##                                                                     ## */
 /* ## ------------------------------------------------------------------- ## */
 /* ##                                                                     ## */
-/* ##  Job .......: Contins the definition for Dynamo's Access class.     ## */
+/* ##  Job .......: Implements structurep packing                         ## */
+/* ##                                                                     ## */
+/* ## ------------------------------------------------------------------- ## */
+/* ##                                                                     ## */
+/* ##  Remarks ...: <none>                                                ## */
 /* ##                                                                     ## */
 /* ## ------------------------------------------------------------------- ## */
 /* ##                                                                     ## */
@@ -43,79 +47,27 @@
 /* ##  OF SUCH DAMAGE.                                                    ## */
 /* ##                                                                     ## */
 /* ## ------------------------------------------------------------------- ## */
-/* ##                                                                     ## */
-/* ##  Remarks ...: <none>                                                ## */
-/* ## ------------------------------------------------------------------- ## */
-/* ##                                                                     ## */
-/* ##  Changes ...: 2003-07-17 (daniel.scheibli@edelbyte.org)             ## */
-/* ##               - Moved to the use of the IOMTR_[OSFAMILY|OS|CPU]_*   ## */
-/* ##                 global defines.                                     ## */
-/* ##               - Integrated the License Statement into this header.  ## */
-/* ##               - Added new header holding the changelog.             ## */
-/* ##                                                                     ## */
-/* ######################################################################### */
-#ifndef ACCESS_DEFINED
-#define ACCESS_DEFINED
 
-#include "IOCommon.h"
-#define NOT_POWER_OF_TWO   (DWORDLONG) -1	// a mask is set to this if it cannot be used for
-					    // byte alignment (because the alignment isn't a
-					    // power of two)
 
-#include "pack.h"
+//
+// Anything included after this file will have the following byte alignment
+//
 
-typedef struct {
-	int random;
-	int read;
-	DWORD size;
-	int delay;
-	int burst;
-	DWORD align;
-	DWORD reply;
-	DWORDLONG align_mask;
-} STRUCT_ALIGN_IOMETER ACCESS;
+#if defined(FORCE_STRUCT_ALIGN) //&& !defined(GCC_ATTRIBUTE_ALIGN)
 
-struct Access_Spec {
-	int of_size;		// Indicates how many percent this Access_Spec
-	// acquires in AccessSpecList (so the sum of
-	// all Access_Spec's of_size fields has to be
-	// 100 in total)
-	int reads;
-	int random;
-	int delay;
-	int burst;
-	DWORD align;
-	DWORD reply;
-	DWORD size;
-} STRUCT_ALIGN_IOMETER;
+#if defined(IOMTR_OSFAMILY_WINDOWS)
+#pragma pack(push, 1)
 
-#include "unpack.h"
+#elif defined(IOMTR_OSFAMILY_UNIX)
 
-#define Access_Specs Access_Spec*
-#define MAX_ACCESS_SPECS	100	// Maximum number of specs in a total specification.
+#ifndef GCC_ATTRIBUTE_ALIGN
+#pragma pack(push, 1)
+#endif //GCC_ATTRIBUTE_ALIGN
 
-class Access {
-      public:
+// Look for GCC_ATTRIBUTE_ALIGN in iocommon.h for this definition
 
-	Access() {
-		max_transfer = 0;
-	} ~Access() {
-	}
-
-	void Initialize(const Access_Specs specs);
-
-	void GetNextBurst(int access_percent,
-			  int *burst, DWORD * size, int *delay, DWORD * align, DWORDLONG * align_mask, DWORD * reply);
-
-	BOOL Read(int access_percent, int read_percent);
-	BOOL Random(int access_percent, int random_percent);
-
-	int max_transfer;	// Maximum size of a transfer request for a test.
-
-	BOOL HasWrite();
-      private:
-
-	ACCESS access_grid[MAX_ACCESS_SPECS];
-};
-
+#else // other os
+#error ===> You must include an n-byte structure packing/alignment directive.
 #endif
+
+#endif //FORCE_STRUCT_ALIGN

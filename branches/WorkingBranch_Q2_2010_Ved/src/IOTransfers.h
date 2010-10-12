@@ -67,7 +67,7 @@
 #include "IOCommon.h"
 #include "vipl.h"
 
-#include "pack8.h"
+#include "pack.h"
 
 //
 // Generic structure to hold information that may be passed to a thread.
@@ -78,7 +78,7 @@ struct Thread_Info {
 	void *parent;	// Pointer used to get parent object.
 	unsigned char* _random_data_buffer;		// The random data buffer to use for preparing the drive
 	long long _random_data_buffer_size;		// The random data buffer size
-} STRUCT_ALIGN_8;
+} STRUCT_ALIGN_IOMETER;
 
 //
 // Information about a single transaction performed by a thread.  Note that a 
@@ -111,8 +111,8 @@ struct Transaction {
 	// not when it is queued
 	int remaining_requests;	// PING (number of requests remaining in this transaction)
 	int remaining_replies;	// PONG (number of replies remaining in this transaction)
-} STRUCT_ALIGN_8;
+} STRUCT_ALIGN_IOMETER;
 
-#include "unpack8.h"
+#include "unpack.h"
 
 #endif

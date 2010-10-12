@@ -1200,11 +1200,11 @@ BOOL TargetDisk::Prepare(DWORDLONG * prepare_offset, volatile TestState * test_s
 #if defined(IOMTR_OSFAMILY_NETWARE)
 	NXMemFree(buffer);
 	errno = 0;
-	if (!(buffer = NXMemAlloc(buffer_size, 1)))
+	if (!(buffer = NXMemAlloc(bytes, 1)))
 #elif defined(IOMTR_OSFAMILY_UNIX)
 	free(buffer);
 	errno = 0;
-	if (!(buffer = valloc(buffer_size)))
+	if (!(buffer = valloc(bytes)))
 #elif defined(IOMTR_OSFAMILY_WINDOWS)
 	VirtualFree(buffer, 0, MEM_RELEASE);
 	if (!(buffer = VirtualAlloc(NULL, bytes, MEM_COMMIT, PAGE_READWRITE)))

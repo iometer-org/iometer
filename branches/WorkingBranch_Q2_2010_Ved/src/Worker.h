@@ -72,7 +72,7 @@
 
 class Manager;			// forward declaration
 
-#include "pack8.h"
+#include "pack.h"
 
 //
 // Structure to store information about a worker's targets.
@@ -82,9 +82,9 @@ struct Target {
 
 	// Results of last run test.
 	Results results[MAX_PERF];
-} STRUCT_ALIGN_8;
+} STRUCT_ALIGN_IOMETER;
 
-#include "unpack8.h"
+#include "unpack.h"
 
 #define AMBIGUOUS_VALUE	-1
 #define DISABLED_VALUE	0

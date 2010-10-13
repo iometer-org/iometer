@@ -1221,8 +1221,14 @@ BOOL TargetDisk::Prepare(DWORDLONG * prepare_offset, volatile TestState * test_s
 			// Do nothing here...a new random byte will be chosen below for each IO
 			break;
 		case DATA_PATTERN_PSEUDO_RANDOM:
+			// Save current spec.random so that it can be reset back to the fixed seed value after creating this data buffer
+			// This allows the PRNG to be the same when doing the actual IO, wether the disk is prepped or not and the user specifies fixed seed
+			DWORDLONG rand_tmp;
+			rand_tmp = spec.random;
 			for( DWORD x = 0; x < bytes; x++)
 				((unsigned char*)buffer)[x] = (unsigned char)Rand(0xff);
+			cout << "\tResetting random seed back to(" << rand_tmp << ") after creating disk preperation buffer." << endl;
+			spec.random = rand_tmp;
 			break;
 		case DATA_PATTERN_FULL_RANDOM:
 			long long rand_max = RAND_MAX;

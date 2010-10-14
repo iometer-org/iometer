@@ -473,6 +473,7 @@ BOOL Grunt::Set_Targets(int count, Target_Spec * target_specs)
 			return FALSE;
 	}
 
+
 	// Seed the random number generator.  Grunts transferring data over a
 	// network will use the same seed to produce the same sequence of random
 	// numbers.  This will keep them in synch.

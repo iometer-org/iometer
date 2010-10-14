@@ -535,6 +535,7 @@ BOOL Worker::SetTargets()
 
 		// Initialize random number generator.
 		// If Using a fixed seed is specified use that value, else get a timestamp to use as a seed value
+		target->spec.use_fixed_seed = spec.use_fixed_seed;
 		if(spec.use_fixed_seed)
 			target->spec.random = spec.fixed_seed_value;
 		else

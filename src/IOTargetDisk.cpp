@@ -1193,7 +1193,6 @@ BOOL TargetDisk::Prepare(DWORDLONG * prepare_offset, volatile TestState * test_s
 	int i;
 	void *buffer = NULL;
 	DWORD bytes;
-	long long random_offset_multiplier;
 
 	// Allocate a large (64k for 512 byte sector size) buffer for the preparation.
 	bytes = sector_size * 128;
@@ -1231,17 +1230,9 @@ BOOL TargetDisk::Prepare(DWORDLONG * prepare_offset, volatile TestState * test_s
 			spec.random = rand_tmp;
 			break;
 		case DATA_PATTERN_FULL_RANDOM:
-			long long rand_max = RAND_MAX;
-			//calculate maximum sector-aligned offset using two random integers
-			long long max_random_sector_aligned_number = (rand_max * rand_max * (long long)sector_size);
+			//Nothing to do here
 
-			//come up with a divisor to keep offset in the 16MB region
-			random_offset_multiplier = max_random_sector_aligned_number / _random_datat_buffer_size;
 
-			//increment if remainder
-			if(max_random_sector_aligned_number % _random_datat_buffer_size)
-				random_offset_multiplier += 1;
-			//random data used for writes
 /*
 #if defined(IOMTR_OSFAMILY_NETWARE)
 		randomDataBuffer = NXMemAlloc(RANDOM_BUFFER_SIZE, 1);
@@ -1368,9 +1359,9 @@ BOOL TargetDisk::Prepare(DWORDLONG * prepare_offset, volatile TestState * test_s
 						case DATA_PATTERN_PSEUDO_RANDOM:
 							break; // Nothing to do here, buffer was set above
 						case DATA_PATTERN_FULL_RANDOM:
-							long long offset = ((long long)rand() * (long long)rand() / random_offset_multiplier) * (long long)sector_size ;
+							long long offset = (long long)Rand(_random_datat_buffer_size-bytes);
 							buffer = &_random_data_buffer[offset];
-							break; // Nothing to do here, buffer was set above
+							break;
 					}
 
 					// Do the asynchronous write.

@@ -1010,23 +1010,8 @@ void Grunt::Asynchronous_Delay(int transfer_delay)
 //
 void CDECL Grunt_Thread_Wrapper(void *grunt)
 {
-	BOOL need_random_buffer = ((Grunt *) grunt)->Need_Random_Buffer();
-	((Grunt *) grunt)->random_offset_multiplier = 0;
 	long long rand_max = RAND_MAX;
 	int max_sector_size = ((Grunt *) grunt)->Get_Maximum_Sector_Size();
-
-	if(need_random_buffer) {
-
-		//calculate maximum sector-aligned offset using two random integers
-		long long max_random_sector_aligned_number = (rand_max * rand_max * (long long)max_sector_size);
-
-		//come up with a divisor to keep offset in the 16MB region
-		((Grunt *) grunt)->random_offset_multiplier = max_random_sector_aligned_number / ((Grunt *) grunt)->random_data_buffer_size;
-
-		//increment if remainder
-		if(max_random_sector_aligned_number % ((Grunt *) grunt)->random_data_buffer_size)
-			((Grunt *) grunt)->random_offset_multiplier += 1;
-	}
 
 	if (param.cpu_affinity) // only if we have been provided an overriding affinity
 		((Grunt *) grunt)->Set_Affinity(param.cpu_affinity);
@@ -1309,7 +1294,7 @@ void Grunt::Do_IOs()
 						// Do nothing...pattern set by the "Set_Access" routine
 						break;
 					case DATA_PATTERN_FULL_RANDOM:
-						long long offset = ((long long)rand() * (long long)rand() / random_offset_multiplier) * (long long)((TargetDisk *) targets[target_id])->spec.disk_info.sector_size ;
+						long long offset = (long long)Rand(RANDOM_BUFFER_SIZE - transaction->size);
 						write_data = &random_data_buffer[offset];
 						break;
 				}

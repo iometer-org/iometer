@@ -145,7 +145,6 @@ class Grunt {
 
 	volatile TestState grunt_state;	// Grunt's status within the test
 
-	long long random_offset_multiplier;
 	int target_count;	// Number of disks/networks.
 	Access access_spec;	// Access specs for a test.
 	void *read_data;	// Pointer to general data memory area for reading and writing.

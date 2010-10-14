@@ -1066,28 +1066,15 @@ void Manager::Start_Test(int target)
 
 void Manager::GenerateRandomData() 
 {
-	BOOL NeedRandomData = FALSE;
+	cout << "   Generating random data..." << endl;
 
-	for (int i=0;i<grunt_count;i++)
-	{
-		if (grunts[i]->Need_Random_Buffer() == TRUE)
-		{
-			NeedRandomData = TRUE;
-			break;
-		}
-	}
-
-	if(IsWrite && NeedRandomData) {
-
-		cout << "   Generating random data..." << endl;
-
-		//random data used for writes
+	//random data used for writes
 #if defined(IOMTR_OSFAMILY_NETWARE)
-		randomDataBuffer = NXMemAlloc(RANDOM_BUFFER_SIZE, 1);
+	randomDataBuffer = NXMemAlloc(RANDOM_BUFFER_SIZE, 1);
 
 #elif defined(IOMTR_OSFAMILY_UNIX)
 #if defined(IOMTR_OS_LINUX)
-		posix_memalign((void **)&randomDataBuffer, sysconf(_SC_PAGESIZE), RANDOM_BUFFER_SIZE);
+	posix_memalign((void **)&randomDataBuffer, sysconf(_SC_PAGESIZE), RANDOM_BUFFER_SIZE);
 
 #elif defined(IOMTR_OS_SOLARIS) || defined(IOMTR_OS_OSX)
 		randomDataBuffer = (unsigned char *) valloc(RANDOM_BUFFER_SIZE);
@@ -1097,47 +1084,46 @@ void Manager::GenerateRandomData()
 #endif
 
 #elif defined(IOMTR_OSFAMILY_WINDOWS)
-		randomDataBuffer = (unsigned char*)VirtualAlloc(NULL, RANDOM_BUFFER_SIZE, MEM_COMMIT|MEM_RESERVE, PAGE_READWRITE);
+	randomDataBuffer = (unsigned char*)VirtualAlloc(NULL, RANDOM_BUFFER_SIZE, MEM_COMMIT|MEM_RESERVE, PAGE_READWRITE);
 
 #else
 #warning ===> WARNING: You have to do some coding here to get the port done!
 #endif
 
 
-		
-		//Find the first grunt with a target and use the spec.random from it to seed the PRNG
-		BOOL NeedSrand = TRUE;
-		DWORDLONG SeedVal;
-		for (int i=0;i<grunt_count;i++)
+	
+	//Find the first grunt with a target and use the spec.random from it to seed the PRNG
+	BOOL NeedSrand = TRUE;
+	DWORDLONG SeedVal;
+	for (int i=0;i<grunt_count;i++)
+	{
+		if(grunts[i]->target_count > 0)
 		{
-			if(grunts[i]->target_count > 0)
-			{
-				SeedVal = grunts[i]->Get_Target_Spec_Random_Value(0);
-				cout << "   Seeding Random Data Random Number Generator from Target Spec to:" << (unsigned int)SeedVal << endl;
-				srand(SeedVal);
-				NeedSrand = FALSE;
-				break;
-			}
+			SeedVal = grunts[i]->Get_Target_Spec_Random_Value(0);
+			cout << "   Seeding Random Data Random Number Generator from Target Spec to:" << (unsigned int)SeedVal << endl;
+			srand(SeedVal);
+			NeedSrand = FALSE;
+			break;
 		}
-		if(NeedSrand)
-		{
-			cout << "   Seeding Random Data Random Number Generator from Time" << endl;
-			srand(time(NULL));
-		}
+	}
+	if(NeedSrand)
+	{
+		cout << "   Seeding Random Data Random Number Generator from Time" << endl;
+		srand(time(NULL));
+	}
 
 
-		if (randomDataBuffer != NULL)
-		{
-			for( int x = 0; x < RANDOM_BUFFER_SIZE; x++)
-				randomDataBuffer[x] = (unsigned char)rand();
+	if (randomDataBuffer != NULL)
+	{
+		for( int x = 0; x < RANDOM_BUFFER_SIZE; x++)
+			randomDataBuffer[x] = (unsigned char)rand();
 
-			cout << "   Done generating random data." << endl;
-		}
-		else
-		{
-			// Could not allocate a larger buffer.  Signal failure.
-			cout << "   Error allocating random data buffer..." << endl;
-		}
+		cout << "   Done generating random data." << endl;
+	}
+	else
+	{
+		// Could not allocate a larger buffer.  Signal failure.
+		cout << "   Error allocating random data buffer..." << endl;
 	}
 }
 
@@ -1257,11 +1243,6 @@ void Manager::Remove_Workers(int target)
 //
 BOOL Manager::Set_Targets(int worker_no, int count, Target_Spec * target_specs)
 {
-	//if(target_specs->DataPattern == DATA_PATTERN_FULL_RANDOM) {
-	//	GenerateRandomData();
-	//}
-
-
 	if (worker_no == ALL_WORKERS) {
 		for (int i = 0; i < grunt_count; i++) {
 			cout << "Worker " << i << " setting targets..." << endl;

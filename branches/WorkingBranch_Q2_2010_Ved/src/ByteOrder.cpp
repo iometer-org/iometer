@@ -362,6 +362,7 @@ void reorder(Data_Message & var, int uniontype, int send_recv)
 #endif
 			reorder(var.data.targets[i].trans_per_conn);
 			reorder(var.data.targets[i].random);
+			reorder(var.data.targets[i].use_fixed_seed);
 
 			// Must be last before send. Else Sparc Solaris will be confused.
 			if (send_recv == SEND)

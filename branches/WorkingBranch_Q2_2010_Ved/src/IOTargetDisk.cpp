@@ -1193,6 +1193,11 @@ BOOL TargetDisk::Prepare(DWORDLONG * prepare_offset, volatile TestState * test_s
 	int i;
 	void *buffer = NULL;
 	DWORD bytes;
+	DWORDLONG rand_seed;
+
+	// Save current spec.random so that it can be reset back to the same seed value after preparing disks
+	// This allows the PRNG to be the same when doing the actual IO, whether the disk is prepped or not and the user specifies fixed seed
+	rand_seed = spec.random;
 
 	// Allocate a large (64k for 512 byte sector size) buffer for the preparation.
 	bytes = sector_size * 128;
@@ -1220,14 +1225,8 @@ BOOL TargetDisk::Prepare(DWORDLONG * prepare_offset, volatile TestState * test_s
 			// Do nothing here...a new random byte will be chosen below for each IO
 			break;
 		case DATA_PATTERN_PSEUDO_RANDOM:
-			// Save current spec.random so that it can be reset back to the fixed seed value after creating this data buffer
-			// This allows the PRNG to be the same when doing the actual IO, wether the disk is prepped or not and the user specifies fixed seed
-			DWORDLONG rand_tmp;
-			rand_tmp = spec.random;
 			for( DWORD x = 0; x < bytes; x++)
 				((unsigned char*)buffer)[x] = (unsigned char)Rand(0xff);
-			cout << "\tResetting random seed back to(" << rand_tmp << ") after creating disk preperation buffer." << endl;
-			spec.random = rand_tmp;
 			break;
 		case DATA_PATTERN_FULL_RANDOM:
 			//Nothing to do here
@@ -1481,6 +1480,15 @@ BOOL TargetDisk::Prepare(DWORDLONG * prepare_offset, volatile TestState * test_s
 #endif
 		CloseHandle(olap[i].hEvent);
 	}
+
+	// Restore spec.random to what it was upon entering this fuction - if using fixed seed
+	// This allows the PRNG to be the same when doing the actual IO, whether the disk is prepped or not and the user specifies fixed seed
+	if(spec.use_fixed_seed)
+	{
+		cout << "   Resetting Targets random seed back to(" << rand_seed << ") after disk preperation." << endl;
+		spec.random = rand_seed;
+	}
+		
 
 #ifdef _DEBUG
 	cout << "out of member function TargetDisk::Prepare()" << endl;

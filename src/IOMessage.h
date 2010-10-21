@@ -103,7 +103,6 @@
 //
 #define DELAY_REPLY_FILTER		0x00100000	// DO NOT CHANGE!!!
 #define PREP_DISKS				DELAY_REPLY_FILTER + 1
-#define GENERATE_RANDOM_DATA	DELAY_REPLY_FILTER + 2
 
 //
 // A reply is NOT expected (or wanted) for the following messages.

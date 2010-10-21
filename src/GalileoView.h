@@ -119,7 +119,6 @@ class CGalileoView:public CView {
 	void OnNewWorker(TargetType worker_type);
 	void AddDefaultWorkers(Manager * manager);
 	BOOL DisksNotPrepared();
-	void CGalileoView::GenerateRandomData();
 	void ChangedSelection();
 	void ChangingSelection();
 	TargetType GetSelectedTargetType();

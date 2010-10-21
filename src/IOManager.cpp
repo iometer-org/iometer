@@ -622,6 +622,12 @@ void Manager::Prepare_Disks(int target)
 {
 	int i, loop_start, loop_finish;
 
+	// Check if the random data buffer has been created. If not, allocate and fill it
+	if (randomDataBuffer == NULL)
+	{
+		GenerateRandomData();
+	}
+
 	if (target == ALL_WORKERS) {
 		// Preparing all grunts at the same time.  This requires a great
 		// amount of coordination on the part of Iometer to ensure that the
@@ -899,14 +905,6 @@ BOOL Manager::Process_Message()
 		Prepare_Disks(msg.data);
 		break;
 
-		// Preparing drives for access.
-	case GENERATE_RANDOM_DATA:
-#if _DETAILS
-		cout << "in Process_Message() : GENERATE_RANDOM_DATA" << endl;
-#endif
-		GenerateRandomData();
-		break;
-
 		// Signalling to stop disk preparation.
 	case STOP_PREPARE:
 #if _DETAILS
@@ -1044,6 +1042,12 @@ void Manager::Start_Test(int target)
 	int g;
 
 	IsWrite = FALSE;
+
+	// Check if the random data buffer has been created. If not, allocate and fill it
+	if (randomDataBuffer == NULL)
+	{
+		GenerateRandomData();
+	}
 
 	cout << "Starting..." << endl << flush;
 

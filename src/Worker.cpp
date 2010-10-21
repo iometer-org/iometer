@@ -115,7 +115,7 @@ Worker::Worker(Manager * mgr, TargetType wkr_type)
 	spec.queue_depth = 1;
 	spec.test_connection_rate = FALSE;
 	spec.trans_per_conn = 1;
-	spec.DataPattern = DATA_PATTERN_FULL_RANDOM;
+	spec.DataPattern = DATA_PATTERN_REPEATING_BYTES;
 
 	if (IsType(wkr_type, GenericServerType)) {
 		SetLocalNetworkInterface(0, (TargetType) (wkr_type & NETWORK_COMPATIBILITY_MASK));

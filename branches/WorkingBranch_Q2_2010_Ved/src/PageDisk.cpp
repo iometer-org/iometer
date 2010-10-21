@@ -675,7 +675,7 @@ void CPageDisk::ShowSettings()
 	}
 
 	if (data_pattern == AMBIGUOUS_VALUE) {
-		m_CDataPattern.SetCurSel(DATA_PATTERN_FULL_RANDOM);
+		m_CDataPattern.SetCurSel(DATA_PATTERN_REPEATING_BYTES);
 	} else {
 		m_CDataPattern.SetCurSel(data_pattern);
 	}

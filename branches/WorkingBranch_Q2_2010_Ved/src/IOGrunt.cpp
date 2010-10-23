@@ -535,6 +535,12 @@ void Grunt::Wait_For_Stop()
 		Sleep(1);
 }
 
+void Grunt::Set_Random_Data_Buffer(unsigned char* _random_data_buffer, long long _random_data_buffer_size) 
+{
+	random_data_buffer = _random_data_buffer;
+	random_data_buffer_size = _random_data_buffer_size;
+}
+
 //
 // Setting access specifications for worker.  Also ensuring that a data buffer
 // large enough to support the maximum requested transfer has been allocated.
@@ -711,7 +717,7 @@ void Grunt::Set_Affinity(DWORD_PTR affinity)
 // Starting threads to prepare disks for tests.  Returning TRUE if we
 // successfully started the disk preparation.
 //
-BOOL Grunt::Prepare_Disks(unsigned char* _random_data_buffer, long long _random_data_buffer_size)
+BOOL Grunt::Prepare_Disks()
 {
 #if defined(IOMTR_OSFAMILY_NETWARE) || defined(IOMTR_OSFAMILY_UNIX)
 	pthread_t newThread;
@@ -743,8 +749,6 @@ BOOL Grunt::Prepare_Disks(unsigned char* _random_data_buffer, long long _random_
 		if (IsType(targets[i]->spec.type, LogicalDiskType)) {
 			prepare_thread[i].parent = this;
 			prepare_thread[i].id = i;
-			prepare_thread[i]._random_data_buffer = _random_data_buffer;
-			prepare_thread[i]._random_data_buffer_size = _random_data_buffer_size;
 			cout << "   " << targets[i]->spec.name << " preparing." << endl;
 #if defined(IOMTR_OSFAMILY_NETWARE) || defined(IOMTR_OSFAMILY_UNIX)
 			// Assuming that thr_create call will not fail !!!
@@ -770,14 +774,14 @@ void CDECL Prepare_Disk_Wrapper(void *disk_thread_info)
 	Grunt *grunt = (Grunt *) (((Thread_Info *) disk_thread_info)->parent);
 	int disk_id = ((Thread_Info *) disk_thread_info)->id;
 
-	grunt->Prepare_Disk(disk_id, ((Thread_Info *)disk_thread_info)->_random_data_buffer, ((Thread_Info *)disk_thread_info)->_random_data_buffer_size);
+	grunt->Prepare_Disk(disk_id);
 }
 
 //
 // Preparing a disk for access by a worker thread.  The disk must have been 
 // previously initialized.
 //
-void Grunt::Prepare_Disk(int disk_id, unsigned char* _random_data_buffer, long long _random_data_buffer_size)
+void Grunt::Prepare_Disk(int disk_id)
 {
 	void *buffer = NULL;
 	//DWORD buffer_size;
@@ -836,7 +840,7 @@ void Grunt::Prepare_Disk(int disk_id, unsigned char* _random_data_buffer, long l
 	}
 	else {
 		// Prepare the disk, first with large block sizes, then with single sectors.
-		if (!disk->Prepare(&prepare_offset, &grunt_state, disk->spec.disk_info.sector_size, _random_data_buffer, _random_data_buffer_size)) {
+		if (!disk->Prepare(&prepare_offset, &grunt_state, disk->spec.disk_info.sector_size, random_data_buffer, random_data_buffer_size)) {
 			cout << "*** An error occurred while preparing the disk." << endl;
 			critical_error = TRUE;
 		}
@@ -1295,7 +1299,16 @@ void Grunt::Do_IOs()
 						// Do nothing...pattern set by the "Set_Access" routine
 						break;
 					case DATA_PATTERN_FULL_RANDOM:
+						//Buffer offset must be DWORD-aligned in memory, otherwise the transfer fails
+						//Choose a pointer into the buffer
 						long long offset = (long long)Rand(RANDOM_BUFFER_SIZE - transaction->size);
+
+						//See how far it is from being DWORD-aligned
+						long long remainder = offset & (sizeof(DWORD) - 1);
+
+						//Align the pointer using the remainder
+						offset = offset - remainder;
+
 						write_data = &random_data_buffer[offset];
 						break;
 				}
@@ -1460,7 +1473,7 @@ void Grunt::Do_Partial_IO(Transaction * transaction, int bytes_done)
 //
 // Start threads to access targets.
 //
-void Grunt::Start_Test(int index, unsigned char* _random_data_buffer, long long _random_data_buffer_size)
+void Grunt::Start_Test(int index)
 {
 #if defined(IOMTR_OSFAMILY_NETWARE) || defined(IOMTR_OSFAMILY_UNIX)
 	pthread_t newThread;
@@ -1479,9 +1492,6 @@ void Grunt::Start_Test(int index, unsigned char* _random_data_buffer, long long 
 	// do not create the thread.
 	if (!target_count || idle)
 		return;
-
-	random_data_buffer = _random_data_buffer;
-	random_data_buffer_size = _random_data_buffer_size;
 
 	ramp_up_ios_pending = 0;
 

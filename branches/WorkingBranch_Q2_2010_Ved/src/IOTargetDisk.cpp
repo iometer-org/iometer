@@ -1319,8 +1319,17 @@ BOOL TargetDisk::Prepare(DWORDLONG * prepare_offset, volatile TestState * test_s
 						case DATA_PATTERN_PSEUDO_RANDOM:
 							break; // Nothing to do here, buffer was set above
 						case DATA_PATTERN_FULL_RANDOM:
-							long long offset = (long long)Rand(_random_datat_buffer_size-bytes);
-							buffer = &_random_data_buffer[offset];
+							//Buffer offset must be DWORD-aligned in memory, otherwise the transfer fails
+							//Choose a pointer into the buffer
+							long long mem_offset = (long long)Rand(_random_datat_buffer_size-bytes);
+
+							//See how far it is from being DWORD-aligned
+							long long remainder = mem_offset & (sizeof(DWORD) - 1);
+
+							//Align the pointer using the remainder
+							mem_offset = mem_offset - remainder;
+
+							buffer = &_random_data_buffer[mem_offset];
 							break;
 					}
 

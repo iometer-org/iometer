@@ -132,10 +132,11 @@ class Manager {
 	void *data;		// Buffer for I/O requests.
 	int data_size;		// Size of currently allocated data buffer.
 
-	unsigned char* randomDataBuffer;
+	map<DWORDLONG,unsigned char*> randomDataBuffers; // Keeps track of random data buffers. One per unique seed.
 	BOOL IsWrite;
 
-	void GenerateRandomData();
+	void GenerateRandomData(); // Generates random data buffers. One per unique seed.
+	void Delete_Random_Data(); // Deletes all random data buffers.
 
 	char manager_name[MAX_WORKER_NAME];	// Name of manager, customizable on command line.
 	char exclude_filesys[MAX_EXCLUDE_FILESYS];	// filesystem types to exclude, command line option

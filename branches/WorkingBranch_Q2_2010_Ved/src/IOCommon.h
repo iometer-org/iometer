@@ -228,6 +228,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <math.h>
+#include <map>
 // ----------------------------------------------------------------------------
 #include <iostream>
 #include <fstream>

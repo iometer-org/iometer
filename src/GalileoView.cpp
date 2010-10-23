@@ -790,10 +790,10 @@ void CGalileoView::RestoreSettings()
 //
 void CGalileoView::StartTest()
 {
-	//if (!SetAccess() || !SetTargets()) {
-	//	TestDone(ReturnError);
-	//	return;
-	//}
+	if (!SetAccess() || !SetTargets()) {
+		TestDone(ReturnError);
+		return;
+	}
 
 	theApp.test_state = TestRampingUp;
 	run_index++;

@@ -183,22 +183,7 @@ Manager::~Manager()
 	prt->Close();
 	delete prt;
 
-	if (randomDataBuffer != NULL)
-	{
-#if defined(IOMTR_OS_LINUX) || defined(IOMTR_OS_OSX) || defined(IOMTR_OS_SOLARIS)
-		free(randomDataBuffer);
-
-#elif defined(IOMTR_OS_NETWARE)
-		NXMemFree(randomDataBuffer);
-
-#elif defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)
-		VirtualFree(randomDataBuffer, 0, MEM_RELEASE);
-	
-#else
-#warning ===> WARNING: You have to do some coding here to get the port done!
-#endif
-
-	}
+	Delete_Random_Data();
 
 #if defined(IOMTR_OS_LINUX) || defined(IOMTR_OS_OSX) || defined(IOMTR_OS_SOLARIS)
 	if (data != NULL)
@@ -623,7 +608,7 @@ void Manager::Prepare_Disks(int target)
 	int i, loop_start, loop_finish;
 
 	// Check if the random data buffer has been created. If not, allocate and fill it
-	if (randomDataBuffer == NULL)
+	if (randomDataBuffers.empty())
 	{
 		GenerateRandomData();
 	}
@@ -633,7 +618,7 @@ void Manager::Prepare_Disks(int target)
 		// amount of coordination on the part of Iometer to ensure that the
 		// grunts do not prepare the same drives.
 		for (i = 0; i < grunt_count; i++) {
-			if (!grunts[i]->Prepare_Disks(randomDataBuffer,RANDOM_BUFFER_SIZE)) {
+			if (!grunts[i]->Prepare_Disks()) {
 				// Send failure message back to Iometer.
 				msg.data = 0;
 				if (IsBigEndian()) {
@@ -647,7 +632,7 @@ void Manager::Prepare_Disks(int target)
 		loop_finish = grunt_count;
 	} else {
 		// Preparing a single grunt.
-		if (!grunts[target]->Prepare_Disks(randomDataBuffer,RANDOM_BUFFER_SIZE)) {
+		if (!grunts[target]->Prepare_Disks()) {
 			// Send failure message back to Iometer.
 			msg.data = 0;
 			if (IsBigEndian()) {
@@ -1044,7 +1029,7 @@ void Manager::Start_Test(int target)
 	IsWrite = FALSE;
 
 	// Check if the random data buffer has been created. If not, allocate and fill it
-	if (randomDataBuffer == NULL)
+	if (randomDataBuffers.empty())
 	{
 		GenerateRandomData();
 	}
@@ -1055,10 +1040,10 @@ void Manager::Start_Test(int target)
 	// Pass as argument the index of the Target. Can be used for affinity.
 	if (target == ALL_WORKERS) {
 		for (g = 0; g < grunt_count; g++) {
-			grunts[g]->Start_Test(g,randomDataBuffer,RANDOM_BUFFER_SIZE);
+			grunts[g]->Start_Test(g);
 		}
 	} else {
-		grunts[target]->Start_Test(target,randomDataBuffer,RANDOM_BUFFER_SIZE);
+		grunts[target]->Start_Test(target);
 	}
 #ifdef _DEBUG
 	cout << "   Started." << endl << flush;
@@ -1072,62 +1057,97 @@ void Manager::GenerateRandomData()
 {
 	cout << "   Generating random data..." << endl;
 
-	//random data used for writes
-#if defined(IOMTR_OSFAMILY_NETWARE)
-	randomDataBuffer = NXMemAlloc(RANDOM_BUFFER_SIZE, 1);
-
-#elif defined(IOMTR_OSFAMILY_UNIX)
-#if defined(IOMTR_OS_LINUX)
-	posix_memalign((void **)&randomDataBuffer, sysconf(_SC_PAGESIZE), RANDOM_BUFFER_SIZE);
-
-#elif defined(IOMTR_OS_SOLARIS) || defined(IOMTR_OS_OSX)
-		randomDataBuffer = (unsigned char *) valloc(RANDOM_BUFFER_SIZE);
-
-#else
-#warning ===> WARNING: You have to do some coding here to get the port done! 
-#endif
-
-#elif defined(IOMTR_OSFAMILY_WINDOWS)
-	randomDataBuffer = (unsigned char*)VirtualAlloc(NULL, RANDOM_BUFFER_SIZE, MEM_COMMIT|MEM_RESERVE, PAGE_READWRITE);
-
-#else
-#warning ===> WARNING: You have to do some coding here to get the port done!
-#endif
-
-
-	
 	//Find the first grunt with a target and use the spec.random from it to seed the PRNG
-	BOOL NeedSrand = TRUE;
 	DWORDLONG SeedVal;
+
+	Delete_Random_Data();
 	for (int i=0;i<grunt_count;i++)
 	{
 		if(grunts[i]->target_count > 0)
 		{
-			SeedVal = grunts[i]->Get_Target_Spec_Random_Value(0);
-			cout << "   Seeding Random Data Random Number Generator from Target Spec to:" << (unsigned int)SeedVal << endl;
-			srand(SeedVal);
-			NeedSrand = FALSE;
-			break;
+			if(grunts[i]->Need_Random_Buffer()) 
+			{
+				SeedVal = grunts[i]->Get_Target_Spec_Random_Value(0);
+				cout << "   Seeding Random Data Random Number Generator from Target Spec to:" << (unsigned int)SeedVal << endl;
+
+				map<DWORDLONG,unsigned char*>::iterator it = randomDataBuffers.find(SeedVal);
+				if(it != randomDataBuffers.end()) 
+				{
+					cout << "   Using existing random data." << endl;
+					grunts[i]->Set_Random_Data_Buffer(randomDataBuffers[SeedVal], RANDOM_BUFFER_SIZE);
+				} 
+				else 
+				{
+					srand(SeedVal);
+
+	//random data used for writes
+#if defined(IOMTR_OSFAMILY_NETWARE)
+					randomDataBuffers[SeedVal] = NXMemAlloc(RANDOM_BUFFER_SIZE, 1);
+
+#elif defined(IOMTR_OSFAMILY_UNIX)
+#if defined(IOMTR_OS_LINUX)
+					posix_memalign((void **)&randomDataBuffers[SeedVal], sysconf(_SC_PAGESIZE), RANDOM_BUFFER_SIZE);
+
+#elif defined(IOMTR_OS_SOLARIS) || defined(IOMTR_OS_OSX)
+					randomDataBuffers[SeedVal] = (unsigned char *) valloc(RANDOM_BUFFER_SIZE);
+
+#else
+					#warning ===> WARNING: You have to do some coding here to get the port done! 
+#endif
+
+#elif defined(IOMTR_OSFAMILY_WINDOWS)
+					randomDataBuffers[SeedVal] = (unsigned char*)VirtualAlloc(NULL, RANDOM_BUFFER_SIZE, MEM_COMMIT|MEM_RESERVE, PAGE_READWRITE);
+
+#else
+					#warning ===> WARNING: You have to do some coding here to get the port done!
+#endif
+
+					if (randomDataBuffers[SeedVal] != NULL) 
+					{
+						for( int x = 0; x < RANDOM_BUFFER_SIZE; x++)
+							randomDataBuffers[SeedVal][x] = (unsigned char)rand();
+
+						grunts[i]->Set_Random_Data_Buffer(randomDataBuffers[SeedVal], RANDOM_BUFFER_SIZE);
+						cout << "   Done generating random data." << endl;
+					} 
+					else 
+					{
+						// Could not allocate a larger buffer.  Signal failure.
+						cout << "   Error allocating random data buffer..." << endl;
+					}
+
+				}
+			}
 		}
 	}
-	if(NeedSrand)
-	{
-		cout << "   Seeding Random Data Random Number Generator from Time" << endl;
-		srand(time(NULL));
-	}
+}
 
-
-	if (randomDataBuffer != NULL)
+//
+// Deletes all random data buffers
+//
+void Manager::Delete_Random_Data()
+{
+	if (!randomDataBuffers.empty())
 	{
-		for( int x = 0; x < RANDOM_BUFFER_SIZE; x++)
-			randomDataBuffer[x] = (unsigned char)rand();
+		map<DWORDLONG,unsigned char*>::iterator it;
 
-		cout << "   Done generating random data." << endl;
-	}
-	else
-	{
-		// Could not allocate a larger buffer.  Signal failure.
-		cout << "   Error allocating random data buffer..." << endl;
+		for ( it=randomDataBuffers.begin() ; it != randomDataBuffers.end(); it++ )
+		{
+#if defined(IOMTR_OS_LINUX) || defined(IOMTR_OS_OSX) || defined(IOMTR_OS_SOLARIS)
+			free((*it).second);
+
+#elif defined(IOMTR_OS_NETWARE)
+			NXMemFree((*it).second);
+
+#elif defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)
+			VirtualFree((*it).second, 0, MEM_RELEASE);
+	
+#else
+#warning ===> WARNING: You have to do some coding here to get the port done!
+#endif
+		}
+
+		randomDataBuffers.clear();
 	}
 }
 

@@ -107,7 +107,7 @@ class Grunt {
 	//
 	BOOL Set_Targets(int count, Target_Spec * target_specs = NULL);
 	BOOL Set_Access(const Test_Spec * spec);
-	void Start_Test(int index, unsigned char* _random_data_buffer, long long _random_data_buffer_size);
+	void Start_Test(int index);
 	void Begin_IO();
 	void Record_On();
 	void Record_Off();
@@ -116,19 +116,20 @@ class Grunt {
 	void Set_Affinity(DWORD_PTR affinity);
 	int Get_Maximum_Sector_Size();
 	BOOL Need_Random_Buffer();
+	void Set_Random_Data_Buffer(unsigned char* _random_data_buffer, long long _random_data_buffer_size);
 	DWORDLONG Get_Target_Spec_Random_Value(int target_index);
 	//
 	///////////////////////////////////////////////////////////////////////////
 
 	// Function to prepare logical drives for access.
-	BOOL Prepare_Disks(unsigned char* _random_data_buffer, long long _random_data_buffer_size);
+	BOOL Prepare_Disks();
 
 	///////////////////////////////////////////////////////////////////////////
 	// Functions to access the targets (called via _Wrapper() interfaces)
 	// These functions are run by threads which perform the actual I/O transfers.
 	// They are intentially monolithic in nature for performance reasons.
 	//
-	void Prepare_Disk(int disk_id, unsigned char* _random_data_buffer, long long _random_data_buffer_size);
+	void Prepare_Disk(int disk_id);
 	//
 	// the three functions called by Grunt_Thread_Wrapper()
 	void Open_Targets();

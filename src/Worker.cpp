@@ -1392,7 +1392,7 @@ void Worker::SetDataPattern(int data_pattern)
 	spec.DataPattern = data_pattern;
 
 	// Loop through all the worker's targets.
-	target_count = TargetCount();
+	target_count = TargetCount(GenericDiskType);
 	for (i = 0; i < target_count; i++)
 		GetTarget(i)->spec.DataPattern = data_pattern;
 }

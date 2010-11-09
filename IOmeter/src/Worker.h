@@ -72,9 +72,7 @@
 
 class Manager;			// forward declaration
 
-#ifdef FORCE_STRUCT_ALIGN
-#include "pack8.h"
-#endif
+#include "pack.h"
 
 //
 // Structure to store information about a worker's targets.
@@ -84,11 +82,9 @@ struct Target {
 
 	// Results of last run test.
 	Results results[MAX_PERF];
-};
+} STRUCT_ALIGN_IOMETER;
 
-#ifdef FORCE_STRUCT_ALIGN
-#include "unpack8.h"
-#endif
+#include "unpack.h"
 
 #define AMBIGUOUS_VALUE	-1
 #define DISABLED_VALUE	0
@@ -155,6 +151,7 @@ class Worker {
 	///////////////////////////////////////////////////////////////////////////
 	// Retrieving/setting information about a worker's targets.
 	//
+	int GetDataPattern(TargetType type);
 	int GetConnectionRate(TargetType type);
 	DWORDLONG GetDiskSize(TargetType type);
 	DWORDLONG GetDiskStart(TargetType type);
@@ -162,9 +159,12 @@ class Worker {
 	int GetQueueDepth(TargetType type);
 	int GetMaxSends(TargetType type);
 	int GetTransPerConn(TargetType type);
+	int GetUseFixedSeed(TargetType type);
+	DWORDLONG GetFixedSeedValue(TargetType type);
 	// GetValue will replace most Get*() functions.
 	//      int                     GetValue( TargetType type, int offset );
 	//
+	void SetDataPattern(int data_pattern);
 	void SetConnectionRate(BOOL test_connection_rate);
 	void SetDiskSize(DWORDLONG disk_size);
 	void SetDiskStart(DWORDLONG disk_start);
@@ -173,6 +173,8 @@ class Worker {
 	void SetQueueDepth(int queue_depth);
 	void SetMaxSends(int queue_depth);
 	void SetTransPerConn(int trans_per_conn);
+	void SetUseFixedSeed(BOOL use_fixed_seed);
+	void SetFixedSeedValue(DWORDLONG fixed_seed_value);
 	//      SetValue will replace most Set*() functions.
 	//      void            SetValue( TargetType type, int offset, int value );
 	//

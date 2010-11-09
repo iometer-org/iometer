@@ -87,7 +87,7 @@
 //       [1] = http://msdn.microsoft.com/library/default.asp?url=/library/en-us/vclib/html/_mfc_debug_new.asp
 //
 #if defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)
-#ifdef _DEBUG
+#ifdef IOMTR_SETTING_MFC_MEMALLOC_DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
@@ -412,8 +412,8 @@ void ManagerList::SaveResults(ostream * file, int access_index, int result_type)
 	// Writing result header information.
 	(*file) << "'Results" << endl
 	    << "'Target Type,Target Name,Access Specification Name,# Managers,"
-	    << "# Workers,# Disks,IOps,Read IOps,Write IOps,MBps,Read MBps,"
-	    << "Write MBps,Transactions per Second,Connections per Second,"
+	    << "# Workers,# Disks,IOps,Read IOps,Write IOps,MBps (Binary),Read MBps (Binary),Write MBps (Binary),"
+		<< "MBps (Decimal),Read MBps (Decimal),Write MBps (Decimal),Transactions per Second,Connections per Second,"
 	    << "Average Response Time,Average Read Response Time,"
 	    << "Average Write Response Time,Average Transaction Time,"
 	    << "Average Connection Time,Maximum Response Time,"
@@ -439,9 +439,12 @@ void ManagerList::SaveResults(ostream * file, int access_index, int result_type)
 	    << "," << results[WHOLE_TEST_PERF].IOps
 	    << "," << results[WHOLE_TEST_PERF].read_IOps
 	    << "," << results[WHOLE_TEST_PERF].write_IOps
-	    << "," << results[WHOLE_TEST_PERF].MBps
-	    << "," << results[WHOLE_TEST_PERF].read_MBps
-	    << "," << results[WHOLE_TEST_PERF].write_MBps
+	    << "," << results[WHOLE_TEST_PERF].MBps_Bin
+	    << "," << results[WHOLE_TEST_PERF].read_MBps_Bin
+	    << "," << results[WHOLE_TEST_PERF].write_MBps_Bin
+	    << "," << results[WHOLE_TEST_PERF].MBps_Dec
+	    << "," << results[WHOLE_TEST_PERF].read_MBps_Dec
+	    << "," << results[WHOLE_TEST_PERF].write_MBps_Dec
 	    << "," << results[WHOLE_TEST_PERF].transactions_per_second
 	    << "," << results[WHOLE_TEST_PERF].connections_per_second
 	    << "," << results[WHOLE_TEST_PERF].ave_latency
@@ -551,9 +554,12 @@ void ManagerList::UpdateResults(int which_perf)
 		results[which_perf].raw.write_count += manager->results[which_perf].raw.write_count;
 
 		// Recording throughput results.
-		results[which_perf].MBps += manager->results[which_perf].MBps;
-		results[which_perf].read_MBps += manager->results[which_perf].read_MBps;
-		results[which_perf].write_MBps += manager->results[which_perf].write_MBps;
+		results[which_perf].MBps_Bin += manager->results[which_perf].MBps_Bin;
+		results[which_perf].read_MBps_Bin += manager->results[which_perf].read_MBps_Bin;
+		results[which_perf].write_MBps_Bin += manager->results[which_perf].write_MBps_Bin;
+		results[which_perf].MBps_Dec += manager->results[which_perf].MBps_Dec;
+		results[which_perf].read_MBps_Dec += manager->results[which_perf].read_MBps_Dec;
+		results[which_perf].write_MBps_Dec += manager->results[which_perf].write_MBps_Dec;
 		results[which_perf].raw.bytes_read += manager->results[which_perf].raw.bytes_read;
 		results[which_perf].raw.bytes_written += manager->results[which_perf].raw.bytes_written;
 
@@ -714,6 +720,16 @@ void ManagerList::SetConnectionRate(BOOL connection_rate, TargetType type)
 		GetManager(i, type)->SetConnectionRate(connection_rate, type);
 }
 
+void ManagerList::SetDataPattern(int data_pattern, TargetType type)
+{
+	int i, mgr_count;
+
+	// Loop through all the managers.
+	mgr_count = ManagerCount(type);
+	for (i = 0; i < mgr_count; i++)
+		GetManager(i, type)->SetDataPattern(data_pattern, type);
+}
+
 void ManagerList::SetTransPerConn(int trans_per_conn, TargetType type)
 {
 	int i, mgr_count;
@@ -724,6 +740,25 @@ void ManagerList::SetTransPerConn(int trans_per_conn, TargetType type)
 		GetManager(i, type)->SetTransPerConn(trans_per_conn, type);
 }
 
+void ManagerList::SetUseFixedSeed(BOOL use_fixed_seed, TargetType type)
+{
+	int i, mgr_count;
+
+	// Loop through all the managers.
+	mgr_count = ManagerCount(type);
+	for (i = 0; i < mgr_count; i++)
+		GetManager(i, type)->SetUseFixedSeed(use_fixed_seed, type);
+}
+
+void ManagerList::SetFixedSeedValue(DWORDLONG fixed_seed_value, TargetType type)
+{
+	int i, mgr_count;
+
+	// Loop through all the managers.
+	mgr_count = ManagerCount(type);
+	for (i = 0; i < mgr_count; i++)
+		GetManager(i, type)->SetFixedSeedValue(fixed_seed_value, type);
+}
 ///////////////////////////////////////////////
 //
 // Functions to retrieve worker information
@@ -755,6 +790,29 @@ int ManagerList::GetConnectionRate(TargetType type)
 	return mgr_result;
 }
 
+int ManagerList::GetDataPattern(TargetType type)
+{
+	BOOL mgr_result;
+	int m, mgr_count;
+
+	if (!(mgr_count = ManagerCount(type)))
+		return AMBIGUOUS_VALUE;
+
+	// Get the value of the first manager.
+	mgr_result = GetManager(0, type)->GetDataPattern(type);
+
+	// Compare each manager's value with the first manager.
+	for (m = 1; m < mgr_count; m++) {
+		if (GetManager(m, type)->WorkerCount(type) &&
+		    mgr_result != GetManager(m, type)->GetDataPattern(type)) {
+			// The values are not the same.
+			return AMBIGUOUS_VALUE;
+		}
+	}
+	// All managers have the same value.
+	return mgr_result;
+}
+
 int ManagerList::GetTransPerConn(TargetType type)
 {
 	int m, mgr_count, mgr_result;
@@ -769,6 +827,50 @@ int ManagerList::GetTransPerConn(TargetType type)
 	// workers of the specified type.
 	for (m = 1; m < mgr_count; m++) {
 		if (GetManager(m, type)->WorkerCount(type) && mgr_result != GetManager(m, type)->GetTransPerConn(type)) {
+			// The values are not the same.
+			return AMBIGUOUS_VALUE;
+		}
+	}
+	return mgr_result;
+}
+
+int ManagerList::GetUseFixedSeed(TargetType type)
+{
+	int m, mgr_count, mgr_result;
+
+	if (!(mgr_count = ManagerCount(type)))
+		return AMBIGUOUS_VALUE;
+
+	// Get the value of the first manager.
+	mgr_result = GetManager(0, type)->GetUseFixedSeed(type);
+
+	// Compare each manager's value with the first manager.
+	for (m = 1; m < mgr_count; m++) {
+		if (GetManager(m, type)->WorkerCount(type) &&
+		    mgr_result != GetManager(m, type)->GetUseFixedSeed(type)) {
+			// The values are not the same.
+			return AMBIGUOUS_VALUE;
+		}
+	}
+	// All managers have the same value.
+	return mgr_result;
+}
+
+DWORDLONG ManagerList::GetFixedSeedValue(TargetType type)
+{
+	int m, mgr_count;
+	DWORDLONG mgr_result;
+
+	if (!(mgr_count = ManagerCount(type)))
+		return AMBIGUOUS_VALUE;
+
+	// Get the value of the first manager.
+	mgr_result = GetManager(0, type)->GetFixedSeedValue(type);
+
+	// Compare each manager's value with the first manager, if it has any
+	// workers of the specified type.
+	for (m = 1; m < mgr_count; m++) {
+		if (GetManager(m, type)->WorkerCount(type) && mgr_result != GetManager(m, type)->GetFixedSeedValue(type)) {
 			// The values are not the same.
 			return AMBIGUOUS_VALUE;
 		}

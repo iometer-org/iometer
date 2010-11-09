@@ -189,6 +189,33 @@ void Grunt::Initialize_Results()
 	memset(&prev_worker_performance, 0, sizeof(Worker_Results));
 }
 
+int Grunt::Get_Maximum_Sector_Size() {
+
+	int max_sector_size = 0;
+	for (int i = 0; i < target_count; i++) {
+		max_sector_size = __max(targets[i]->spec.disk_info.sector_size, max_sector_size);
+	}
+	return max_sector_size;
+}
+
+BOOL Grunt::Need_Random_Buffer() {
+
+	BOOL need_random_buffer = false;
+	BOOL has_write = access_spec.HasWrite();
+
+	for (int i = 0; i < target_count; i++) {
+		if(targets[i]->spec.DataPattern == DATA_PATTERN_FULL_RANDOM && has_write) {
+			need_random_buffer = true;
+			break;
+		}
+	}
+	return need_random_buffer;
+}
+
+DWORDLONG Grunt::Get_Target_Spec_Random_Value(int target_index){
+	return targets[target_index]->spec.random;
+}
+
 //
 // Setting the size of the target array to hold the number and type of 
 // targets specified.  If the requested number of targets is 0, the 
@@ -446,9 +473,11 @@ BOOL Grunt::Set_Targets(int count, Target_Spec * target_specs)
 			return FALSE;
 	}
 
+
 	// Seed the random number generator.  Grunts transferring data over a
 	// network will use the same seed to produce the same sequence of random
 	// numbers.  This will keep them in synch.
+	cout << "Seeding random Number Generator(" << target_specs[0].random << ")" << endl;
 	Srand(target_specs[0].random);
 
 	return Resize_Transaction_Arrays();
@@ -506,6 +535,12 @@ void Grunt::Wait_For_Stop()
 		Sleep(1);
 }
 
+void Grunt::Set_Random_Data_Buffer(unsigned char* _random_data_buffer, long long _random_data_buffer_size) 
+{
+	random_data_buffer = _random_data_buffer;
+	random_data_buffer_size = _random_data_buffer_size;
+}
+
 //
 // Setting access specifications for worker.  Also ensuring that a data buffer
 // large enough to support the maximum requested transfer has been allocated.
@@ -514,8 +549,6 @@ void Grunt::Wait_For_Stop()
 //
 BOOL Grunt::Set_Access(const Test_Spec * spec)
 {
-	char *write_ptr = NULL;
-
 	// Check for idle spec.
 	if ((idle = (spec->access[0].of_size == IOERROR)))
 		return TRUE;
@@ -619,46 +652,37 @@ BOOL Grunt::Set_Access(const Test_Spec * spec)
 
 	data_size = access_spec.max_transfer;
 
-	/* Fill write buffer with something non-zero, it can affect the
-	 * rate at which the processor can do crc calculations
-	 */
-	write_ptr = (char *)write_data;
-	while ((ULONG_PTR)write_ptr < ((ULONG_PTR)write_data + data_size)) {
-		*write_ptr++ = (char)Rand(0xff);
-	}
+	saved_write_data_pointer = write_data;
 
 	return TRUE;
 }
 
-#if defined(IOMTR_SETTING_CPU_AFFINITY)
+// Do not do this yet
+#if 0 // defined(IOMTR_SETTING_CPU_AFFINITY)
 //
 // The idea is to set each of the worker threads to their own CPU, within the 
 // constraint of any other cpu affinity we have been passed at the cmd line.
 //
-void Grunt::Set_Affinity()
+void Grunt::Set_Affinity(DWORD_PTR affinity)
 {
 	int found_bits = -1; // seed this guy so the first ++ starts at 0 to help with 0-based index
 	int effective_procs = 0;
 	int effective_index = 0;
-	ULONG_PTR effective_affinity = 1;
-	ULONG_PTR affinity = param.cpu_affinity;
-
+	DWORD_PTR effective_affinity = 1, temp_affinity = affinity;
 
 	// Calculate effective_procs, whcih  may be equal to or less 
 	// then actual number of procs, depending on the mask specified
 	// and never greater
-	while (affinity)
+	while (temp_affinity)
 	{
-		if (affinity & 0x1)
+		if (temp_affinity & 0x1)
 			effective_procs++;
-		affinity = affinity >> (ULONG_PTR) 1;
+		temp_affinity = temp_affinity >> (DWORD_PTR) 1;
 	}
 
 	// Both index values are 0-based. Round-robin the threads
 	// if their number exceeds number processors.
 	effective_index = worker_index % effective_procs;
-	
-	affinity = param.cpu_affinity;
 	
 	while (effective_affinity)
 	{
@@ -670,6 +694,8 @@ void Grunt::Set_Affinity()
 			// We have a match for our index, so set the affinity for the thread
 #if defined(IOMTR_OSFAMILY_WINDOWS)
 			SetThreadAffinityMask(GetCurrentThread(), effective_affinity);
+//#elif defined(IOMTR_OS_LINUX)
+//			sched_setaffinity(gettid(), CPU_SETSIZE, &s)
 #else
 #error ===> ERROR: You have to add affinity code here
 
@@ -681,13 +707,13 @@ void Grunt::Set_Affinity()
 #endif
 			break;
 		}
-		effective_affinity = effective_affinity << 0x1;
+		effective_affinity = effective_affinity << (DWORD_PTR) 0x1;
 	}
 }
 #else
-void Grunt::Set_Affinity()
+void Grunt::Set_Affinity(DWORD_PTR affinity)
 {
-	;
+	return;
 }
 #endif //IOMTR_SETTING_CPU_AFFINITY
 //
@@ -761,12 +787,12 @@ void CDECL Prepare_Disk_Wrapper(void *disk_thread_info)
 void Grunt::Prepare_Disk(int disk_id)
 {
 	void *buffer = NULL;
-	DWORD buffer_size;
+	//DWORD buffer_size;
 	DWORDLONG prepare_offset = 0;
 	TargetDisk *disk = (TargetDisk *) targets[disk_id];
 
 	critical_error = FALSE;
-
+/*
 	// Allocate a large (64k for 512 byte sector size) buffer for the preparation.
 	buffer_size = disk->spec.disk_info.sector_size * 128;
 #if defined(IOMTR_OSFAMILY_NETWARE)
@@ -790,7 +816,7 @@ void Grunt::Prepare_Disk(int disk_id)
 
 		return;
 	}
-
+*/
 	// Open the disk for preparation.
 #if defined(IOMTR_OSFAMILY_NETWARE) || defined(IOMTR_OSFAMILY_UNIX)
 	// The disk::prepare() operation writes to a file iobw.tst till it uses up
@@ -817,8 +843,7 @@ void Grunt::Prepare_Disk(int disk_id)
 	}
 	else {
 		// Prepare the disk, first with large block sizes, then with single sectors.
-		if (!disk->Prepare(buffer, &prepare_offset, buffer_size, &grunt_state) ||
-		    !disk->Prepare(buffer, &prepare_offset, disk->spec.disk_info.sector_size, &grunt_state)) {
+		if (!disk->Prepare(&prepare_offset, &grunt_state, disk->spec.disk_info.sector_size, random_data_buffer, random_data_buffer_size)) {
 			cout << "*** An error occurred while preparing the disk." << endl;
 			critical_error = TRUE;
 		}
@@ -993,7 +1018,11 @@ void Grunt::Asynchronous_Delay(int transfer_delay)
 //
 void CDECL Grunt_Thread_Wrapper(void *grunt)
 {
-	((Grunt *) grunt)->Set_Affinity();
+	long long rand_max = RAND_MAX;
+	int max_sector_size = ((Grunt *) grunt)->Get_Maximum_Sector_Size();
+
+	if (param.cpu_affinity) // only if we have been provided an overriding affinity
+		((Grunt *) grunt)->Set_Affinity(param.cpu_affinity);
 
 	// open targets
 	((Grunt *) grunt)->Open_Targets();
@@ -1262,7 +1291,31 @@ void Grunt::Do_IOs()
 			if (transaction->is_read) {
 				transfer_result = target->Read(read_data, transaction);
 			} else {
-				memset(write_data, rand(), transaction->size);
+
+				// Depending on the data pattern selected, set the write_data appropriately
+				switch (((TargetDisk *) targets[target_id])->spec.DataPattern){
+					case DATA_PATTERN_REPEATING_BYTES:
+						write_data = saved_write_data_pointer;
+						memset(write_data, rand(), transaction->size);
+						break;
+					case DATA_PATTERN_PSEUDO_RANDOM:
+						// Do nothing...pattern set by the "Set_Access" routine
+						break;
+					case DATA_PATTERN_FULL_RANDOM:
+						//Buffer offset must be DWORD-aligned in memory, otherwise the transfer fails
+						//Choose a pointer into the buffer
+						long long offset = (long long)Rand(RANDOM_BUFFER_SIZE - transaction->size);
+
+						//See how far it is from being DWORD-aligned
+						long long remainder = offset & (sizeof(DWORD) - 1);
+
+						//Align the pointer using the remainder
+						offset = offset - remainder;
+
+						write_data = &random_data_buffer[offset];
+						break;
+				}
+
 				transfer_result = target->Write(write_data, transaction);
 			}
 
@@ -1406,7 +1459,7 @@ void Grunt::Do_Partial_IO(Transaction * transaction, int bytes_done)
 	if (transaction->is_read) {
 		result = targets[transaction->target_id]->Read(read_data, transaction);
 	} else {
-		result = targets[transaction->target_id]->Write(write_data, transaction);
+		result = targets[transaction->target_id]->Write((unsigned char* )write_data, transaction);
 	}
 
 	if ((result != ReturnSuccess) && (result != ReturnPending) && (grunt_state == TestRecording)) {
@@ -1432,6 +1485,7 @@ void Grunt::Start_Test(int index)
 #else
 #warning ===> WARNING: You have to do some coding here to get the port done!
 #endif
+	char *write_ptr = NULL;
 
 	// Clear the results.
 	Initialize_Results();
@@ -1447,6 +1501,17 @@ void Grunt::Start_Test(int index)
 	worker_index = index; // save off our index
 
 	Initialize_Transaction_Arrays();
+
+	/* If we are doing pseudo random, fill the write buffer with a pseudo random pattern now as
+	   we don't want to be doing this during IO submission */
+	int target_id = trans_slots[available_trans_queue[available_head]].target_id;
+	if (((TargetDisk *) targets[target_id])->spec.DataPattern==DATA_PATTERN_PSEUDO_RANDOM)
+	{
+		write_ptr = (char *)write_data;
+		while ((ULONG_PTR)write_ptr < ((ULONG_PTR)write_data + data_size)) {
+			*write_ptr++ = (char)Rand(0xff);
+		}
+	}
 
 	// The grunt thread will become ready after opening its targets.
 	InterlockedExchange(IOMTR_MACRO_INTERLOCK_CAST(long)&not_ready, 1);

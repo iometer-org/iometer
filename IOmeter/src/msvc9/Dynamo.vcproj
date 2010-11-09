@@ -51,7 +51,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories=""
-				PreprocessorDefinitions="_PULSAR_;IOMTR_OSFAMILY_WINDOWS;IOMTR_OS_WIN32;IOMTR_CPU_I386;WINVER=0x0502;IOMTR_SETTING_CPU_AFFINITY;USE_NEW_DISCOVERY_MECHANISM;FORCE_STRUCT_ALIGN;_CRT_SECURE_NO_DEPRECATE;_CONSOLE;_DEBUG;_DETAILS"
+				PreprocessorDefinitions="_PULSAR_;IOMTR_OSFAMILY_WINDOWS;IOMTR_OS_WIN32;IOMTR_CPU_I386;WINVER=0x0502;USE_NEW_DISCOVERY_MECHANISM;FORCE_STRUCT_ALIGN;_CRT_SECURE_NO_DEPRECATE;_CONSOLE;_DEBUG;_DETAILS"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				PrecompiledHeaderFile="$(IntDir)/Dynamo.pch"
@@ -112,100 +112,6 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Release|Win32"
-			OutputDirectory=".\$(ConfigurationName)\$(PlatformName)"
-			IntermediateDirectory=".\$(ConfigurationName)\obj\$(PlatformName)\$(ProjectName)"
-			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC70.vsprops"
-			UseOfMFC="1"
-			UseOfATL="0"
-			ATLMinimizesCRunTimeLibraryUsage="false"
-			CharacterSet="0"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				TypeLibraryName=".\Release/Dynamo.tlb"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories=""
-				PreprocessorDefinitions="_PULSAR_;IOMTR_OSFAMILY_WINDOWS;IOMTR_OS_WIN32;IOMTR_CPU_I386;WINVER=0x0502;IOMTR_SETTING_CPU_AFFINITY;USE_NEW_DISCOVERY_MECHANISM;FORCE_STRUCT_ALIGN;_CRT_SECURE_NO_DEPRECATE;_CONSOLE"
-				StringPooling="true"
-				RuntimeLibrary="0"
-				EnableFunctionLevelLinking="true"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="$(IntDir)/Dynamo.pch"
-				AssemblerListingLocation="$(IntDir)\"
-				ObjectFile="$(IntDir)\"
-				ProgramDataBaseFileName="$(IntDir)\"
-				WarningLevel="3"
-				SuppressStartupBanner="true"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="_PULSAR_,IOMTR_OSFAMILY_WINDOWS,IOMTR_OS_WIN32,IOMTR_CPU_I386"
-				Culture="1033"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="WS2_32.LIB MSWSOCK.LIB VERSION.LIB NETAPI32.LIB"
-				OutputFile="$(OutDir)/Dynamo.exe"
-				LinkIncremental="1"
-				SuppressStartupBanner="true"
-				IgnoreAllDefaultLibraries="false"
-				IgnoreDefaultLibraryNames=""
-				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/Dynamo.pdb"
-				StripPrivateSymbols="No"
-				SubSystem="1"
-				StackReserveSize="2097152"
-				StackCommitSize="1048576"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
 			Name="Debug|Itanium"
 			OutputDirectory=".\$(ConfigurationName)\$(PlatformName)"
 			IntermediateDirectory=".\$(ConfigurationName)\obj\$(PlatformName)\$(ProjectName)"
@@ -235,7 +141,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\..\..\bin\ddk\6000.rtm\inc\api"
+				AdditionalIncludeDirectories=""
 				PreprocessorDefinitions="_PULSAR_;IOMTR_OSFAMILY_WINDOWS;IOMTR_OS_WIN64;IOMTR_CPU_IA64;WINVER=0x0502;USE_NEW_DISCOVERY_MECHANISM;FORCE_STRUCT_ALIGN;_CRT_SECURE_NO_DEPRECATE;_DEBUG;_CONSOLE;_DETAILS"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -325,7 +231,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\..\..\bin\ddk\6000.rtm\inc\api"
+				AdditionalIncludeDirectories=""
 				PreprocessorDefinitions="_PULSAR_;IOMTR_OSFAMILY_WINDOWS;IOMTR_OS_WIN64;IOMTR_CPU_X86_64;WINVER=0x0502;USE_NEW_DISCOVERY_MECHANISM;FORCE_STRUCT_ALIGN;_CRT_SECURE_NO_DEPRECATE;_DEBUG;_CONSOLE;_DETAILS"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -386,6 +292,100 @@
 			/>
 		</Configuration>
 		<Configuration
+			Name="Release|Win32"
+			OutputDirectory=".\$(ConfigurationName)\$(PlatformName)"
+			IntermediateDirectory=".\$(ConfigurationName)\obj\$(PlatformName)\$(ProjectName)"
+			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC70.vsprops"
+			UseOfMFC="1"
+			UseOfATL="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="0"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TypeLibraryName=".\Release/Dynamo.tlb"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				InlineFunctionExpansion="1"
+				AdditionalIncludeDirectories=""
+				PreprocessorDefinitions="_PULSAR_;IOMTR_OSFAMILY_WINDOWS;IOMTR_OS_WIN32;IOMTR_CPU_I386;IOMTR_SETTING_CPU_AFFINITY;WINVER=0x0502;USE_NEW_DISCOVERY_MECHANISM;FORCE_STRUCT_ALIGN;_CRT_SECURE_NO_DEPRECATE;_CONSOLE"
+				GeneratePreprocessedFile="0"
+				StringPooling="true"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
+				PrecompiledHeaderFile="$(IntDir)/Dynamo.pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\"
+				WarningLevel="3"
+				SuppressStartupBanner="true"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_PULSAR_,IOMTR_OSFAMILY_WINDOWS,IOMTR_OS_WIN32,IOMTR_CPU_I386"
+				Culture="1033"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions="/MACHINE:I386"
+				AdditionalDependencies="WS2_32.LIB MSWSOCK.LIB VERSION.LIB NETAPI32.LIB"
+				OutputFile="$(OutDir)/Dynamo.exe"
+				LinkIncremental="1"
+				SuppressStartupBanner="true"
+				UACExecutionLevel="2"
+				IgnoreAllDefaultLibraries="false"
+				IgnoreDefaultLibraryNames=""
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(OutDir)/Dynamo.pdb"
+				StripPrivateSymbols="No"
+				SubSystem="1"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
 			Name="Release|Itanium"
 			OutputDirectory=".\$(ConfigurationName)\$(PlatformName)"
 			IntermediateDirectory=".\$(ConfigurationName)\obj\$(PlatformName)\$(ProjectName)"
@@ -418,7 +418,7 @@
 				EnableIntrinsicFunctions="false"
 				FavorSizeOrSpeed="0"
 				AdditionalIncludeDirectories=""
-				PreprocessorDefinitions="_PULSAR_;IOMTR_OSFAMILY_WINDOWS;IOMTR_OS_WIN64;IOMTR_CPU_IA64;WINVER=0x0502;IOMTR_SETTING_CPU_AFFINITY;USE_NEW_DISCOVERY_MECHANISM;FORCE_STRUCT_ALIGN;_CRT_SECURE_NO_DEPRECATE;_CONSOLE"
+				PreprocessorDefinitions="_PULSAR_;IOMTR_OSFAMILY_WINDOWS;IOMTR_OS_WIN64;IOMTR_CPU_IA64;IOMTR_SETTING_CPU_AFFINITY;WINVER=0x0502;USE_NEW_DISCOVERY_MECHANISM;FORCE_STRUCT_ALIGN;_CRT_SECURE_NO_DEPRECATE;_CONSOLE"
 				IgnoreStandardIncludePath="false"
 				GeneratePreprocessedFile="0"
 				StringPooling="true"
@@ -450,12 +450,11 @@
 				OutputFile="$(OutDir)/Dynamo.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
+				UACExecutionLevel="2"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/Dynamo.pdb"
 				StripPrivateSymbols="No"
 				SubSystem="1"
-				StackReserveSize="2097152"
-				StackCommitSize="1048576"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
 				TargetMachine="5"
@@ -513,7 +512,7 @@
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories=""
-				PreprocessorDefinitions="_PULSAR_;IOMTR_OSFAMILY_WINDOWS;IOMTR_OS_WIN64;IOMTR_CPU_X86_64;WINVER=0x0502;IOMTR_SETTING_CPU_AFFINITY;USE_NEW_DISCOVERY_MECHANISM;FORCE_STRUCT_ALIGN;_CRT_SECURE_NO_DEPRECATE;_CONSOLE"
+				PreprocessorDefinitions="_PULSAR_;IOMTR_OSFAMILY_WINDOWS;IOMTR_OS_WIN64;IOMTR_CPU_X86_64;IOMTR_SETTING_CPU_AFFINITY;WINVER=0x0502;USE_NEW_DISCOVERY_MECHANISM;FORCE_STRUCT_ALIGN;_CRT_SECURE_NO_DEPRECATE;_CONSOLE"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -543,12 +542,11 @@
 				OutputFile="$(OutDir)/Dynamo.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
+				UACExecutionLevel="2"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/Dynamo.pdb"
 				StripPrivateSymbols="No"
 				SubSystem="1"
-				StackReserveSize="2097152"
-				StackCommitSize="1048576"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
 				TargetMachine="17"
@@ -797,11 +795,11 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\pack8.h"
+				RelativePath="..\pack.h"
 				>
 			</File>
 			<File
-				RelativePath="..\unpack8.h"
+				RelativePath="..\unpack.h"
 				>
 			</File>
 			<File
@@ -839,6 +837,74 @@
 			</File>
 			<File
 				RelativePath="..\Pulsar\sources"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="non-Windows"
+			>
+			<File
+				RelativePath="..\IOManagerLinux.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\IOManagerNetware.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\IOManagerOSX.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\IOManagerSolaris.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\IOPerformanceLinux.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\IOPerformanceNetware.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\IOPerformanceOSX.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Makefile-Linux.i386"
+				>
+			</File>
+			<File
+				RelativePath="..\Makefile-Linux.ia64"
+				>
+			</File>
+			<File
+				RelativePath="..\Makefile-Linux.ppc"
+				>
+			</File>
+			<File
+				RelativePath="..\Makefile-Linux.x86_64"
+				>
+			</File>
+			<File
+				RelativePath="..\Makefile-Linux.xscale"
+				>
+			</File>
+			<File
+				RelativePath="..\Makefile-NetWare.i386"
+				>
+			</File>
+			<File
+				RelativePath="..\Makefile-OSX.all"
+				>
+			</File>
+			<File
+				RelativePath="..\Makefile-Solaris.i386"
+				>
+			</File>
+			<File
+				RelativePath="..\Makefile-Solaris.sparc"
 				>
 			</File>
 		</Filter>

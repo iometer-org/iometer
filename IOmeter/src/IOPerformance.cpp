@@ -992,7 +992,7 @@ void Performance::Extract_CPU_Counters(int snapshot)
 
 		strcpy((char *)cpu_reg_name, (char *)((LPBYTE) perf_instance + perf_instance->NameOffset));
 
-		if (perf_instance->NameLength = 6) {
+		if (perf_instance->NameLength == 6) {
 			strcat((char *)cpu_reg_name, (char *)((LPBYTE) perf_instance + perf_instance->NameOffset) + 2);
 		}
 

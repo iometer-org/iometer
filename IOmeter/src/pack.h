@@ -1,10 +1,14 @@
 /* ######################################################################### */
 /* ##                                                                     ## */
-/* ##  Iometer / Iometer.rc2                                              ## */
+/* ##  pack.h		                                                  ## */
 /* ##                                                                     ## */
 /* ## ------------------------------------------------------------------- ## */
 /* ##                                                                     ## */
-/* ##  Job .......: ...                                                   ## */
+/* ##  Job .......: Implements structurep packing                         ## */
+/* ##                                                                     ## */
+/* ## ------------------------------------------------------------------- ## */
+/* ##                                                                     ## */
+/* ##  Remarks ...: <none>                                                ## */
 /* ##                                                                     ## */
 /* ## ------------------------------------------------------------------- ## */
 /* ##                                                                     ## */
@@ -43,82 +47,27 @@
 /* ##  OF SUCH DAMAGE.                                                    ## */
 /* ##                                                                     ## */
 /* ## ------------------------------------------------------------------- ## */
-/* ##                                                                     ## */
-/* ##  Remarks ...: <none>                                                ## */
-/* ##                                                                     ## */
-/* ## ------------------------------------------------------------------- ## */
-/* ##                                                                     ## */
-/* ##  Changes ...: 2003-10-17 (daniel.scheibli@edelbyte.org)             ## */
-/* ##               - Moved to the use of the IOMTR_[OSFAMILY|OS|CPU]_*   ## */
-/* ##                 global defines.                                     ## */
-/* ##               - Integrated the License Statement into this header.  ## */
-/* ##               - Added new header holding the changelog.             ## */
-/* ##                                                                     ## */
-/* ######################################################################### */
+
+
 //
-// IOMETER.RC2 - resources Microsoft Visual C++ does not edit directly
+// Anything included after this file will have the following byte alignment
 //
 
-#ifdef APSTUDIO_INVOKED
-	#error this file is not editable by Microsoft Visual C++
-#endif //APSTUDIO_INVOKED
+#if defined(FORCE_STRUCT_ALIGN) //&& !defined(GCC_ATTRIBUTE_ALIGN)
 
-#ifndef _MAC
-/////////////////////////////////////////////////////////////////////////////
-//
-// Version
-//
-#include "winver.h"
-#include "ioversion.h"							  //Iometer version info definitions
+#if defined(IOMTR_OSFAMILY_WINDOWS)
+#pragma pack(push, 1)
 
-VS_VERSION_INFO     VERSIONINFO
-  FILEFLAGSMASK     VS_FFI_FILEFLAGSMASK    //0x0000003FL
+#elif defined(IOMTR_OSFAMILY_UNIX)
 
-#ifdef _DEBUG
-  FILEFLAGS         VS_FF_DEBUG             //0x00000001L
+#ifndef GCC_ATTRIBUTE_ALIGN
+#pragma pack(push, 1)
+#endif //GCC_ATTRIBUTE_ALIGN
 
-#else
-  FILEFLAGS         0x0L                    //release version
+// Look for GCC_ATTRIBUTE_ALIGN in iocommon.h for this definition
 
+#else // other os
+#error ===> You must include an n-byte structure packing/alignment directive.
 #endif
 
-#ifndef JLB051002
-// Make sure you put _GALILEO_ in the preprocessor defines in Project/Settings/Resources
-#endif
-
-  FILEOS            VOS__WINDOWS32          //0x00000004L
-  FILETYPE          IOVER_FILETYPE          //APP (0x1L), DLL, or STATIC_LIB
-  FILESUBTYPE       VFT2_UNKNOWN            //for FILETYPE of DRV, FONT, or VXD
-
-  FILEVERSION       IOVER_FILEVERSION_INT
-  PRODUCTVERSION    IOVER_PRODUCTVERSION_INT
-BEGIN
-    BLOCK "StringFileInfo"
-    BEGIN
-        BLOCK "040904b0"                    // Lang=US English, CharSet=Unicode
-        BEGIN
-            VALUE "Comments",           IOVER_COMMENTS
-            VALUE "CompanyName",        IOVER_COMPANYNAME
-            VALUE "FileDescription",    IOVER_FILE_DESCRIPTION
-            VALUE "FileVersion",        IOVER_FILEVERSION
-            VALUE "InternalName",       IOVER_INTERNAL_NAME
-            VALUE "LegalCopyright",     IOVER_LEGALCOPYRIGHT
-            VALUE "LegalTrademarks",    IOVER_LEGALTRADEMARKS
-            VALUE "OriginalFilename",   IOVER_ORIGINAL_FILE_NAME
-            VALUE "ProductName",        IOVER_PRODUCT_NAME
-            VALUE "ProductVersion",     IOVER_PRODUCTVERSION
-        END
-    END
-    BLOCK "VarFileInfo"
-    BEGIN
-        VALUE "Translation", 0x409, 1200
-		// English language (0x409) and the Unicode codepage (1200)
-    END
-END
-
-#endif    // !_MAC
-
-/////////////////////////////////////////////////////////////////////////////
-// Add manually edited resources here...
-
-/////////////////////////////////////////////////////////////////////////////
+#endif //FORCE_STRUCT_ALIGN

@@ -71,6 +71,8 @@ STRIP=/usr/ccs/bin/strip
 # Note 1) -DWORKAROUND_MOD_BUG can be dropped if -O is used in place of -g in CFLAGS
 # Note 2) -DIOMTR_SETTING_OVERRIDE_FS controls inclusion of destructive dynamo code.
 # Note 3) -D_DETAILS=1 -D_DEBUG=1 enables maximum debug information
+# Note 4) As of version 1.1.0, OSX support only requires the definition of any 
+#         architecture (i.e. IOMTR_CPU_xxx). Intrinsic macros will cover the rest.
 #
 CFLAGS= -O \
         -Wall \

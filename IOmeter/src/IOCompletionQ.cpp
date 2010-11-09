@@ -569,7 +569,14 @@ BOOL ReadFile(HANDLE file_handle, void *buffer, DWORD bytes_to_read, LPDWORD byt
 #warning ===> WARNING: You have to do some coding here to get the port done!
 #endif
 	{
-		cout << "queuing for read failed with error " << errno << endl;
+		if (errno == EAGAIN)
+		{
+			cout << "aio_read64 failed with EAGAIN -- system limitation???" << endl;
+		}
+		else
+		{
+			cout << "queuing for read failed with error " << errno << endl;
+		}
 		// Note that we have not set aiocb_list[] with the correct pointers.
 		// So, this slot will get grabbed in the next loop.
 		SetLastError(errno);

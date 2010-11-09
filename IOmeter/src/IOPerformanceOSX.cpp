@@ -196,7 +196,8 @@ double Performance::Get_Timer_Resolution()
 			} else {
 				cout << "Processor speed: " << speed / 1000.0 << " GHz." << endl;
 			}
-			return (double)(speed * 1000000);
+			//return (double)(speed * 1000000);
+			return timer_frequency();
 		}
 	}
 	// Round the registry value to the nearest 10
@@ -206,7 +207,15 @@ double Performance::Get_Timer_Resolution()
 	} else {
 		cout << "Processor speed: " << speed / 1000.0 << " GHz." << endl;
 	}
+
+#if 0
+	// The timer resolution may not really based on the processor frequency. 
+	// This is abstracted by the new timer code. Leave the rest of the code 
+	// above for informational purposes.
 	return (double)(speed * 1000000);
+#else
+	return timer_frequency();
+#endif
 }
 
 void Performance::Get_Perf_Data(DWORD perf_data_type, int snapshot)

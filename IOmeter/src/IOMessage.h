@@ -101,8 +101,8 @@
 //
 // The following messages require a reply, but not immediately.
 //
-#define DELAY_REPLY_FILTER	0x00100000	// DO NOT CHANGE!!!
-#define PREP_DISKS		DELAY_REPLY_FILTER + 1
+#define DELAY_REPLY_FILTER		0x00100000	// DO NOT CHANGE!!!
+#define PREP_DISKS				DELAY_REPLY_FILTER + 1
 
 //
 // A reply is NOT expected (or wanted) for the following messages.
@@ -115,9 +115,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifdef FORCE_STRUCT_ALIGN
-#include "pack8.h"
-#endif
+#include "pack.h"
 
 // Different data a message can contain.
 union Message_Data {
@@ -137,25 +135,24 @@ union Message_Data {
 	Manager_Results manager_results;
 	// Results for worker threads, including target results.
 	Worker_Results worker_results;
-};
+} STRUCT_ALIGN_IOMETER;
 
 // Format of informative and data messages.
 struct Message {
 	int purpose;		// Reason message was sent.  See constants above.
 	int data;		// Brief amount of data sent with the message.
-};
+} STRUCT_ALIGN_IOMETER;
 
 struct Data_Message {
+	int size;		// The size of Data_Message
 	int count;		// Number of data items in the message.
 #ifndef FORCE_STRUCT_ALIGN
 	char pad[4];		// coz of Solaris - NT differences
 #endif
 	Message_Data data;	// Detailed data sent with the data message.
-};
+} STRUCT_ALIGN_IOMETER;
 
-#ifdef FORCE_STRUCT_ALIGN
-#include "unpack8.h"
-#endif
+#include "unpack.h"
 
 #define MESSAGE_SIZE		sizeof( Message )
 #define DATA_MESSAGE_SIZE	sizeof( Data_Message )

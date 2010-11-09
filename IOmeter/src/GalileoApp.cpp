@@ -88,7 +88,7 @@
 //       [1] = http://msdn.microsoft.com/library/default.asp?url=/library/en-us/vclib/html/_mfc_debug_new.asp
 //
 #if defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)
-#ifdef _DEBUG
+#ifdef IOMTR_SETTING_MFC_MEMALLOC_DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
@@ -516,6 +516,7 @@ BOOL CGalileoApp::OnIdle(LONG lCount)
 	static Data_Message *login_data_msg;
 	static char *login_data_msg_ptr;
 	static DWORD login_data_msg_size;
+	static DWORD start_recv_timer = 0;
 	DWORDLONG result;
 	Message reply_to_dynamo;
 	Manager *manager;
@@ -584,6 +585,7 @@ BOOL CGalileoApp::OnIdle(LONG lCount)
 			login_msg_size = sizeof(Message);
 			login_port->Receive(login_msg_ptr, login_msg_size);	// begin receiving...
 			login_state = receiving;
+			start_recv_timer = GetTickCount();
 			return TRUE;	// go away and try again later
 		} else {
 			// There is no data for us, go back to waiting
@@ -600,14 +602,14 @@ BOOL CGalileoApp::OnIdle(LONG lCount)
 				// All bytes received!  
 
 				// Format our version number into an integer
-				int year, month, day, iometer_version;
+				int major, minor, subminor, iometer_version;
 
-				sscanf(m_pVersionString, "%d.%d.%d", &year, &month, &day);
-				iometer_version = (year * 10000) + (month * 100) + day;
+				sscanf(m_pVersionString, "%d.%d.%d", &major, &minor, &subminor);
+				iometer_version = common_encode_version(major, minor, subminor);
 
 				// Compare it with Dynamo's version number (will be 0 or uninitialized for 
 				// versions before 1998.09.23)
-				if (login_msg->data != iometer_version) {
+				if ((login_msg->data & compat_version_mask) != (iometer_version & compat_version_mask)) {
 					// give the user a message box explaining the problem
 					char errmsg[2 * MAX_VERSION_LENGTH + 100];
 
@@ -621,18 +623,20 @@ BOOL CGalileoApp::OnIdle(LONG lCount)
 					login_port->Disconnect();
 
 					if (login_msg->data > 19970101 && login_msg->data < 21001231) {
-						year = (int)(login_msg->data / 10000);
-						month = (int)(login_msg->data / 100) - (year * 100);
-						day = login_msg->data - (month * 100) - (year * 10000);
-
-						snprintf(errmsg, 2 * MAX_VERSION_LENGTH + 100,
-							"Iometer %s is not compatible with Dynamo %04d.%02d.%02d",
-							m_pVersionStringWithDebug, year, month, day);
-					} else {
-						snprintf(errmsg, 2 * MAX_VERSION_LENGTH + 100,
-							"Iometer %s is not compatible with Dynamo (unknown version number)",
-							m_pVersionStringWithDebug);
+						major = (int)(login_msg->data / 10000);
+						minor = (int)(login_msg->data / 100) - (major * 100);
+						subminor = login_msg->data - (minor * 100) - (major * 10000);
 					}
+					else
+					{
+						major = common_major_version(login_msg->data);
+						minor = common_minor_version(login_msg->data);
+						subminor = common_submn_version(login_msg->data);
+					}
+
+					snprintf(errmsg, 2 * MAX_VERSION_LENGTH + 100,
+						"Iometer %s is not compatible with Dynamo %d.%d.%d",
+						m_pVersionStringWithDebug, major, minor, subminor);
 
 					ErrorMessage(errmsg);
 
@@ -664,6 +668,18 @@ BOOL CGalileoApp::OnIdle(LONG lCount)
 			}
 		} else {
 			// Receive() has not yet completed
+			DWORD current_time = GetTickCount();
+
+			if (current_time < start_recv_timer) start_recv_timer = current_time - 1; // delay a bit if counter wrapped
+			else if (current_time - start_recv_timer >= IOMETER_RECEIVE_TIMEOUT)
+			{
+				// send a warning
+				ErrorMessage("Timed out waiting for dynamo to complete sending the login message. Please check your networking or your dynamo build.");
+				
+				delete login_msg;
+				login_state = accepting;
+			}
+
 			return TRUE;	// go away and try again later
 		}
 		break;
@@ -673,9 +689,10 @@ BOOL CGalileoApp::OnIdle(LONG lCount)
 			// There is data waiting for us!
 			login_data_msg = new Data_Message;
 			login_data_msg_ptr = (char *)login_data_msg;
-			login_data_msg_size = sizeof(Data_Message);
+			login_data_msg_size = DATA_MESSAGE_SIZE;
 			login_port->Receive(login_data_msg_ptr, login_data_msg_size);	// begin receiving...
 			login_state = receiving_data;
+			start_recv_timer = GetTickCount();
 			return TRUE;	// go away and try again later
 		} else {
 			// There is no data for us, go back to waiting
@@ -688,6 +705,17 @@ BOOL CGalileoApp::OnIdle(LONG lCount)
 		if (login_port->IsReceiveComplete()) {
 			// Yes!  Have all requested bytes been received?
 			result = login_port->GetReceiveResult();
+
+			// The first member is the size and had better not have any alignment problems!
+			if ((result >= sizeof(login_data_msg->size)) && (DATA_MESSAGE_SIZE != login_data_msg->size))
+			{
+				ErrorMessage("Receiving data failed -- invalid Data_Message size encountered. Check structure packing on dynamo build!");
+				login_port->Close();
+				login_state = failed;
+				delete login_data_msg;
+				return FALSE;
+			}
+
 			if (result == login_data_msg_size) {
 				// Keep track of whether this manager is logging in during
 				// a file restore operation.  Once the manager is added to
@@ -758,6 +786,18 @@ BOOL CGalileoApp::OnIdle(LONG lCount)
 			}
 		} else {
 			// Receive() has not yet completed
+			DWORD current_time = GetTickCount();
+
+			if (current_time < start_recv_timer) start_recv_timer = current_time - 1; // delay a bit if counter wrapped
+			else if (current_time - start_recv_timer >= IOMETER_RECEIVE_TIMEOUT)
+			{
+				// send a warning
+				ErrorMessage("Timed out waiting for dynamo to complete sending a data message. Please check your networking or your dynamo build.");
+				
+				delete login_data_msg;
+				login_state = accepting;
+			}
+
 			return TRUE;	// go away and try again later
 		}
 		break;

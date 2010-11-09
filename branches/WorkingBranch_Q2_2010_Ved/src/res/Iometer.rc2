@@ -73,19 +73,12 @@
 
 VS_VERSION_INFO     VERSIONINFO
   FILEFLAGSMASK     VS_FFI_FILEFLAGSMASK    //0x0000003FL
+
 #ifdef _DEBUG
-#if defined(IOMTR_OS_WIN64)
-  FILEFLAGS         VS_FF_DEBUG | VS_FF_SPECIALBUILD
-#else
   FILEFLAGS         VS_FF_DEBUG             //0x00000001L
-#endif // _WIN64
 
 #else
-#if defined(IOMTR_OS_WIN64)
-  FILEFLAGS         0x0L | VS_FF_SPECIALBUILD
-#else
   FILEFLAGS         0x0L                    //release version
-#endif // _WIN64
 
 #endif
 
@@ -96,6 +89,9 @@ VS_VERSION_INFO     VERSIONINFO
   FILEOS            VOS__WINDOWS32          //0x00000004L
   FILETYPE          IOVER_FILETYPE          //APP (0x1L), DLL, or STATIC_LIB
   FILESUBTYPE       VFT2_UNKNOWN            //for FILETYPE of DRV, FONT, or VXD
+
+  FILEVERSION       IOVER_FILEVERSION_INT
+  PRODUCTVERSION    IOVER_PRODUCTVERSION_INT
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN

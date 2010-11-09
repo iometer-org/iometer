@@ -232,7 +232,7 @@ BOOL Manager::Login(char* port_name, int login_port_number)
 	Message msg, reply;
 	Data_Message *data_msg;
 	size_t name_size = MAX_NETWORK_NAME;
-	int year, month, day;
+	int major, minor, subminor;
 
 	data_msg = new Data_Message;
 	// Creating login messages that include the machine name and Dynamo version.
@@ -241,8 +241,8 @@ BOOL Manager::Login(char* port_name, int login_port_number)
 	strcpy(data_msg->data.manager_info.version, m_pVersionStringWithDebug);
 	data_msg->size = DATA_MESSAGE_SIZE;
 
-	sscanf(data_msg->data.manager_info.version, "%d.%d.%d", &year, &month, &day);
-	msg.data = (year * 10000) + (month * 100) + day;
+	sscanf(data_msg->data.manager_info.version, "%d.%d.%d", &major, &minor, &subminor);
+	msg.data = common_encode_version(major, minor, subminor);
 
 	if (manager_name[0] != '\0') {
 		if (strlen(manager_name) > MAX_NETWORK_NAME) {

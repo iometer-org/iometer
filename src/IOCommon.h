@@ -651,6 +651,13 @@ enum {
 #define STRUCT_ALIGN_IOMETER
 #endif // FORCE_STRUCT_ALIGN
 
+// Allows for a 8bit.16bit.8bit version value
+#define common_encode_version(x,y,z) ((x << 24) | (y << 8) | z)
+#define common_major_version(x) ((x >> 24) & 0xff)
+#define common_minor_version(y) ((y >> 8) & 0xffff)
+#define common_submn_version(z) (z & 0xf)
+#define compat_version_mask 0xffffff00 // all but the last byte
+
 #include "pack.h"
 
 struct Manager_Info

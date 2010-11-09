@@ -840,6 +840,74 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="non-Windows"
+			>
+			<File
+				RelativePath="..\IOManagerLinux.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\IOManagerNetware.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\IOManagerOSX.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\IOManagerSolaris.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\IOPerformanceLinux.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\IOPerformanceNetware.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\IOPerformanceOSX.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Makefile-Linux.i386"
+				>
+			</File>
+			<File
+				RelativePath="..\Makefile-Linux.ia64"
+				>
+			</File>
+			<File
+				RelativePath="..\Makefile-Linux.ppc"
+				>
+			</File>
+			<File
+				RelativePath="..\Makefile-Linux.x86_64"
+				>
+			</File>
+			<File
+				RelativePath="..\Makefile-Linux.xscale"
+				>
+			</File>
+			<File
+				RelativePath="..\Makefile-NetWare.i386"
+				>
+			</File>
+			<File
+				RelativePath="..\Makefile-OSX.all"
+				>
+			</File>
+			<File
+				RelativePath="..\Makefile-Solaris.i386"
+				>
+			</File>
+			<File
+				RelativePath="..\Makefile-Solaris.sparc"
+				>
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

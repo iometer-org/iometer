@@ -183,8 +183,10 @@ int InitIoctlInterface(void)
 
 	res = open("/dev/iomtr_kstat", O_RDONLY);
 	if (res < 0) {
-		cerr << "Fail to open kstat device file. You can ignore this warning" << endl;
+#if defined(IOMTR_CPU_XSCALE)
+		cerr << "Failed to open kstat device file. You can ignore this warning" << endl;
 		cerr << "unless you are running dynamo on XSCALE CPU." << endl;
+#endif
 	}
 	return res;
 }
@@ -258,7 +260,8 @@ static int iomtr_set_cpu_affinity(ULONG_PTR affinity_mask)
 	unsigned long t = 1;
 
 	if (!affinity_mask) {
-		affinity_mask = 1;
+		//affinity_mask = 1;
+		return 0;
 	}
 	i = sizeof(unsigned long) * 8;
 	if (i > CPU_SETSIZE) {
@@ -290,6 +293,11 @@ static int iomtr_set_cpu_affinity(ULONG_PTR affinity_mask)
 #elif defined(IOMTR_OSFAMILY_WINDOWS)
 	DWORD_PTR processAffinity, systemAffinity;
 
+	if (!affinity_mask)
+	{
+		return 0;
+	}
+
 	res = GetProcessAffinityMask(GetCurrentProcess(), &processAffinity,  &systemAffinity);
 
 	if (!res) 
@@ -301,24 +309,28 @@ static int iomtr_set_cpu_affinity(ULONG_PTR affinity_mask)
 		return 0;
 	}
 
-	if (affinity_mask)
+	// Set affinity only if it is different than current and 
+	// if it is a subset of the system affinity mask
+	if (affinity_mask != processAffinity && ((affinity_mask & systemAffinity) == affinity_mask))
 	{
-		if (affinity_mask != processAffinity && ((affinity_mask & systemAffinity) == affinity_mask))
+		res = SetProcessAffinityMask(GetCurrentProcess(), affinity_mask);
+		if (!res) 
 		{
-			res = SetProcessAffinityMask(GetCurrentProcess(), affinity_mask);
-			if (!res) 
-			{
-				res = GetLastError();
-				cout << "Set cpu affinity failed with error=" << GetLastError() << endl;
-				return 0;
-			}
+			res = GetLastError();
+			cout << "Set cpu affinity failed with error=" << GetLastError() << endl;
+			return 0;
 		}
-		else
+		else 
 		{
-			cout << "Warning: ignoring affinity mask due to redundant or invalid value." << endl;
+#ifdef _DEBUG
+			cout << "Set CPU affinity sucessfully." << endl;
+#endif
 		}
 	}
-	// else // do nothing
+	else
+	{
+		cout << "Warning: ignoring affinity mask due to redundant or invalid value." << endl;
+	}
 
 #elif defined(IOMTR_OS_NETWARE) || defined(IOMTR_OS_SOLARIS)
 	// nop  
@@ -610,19 +622,19 @@ void Banner()
 	//cout << "Version " << g_pVersionStringWithDebug << endl;
 	cout << "Dynamo version " << IOVER_FILEVERSION << VERSION_DEBUG ; 
 
-#if defined(IOMTR_OSFAMILY_WINDOWS)
- #if defined(_M_IX86)
+#if (defined(IOMTR_OSFAMILY_WINDOWS) ||  defined(IOMTR_OS_LINUX))
+  #if defined(IOMTR_CPU_I386)		//#if defined(_M_IX86)
 	cout << ", Intel x86 32bit";
- #elif defined(_M_IA64)
+  #elif defined(IOMTR_CPU_IA64)		//#elif defined(_M_IA64)
 	cout << ", Intel Itanium 64bit";
- #elif defined(_M_X64)
+  #elif defined(IOMTR_CPU_X86_64)	//#elif defined(_M_X64)
 	cout << ", Intel/AMD x64 64bit";
- #else
-	cout << ", unknown architecture and bitness";
  #endif
 
 #elif defined(IOMTR_OS_LINUX)
-
+ #if defined(IOMTR_CPU_XSCALE) 
+	cout << ", Intel XScale";
+ #endif
 #elif defined(IOMTR_OS_OSX)
  #if defined(__ppc__)
 	cout << ", PowerPC 32bit";
@@ -641,8 +653,8 @@ void Banner()
  #endif
 #endif 
 
-	cout << endl;
-	cout << "Built: " << __DATE__ << " " << __TIME__ << endl;
+	// cout << endl;
+	cout << ", built " << __DATE__ << " " << __TIME__ << endl;
 	cout << endl;
 }
 

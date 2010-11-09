@@ -657,7 +657,8 @@ BOOL Grunt::Set_Access(const Test_Spec * spec)
 	return TRUE;
 }
 
-#if defined(IOMTR_SETTING_CPU_AFFINITY)
+// Do not do this yet
+#if 0 // defined(IOMTR_SETTING_CPU_AFFINITY)
 //
 // The idea is to set each of the worker threads to their own CPU, within the 
 // constraint of any other cpu affinity we have been passed at the cmd line.
@@ -693,6 +694,8 @@ void Grunt::Set_Affinity(DWORD_PTR affinity)
 			// We have a match for our index, so set the affinity for the thread
 #if defined(IOMTR_OSFAMILY_WINDOWS)
 			SetThreadAffinityMask(GetCurrentThread(), effective_affinity);
+//#elif defined(IOMTR_OS_LINUX)
+//			sched_setaffinity(gettid(), CPU_SETSIZE, &s)
 #else
 #error ===> ERROR: You have to add affinity code here
 

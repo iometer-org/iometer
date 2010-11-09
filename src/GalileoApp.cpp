@@ -602,14 +602,14 @@ BOOL CGalileoApp::OnIdle(LONG lCount)
 				// All bytes received!  
 
 				// Format our version number into an integer
-				int year, month, day, iometer_version;
+				int major, minor, subminor, iometer_version;
 
-				sscanf(m_pVersionString, "%d.%d.%d", &year, &month, &day);
-				iometer_version = (year * 10000) + (month * 100) + day;
+				sscanf(m_pVersionString, "%d.%d.%d", &major, &minor, &subminor);
+				iometer_version = common_encode_version(major, minor, subminor);
 
 				// Compare it with Dynamo's version number (will be 0 or uninitialized for 
 				// versions before 1998.09.23)
-				if (login_msg->data != iometer_version) {
+				if ((login_msg->data & compat_version_mask) != (iometer_version & compat_version_mask)) {
 					// give the user a message box explaining the problem
 					char errmsg[2 * MAX_VERSION_LENGTH + 100];
 
@@ -623,18 +623,20 @@ BOOL CGalileoApp::OnIdle(LONG lCount)
 					login_port->Disconnect();
 
 					if (login_msg->data > 19970101 && login_msg->data < 21001231) {
-						year = (int)(login_msg->data / 10000);
-						month = (int)(login_msg->data / 100) - (year * 100);
-						day = login_msg->data - (month * 100) - (year * 10000);
-
-						snprintf(errmsg, 2 * MAX_VERSION_LENGTH + 100,
-							"Iometer %s is not compatible with Dynamo %04d.%02d.%02d",
-							m_pVersionStringWithDebug, year, month, day);
-					} else {
-						snprintf(errmsg, 2 * MAX_VERSION_LENGTH + 100,
-							"Iometer %s is not compatible with Dynamo (unknown version number)",
-							m_pVersionStringWithDebug);
+						major = (int)(login_msg->data / 10000);
+						minor = (int)(login_msg->data / 100) - (major * 100);
+						subminor = login_msg->data - (minor * 100) - (major * 10000);
 					}
+					else
+					{
+						major = common_major_version(login_msg->data);
+						minor = common_minor_version(login_msg->data);
+						subminor = common_submn_version(login_msg->data);
+					}
+
+					snprintf(errmsg, 2 * MAX_VERSION_LENGTH + 100,
+						"Iometer %s is not compatible with Dynamo %d.%d.%d",
+						m_pVersionStringWithDebug, major, minor, subminor);
 
 					ErrorMessage(errmsg);
 

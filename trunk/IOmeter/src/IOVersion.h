@@ -118,9 +118,19 @@ extern "C"
 //#define IOVER_FILEVERSION				"2004.07.30-post\0"
 //#define IOVER_FILEVERSION				"2006.07.27\0"
 //#define IOVER_FILEVERSION				"2008.03.06\0"
-#define IOVER_FILEVERSION				"2008.06.18-RC2\0"
-#define IOVER_PRODUCTVERSION				IOVER_FILEVERSION
 
+// New version format:
+// x.y.z
+//    x = major version - always 1 for now
+//    y = minor version (up to 66536)
+//    z = subminor version
+
+#define IOVER_FILEVERSION				"1.1.0\0" // increment subminor to reflect a compatible fix
+#define IOVER_PRODUCTVERSION			"1.1.0\0" // subminor always stays 0 here
+
+// The integerized version of this macro utilizes 4 values, so just ignore the last one
+#define IOVER_FILEVERSION_INT			1,1,0,0 // increment subminor to reflect a compatible fix
+#define IOVER_PRODUCTVERSION_INT		1,1,0,0 // subminor always stays 0 here
 
 #if defined(IOMTR_OSFAMILY_WINDOWS)
 

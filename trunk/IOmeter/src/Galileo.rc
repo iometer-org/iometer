@@ -159,13 +159,13 @@ STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Disk Targets"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    GROUPBOX        "Targets",IDC_STATIC,2,2,379,206
+    GROUPBOX        "Targets",IDC_STATIC,0,0,379,206
     CONTROL         "Tree1",TTargets,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_DISABLEDRAGDROP | WS_DISABLED | WS_BORDER | WS_HSCROLL | WS_TABSTOP,7,11,133,193
-    GROUPBOX        "Test Connection Rate",IDC_STATIC,150,135,160,29
-    CONTROL         "",CConnectionRate,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,156,149,11,8
-    EDITTEXT        EConnectionRate,170,146,40,14,ES_AUTOHSCROLL | ES_NUMBER | WS_DISABLED
-    CONTROL         "Spin1",SConnectionRate,"msctls_updown32",UDS_WRAP | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,206,146,11,13
-    LTEXT           "Transactions per connection",IDC_STATIC,214,149,91,8
+    GROUPBOX        "Test Connection Rate",IDC_STATIC,150,144,160,29
+    CONTROL         "",CConnectionRate,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,157,158,11,8
+    EDITTEXT        EConnectionRate,170,155,40,14,ES_AUTOHSCROLL | ES_NUMBER | WS_DISABLED
+    CONTROL         "Spin1",SConnectionRate,"msctls_updown32",UDS_WRAP | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,206,155,11,13
+    LTEXT           "Transactions per connection",IDC_STATIC,214,158,91,8
     GROUPBOX        "Maximum Disk Size",IDC_STATIC,150,11,103,29
     EDITTEXT        EDiskSize,155,22,40,14,ES_AUTOHSCROLL
     LTEXT           "Sectors",IDC_STATIC,200,25,34,8
@@ -174,6 +174,12 @@ BEGIN
     GROUPBOX        "# of Outstanding I/Os",IDC_STATIC,150,78,103,29
     EDITTEXT        EQueueDepth,155,89,40,14,ES_AUTOHSCROLL | ES_NUMBER
     LTEXT           "per target",IDC_STATIC,200,90,35,10
+    GROUPBOX        "Write IO Data Pattern",IDC_STATIC,150,174,160,29
+    COMBOBOX        CDataPattern,157,185,81,78,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "Use Fixed Seed",IDC_STATIC,150,114,160,29
+    CONTROL         "",CUseFixedSeed,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,157,128,11,8
+    EDITTEXT        EFixedSeed,170,125,40,14,ES_AUTOHSCROLL | ES_NUMBER | WS_DISABLED
+    LTEXT           "Fixed Seed Value",IDC_STATIC,214,128,56,8
 END
 
 IDD_DISPLAY DIALOG  0, 0, 383, 210
@@ -501,6 +507,7 @@ BEGIN
         VERTGUIDE, 115
         VERTGUIDE, 120
         VERTGUIDE, 150
+        VERTGUIDE, 157
         VERTGUIDE, 195
         VERTGUIDE, 200
         VERTGUIDE, 253
@@ -662,9 +669,13 @@ BEGIN
         END
         POPUP "Megabytes per Second"
         BEGIN
-            MENUITEM "Total MBs per Second",        MDisplayMBsMBPS
-            MENUITEM "Read MBs per Second",         MDisplayMBsRMBPS
-            MENUITEM "Write MBs per Second",        MDisplayMBsWMBPS
+            MENUITEM "Total MBs per Second (Decimal)", MDisplayMBsMBPSDec
+            MENUITEM "Read MBs per Second (Decimal)", MDisplayMBsRMBPSDec
+            MENUITEM "Write MBs per Second (Decimal)", MDisplayMBsWMBPSDec
+            MENUITEM SEPARATOR
+            MENUITEM "Total MBs per Second (Binary)", MDisplayMBsMBPSBin
+            MENUITEM "Read MBs per Second (Binary)", MDisplayMBsRMBPSBin
+            MENUITEM "Write MBs per Second (Binary)", MDisplayMBsWMBPSBin
         END
         POPUP "Average Latency"
         BEGIN
@@ -802,6 +813,17 @@ BEGIN
 0x6944, 0x6b73, 0x5720, 0x726f, 0x656b, 0x7372, "\000" 
     CDefaultAssignment, 0x403, 16, 0
 0x654e, 0x7774, 0x726f, 0x206b, 0x6f57, 0x6b72, 0x7265, 0x0073, 
+    0
+END
+
+IDD_DISKS DLGINIT
+BEGIN
+    CDataPattern, 0x403, 16, 0
+0x6552, 0x6570, 0x7461, 0x6e69, 0x2067, 0x7962, 0x6574, 0x0073, 
+    CDataPattern, 0x403, 14, 0
+0x7350, 0x7565, 0x6f64, 0x7220, 0x6e61, 0x6f64, 0x006d, 
+    CDataPattern, 0x403, 12, 0
+0x7546, 0x6c6c, 0x7220, 0x6e61, 0x6f64, 0x006d, 
     0
 END
 

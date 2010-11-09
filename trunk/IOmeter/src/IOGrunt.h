@@ -113,7 +113,11 @@ class Grunt {
 	void Record_Off();
 	void Stop_Test();
 	void Wait_For_Stop();
-	void Set_Affinity();
+	void Set_Affinity(DWORD_PTR affinity);
+	int Get_Maximum_Sector_Size();
+	BOOL Need_Random_Buffer();
+	void Set_Random_Data_Buffer(unsigned char* _random_data_buffer, long long _random_data_buffer_size);
+	DWORDLONG Get_Target_Spec_Random_Value(int target_index);
 	//
 	///////////////////////////////////////////////////////////////////////////
 
@@ -146,6 +150,7 @@ class Grunt {
 	Access access_spec;	// Access specs for a test.
 	void *read_data;	// Pointer to general data memory area for reading and writing.
 	void *write_data;
+	void *saved_write_data_pointer;
 	int data_size;		// Size of currently allocated data buffers.
 	// This is 0 when the grunt is using the manager's buffer.
 
@@ -157,6 +162,9 @@ class Grunt {
 
 	// Indicates the grunt was assigned an idle access spec.
 	BOOL idle;
+
+	long long random_data_buffer_size;
+	unsigned char* random_data_buffer;
 
       private:
 	void Initialize_Results();

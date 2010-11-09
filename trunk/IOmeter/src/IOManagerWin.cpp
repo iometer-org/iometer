@@ -297,19 +297,6 @@ PGET_VOLUME_PATHNAMES_FOR_VOLUMENAME pGetVolumePathNamesForVolumeName = NULL;
 
 //////////////////////////////////////////LOCAL VARIABLES//////////////////////////////////////
 
-// Used for scanning the DosDevices name spacs
-struct DosDeviceEntry
-{
-	char link[_MAX_FNAME];
-	char target[_MAX_FNAME];
-};
-
-struct DosDeviceList
-{
-	int num_entries;
-	DosDeviceEntry *list; // caller must deallocates, see notes below
-};
-
 /////////////////////////////////////// LOCAL FUNCTION PROTOTYPES//////////////////////////////
 int Report_Volumes1(Target_Spec *disk_spec, int start_count);
 int Report_Volumes2(Target_Spec *disk_spec, int start_count, bool force_all);
@@ -468,7 +455,7 @@ int Manager::Report_Disks( Target_Spec* disk_spec )
 		//
 		// Allocate temporary storage in which we will store our newly sorted list of target_specs
 		// including additional raw disks for hte optional allocating dummy volumes (see below).
-		Target_Spec *new_disks = new Target_Spec[device_count + raw_count];
+		Target_Spec *new_disks = new Target_Spec[device_count + raw_count + 1]; // is the +1 really necessary?
 
 		//
 		// Sort the whole thing based on storage number, tagging each item for tree view 
@@ -1003,13 +990,13 @@ Report_Volumes2( Target_Spec* disk_spec, int start_count, bool force_all )
 		{
 			// display non-fixed disk type
 			if (drive_type == DRIVE_REMOVABLE)
-				strcat (disk_spec[count].name, " (RMV");
+				strcat (disk_spec[count].name, " (REMOVABLE");
 			else if (drive_type == DRIVE_CDROM)
 				strcat (disk_spec[count].name, " (ROM");
 			else if (drive_type == DRIVE_RAMDISK)
 				strcat (disk_spec[count].name, " (RAM");
 			else 
-				strcat (disk_spec[count].name, " (UNK");
+				strcat (disk_spec[count].name, " (UNKNOWN");
 
 			// display read_only flag
 			if (disk_spec[count].read_only)
@@ -1193,7 +1180,6 @@ int Report_RawDisks( Target_Spec *disk_spec, int start_count, int view_type )
 	int	drive_number = 0, number_skipped = 0;
 	int count = start_count;
 	TargetDisk d;
-	DosDeviceList dev_list = {0,0};
 
 	cout << "Reporting raw disk information..." << endl;
 
@@ -1287,8 +1273,6 @@ DoHoleCheck:
 			break;
 	}
 
-	delete [] dev_list.list;
-
 	cout << "Found: " << (count - start_count) << endl;
 	return count;
 
@@ -1372,7 +1356,7 @@ bool GetDeviceNumber(char *name, PSTORAGE_DEVICE_NUMBER sdn)
 	#if _DETAILS
 	cout << " DeviceType=" << (int) storDevNum.DeviceType
 		 << " DeviceNumber=" << (int) storDevNum.DeviceNumber 
-		 << " ParitionNumber=" << (int) storDevNum.PartitionNumber << endl;
+		 << " PartitionNumber=" << (int) storDevNum.PartitionNumber << endl;
 	#endif
 
 	//
@@ -1420,8 +1404,8 @@ bool GetDiskExtents(char *name, PVOID vde, PULONG size, bool allocate)
 		return FALSE;
 	}
 
-	// some weird packing problem, so use *2 for initial, just to be sure
-	bufLen = sizeof(VOLUME_DISK_EXTENTS) * 2;
+	// some weird packing problem, so use 4 extents for starters
+	bufLen = sizeof(VOLUME_DISK_EXTENTS) +  4 * sizeof(DISK_EXTENT);
 
 	while (tries--) {
 		volBuf =  new char[bufLen];
@@ -1438,20 +1422,21 @@ bool GetDiskExtents(char *name, PVOID vde, PULONG size, bool allocate)
 			NULL);
 
 		if (!ErrorCode) {
+			ErrorCode = GetLastError();
 			delete [] volBuf;
-			if (GetLastError() != ERROR_MORE_DATA) { 
+			if (ErrorCode == ERROR_MORE_DATA || ErrorCode == ERROR_INSUFFICIENT_BUFFER) {
+				//bufLen = sizeof(VOLUME_DISK_EXTENTS) + ((volDiskExt->NumberOfDiskExtents-1) * sizeof(DISK_EXTENT));
+				bufLen *=4;
+			#ifdef _DETAILS
+				cout << "GetDiskExtents(): Retrying IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS to device "
+					 << Buffer <<  " with size=" << bufLen << ", numext=" << volDiskExt->NumberOfDiskExtents << endl;
+			#endif
+			} else { 
 			//#ifdef _DETAILS
 				cerr << "GetDiskExtents(): Failed sending IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS with error="
 					 << GetLastError() << endl;
 			//#endif
 				break;
-			}
-			else {
-				bufLen = sizeof(VOLUME_DISK_EXTENTS) + ((volDiskExt->NumberOfDiskExtents-1) * sizeof(DISK_EXTENT));
-			#ifdef _DETAILS
-				cout << "GetDiskExtents(): Retrying IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS to device "
-					 << Buffer <<  " with size=" << bufLen << ", numext=" << volDiskExt->NumberOfDiskExtents << endl;
-			#endif
 			}
 		}
 		else break;
@@ -1771,7 +1756,7 @@ int MergeVolumesAndRawDisks(Target_Spec *dest, Target_Spec *source, ULONG mid_po
 		// problem is if there are holes. Could check for easy case first (plus extents) and 
 		// then fall back to slow search.
 
-		int quick_index = mid_point + GET_SDN_PTR(source[v].disk_info)->DeviceNumber;
+		int quick_index = mid_point + GET_SDN_PTR(source[v].disk_info)->DeviceNumber + 1;
 		if (EQUAL_DEVICE_NUMBERS(GET_SDN_PTR(source[v].disk_info), GET_SDN_PTR(source[quick_index].disk_info)))
 		{
 			PVOLUME_DISK_EXTENTS *pvde = GET_VDE_PTR(source[v].disk_info);				
@@ -1781,7 +1766,7 @@ int MergeVolumesAndRawDisks(Target_Spec *dest, Target_Spec *source, ULONG mid_po
 			source[quick_index].type = PhysicalDiskTypeHasPartitions;
 
 #ifdef _DETAILS2 
-		cout << " Quick-matched raw disk " << source[quick_index].name << endl;
+		cout << " Quick matched raw disk " << source[quick_index].name << endl;
 #endif
 
 			dest[++d] = source[quick_index];
@@ -1866,14 +1851,15 @@ int MergeVolumesAndRawDisks(Target_Spec *dest, Target_Spec *source, ULONG mid_po
 
 						// re-scan the raw list for the rest of the extents
 						ULONG e=1;
-						for (ULONG rr = mid_point; 
-							 (rr < (total - mid_point)) && (e < (*pvde)->NumberOfDiskExtents);
+						for (ULONG rr = r+1; 
+							 (rr < total) && (e < (*pvde)->NumberOfDiskExtents);
 							 rr++)
 						{
 							if (source[rr].type == 0)
 								continue;
 
 							psdn = GET_SDN_PTR(source[rr].disk_info);
+
 							// this only works, becuase both raw and extents disk numbers ordered
 							if (psdn->DeviceType == FILE_DEVICE_DISK &&
 								(psdn->DeviceNumber == (*pvde)->Extents[e].DiskNumber))

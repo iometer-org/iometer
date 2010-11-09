@@ -122,7 +122,7 @@
 //       [1] = http://msdn.microsoft.com/library/default.asp?url=/library/en-us/vclib/html/_mfc_debug_new.asp
 //
 #if defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)
-#ifdef _DEBUG
+#ifdef IOMTR_SETTING_MFC_MEMALLOC_DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
@@ -776,6 +776,7 @@ DWORDLONG PortTCP::SynchSend(LPVOID msg, DWORD size)
 	int bytes_written;
 	DWORD total_bytes_written = 0;
 	DWORD total_size = size;
+	static int error_count=0;
 
 #ifdef _DEBUG
 	cout << "in SynchSend " << endl;
@@ -784,13 +785,32 @@ DWORDLONG PortTCP::SynchSend(LPVOID msg, DWORD size)
 		bytes_written = send(client_socket, (char *)msg, size, 0);
 
 		if (bytes_written == 0 || bytes_written == SOCKET_ERROR) {
-			// socket has been closed, return error
-			*errmsg << "===> ERROR: Send failed." << endl
-			    << "     [PortTCP::SynchSend() in " << __FILE__ << " line " << __LINE__ << "]" << endl
-			    << "     errno = " << WSAGetLastError() << ends;
-			OutputErrMsg();
+			error_count++;
+			if (error_count == 1 || error_count%10 == 0) {
+				// socket has been closed, return error
+				*errmsg << "===> ERROR: Send failed." << endl
+					<< "     [PortTCP::SynchSend() in " << __FILE__ << " line " << __LINE__ << "]" << endl
+					<< "     errno = " << WSAGetLastError() << endl
+					<< "     error repeats " << error_count << " time(s)." << ends;
+
+				OutputErrMsg();
+			}
 			return PORT_ERROR;
 		}
+		else
+		{
+			if (error_count)
+			{
+				*errmsg << "===> ERROR: Send failed." << endl
+					<< "     [PortTCP::SynchSend() in " << __FILE__ << " line " << __LINE__ << "]" << endl
+					<< "     errno = " << WSAGetLastError() << endl
+					<< "     error repeated " << error_count << " time(s)." << ends;
+				OutputErrMsg();
+			}
+
+			error_count=0;
+		}
+
 #if PORT_DETAILS || _DETAILS
 		cout << "Sent " << bytes_written << " of " << size << " bytes to socket " << name << "." << endl;
 #endif
@@ -900,7 +920,7 @@ DWORD PortTCP::Peek()
 			//otherwise, there are no bytes available, this prevents recv() from blocking
 			bytes_available = 0;
 		}
-		success = ((long)bytes_available != SOCKET_ERROR);
+		success = (bytes_available != SOCKET_ERROR); // was (long)bytes_available ...
 	}
 #if defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)
 	else {

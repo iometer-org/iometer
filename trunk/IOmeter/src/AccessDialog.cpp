@@ -75,7 +75,7 @@
 //       [1] = http://msdn.microsoft.com/library/default.asp?url=/library/en-us/vclib/html/_mfc_debug_new.asp
 //
 #if defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)
-#ifdef _DEBUG
+#ifdef IOMTR_SETTING_MFC_MEMALLOC_DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
@@ -308,7 +308,7 @@ BOOL CAccessDialog::OnInitDialog()
 void CAccessDialog::SizeToText(DWORD size, CString * size_text)
 {
 	// Breaking the size down into MBs, KBs, and bytes.
-	size_text->Format("%4dMB %4dKB %4dB", size / MEGABYTE, (size % MEGABYTE) / KILOBYTE, size % KILOBYTE);
+	size_text->Format("%4dMB %4dKB %4dB", size / MEGABYTE_BIN, (size % MEGABYTE_BIN) / KILOBYTE_BIN, size % KILOBYTE_BIN);
 }
 
 //
@@ -320,13 +320,13 @@ DWORD CAccessDialog::GetMKBEditbox(MKBControls * which)
 	// If any edit boxes are blank, set their sliders to the appropriate current value 
 	// (which, in turn, sets the edit box).
 	if (!which->EBytesCtrl->LineLength())
-		which->SBytesCtrl->SetPos((this->*(which->GetFunc)) () % KILOBYTE);
+		which->SBytesCtrl->SetPos((this->*(which->GetFunc)) () % KILOBYTE_BIN);
 
 	if (!which->EKilobytesCtrl->LineLength())
-		which->SKilobytesCtrl->SetPos(((this->*(which->GetFunc)) () % MEGABYTE) / KILOBYTE);
+		which->SKilobytesCtrl->SetPos(((this->*(which->GetFunc)) () % MEGABYTE_BIN) / KILOBYTE_BIN);
 
 	if (!which->EMegabytesCtrl->LineLength())
-		which->SMegabytesCtrl->SetPos((this->*(which->GetFunc)) () / MEGABYTE);
+		which->SMegabytesCtrl->SetPos((this->*(which->GetFunc)) () / MEGABYTE_BIN);
 
 	// Verify that the megabyte value has not overflowed.
 	if (GetDlgItemInt(which->EMegabytesID) > MAX_SIZE_RANGE) {
@@ -336,7 +336,7 @@ DWORD CAccessDialog::GetMKBEditbox(MKBControls * which)
 	}
 
 	return GetDlgItemInt(which->EBytesID)
-	    + GetDlgItemInt(which->EKilobytesID) * KILOBYTE + GetDlgItemInt(which->EMegabytesID) * MEGABYTE;
+	    + GetDlgItemInt(which->EKilobytesID) * KILOBYTE_BIN + GetDlgItemInt(which->EMegabytesID) * MEGABYTE_BIN;
 }
 
 //
@@ -346,7 +346,7 @@ DWORD CAccessDialog::GetMKBEditbox(MKBControls * which)
 DWORD CAccessDialog::GetMKBSpinners(MKBControls * which)
 {
 	return (which->SBytesCtrl->GetPos() +
-		which->SKilobytesCtrl->GetPos() * KILOBYTE + which->SMegabytesCtrl->GetPos() * MEGABYTE);
+		which->SKilobytesCtrl->GetPos() * KILOBYTE_BIN + which->SMegabytesCtrl->GetPos() * MEGABYTE_BIN);
 }
 
 //
@@ -717,11 +717,11 @@ void CAccessDialog::SetMKBSpinners(MKBControls * which, DWORD new_value)
 	// Updating the display.  Since the spin controls are linked to the
 	// edit boxes, we only need to update the spinners.
 	if (GetFocus() != which->EBytesCtrl)
-		which->SBytesCtrl->SetPos(new_value % KILOBYTE);
+		which->SBytesCtrl->SetPos(new_value % KILOBYTE_BIN);
 	if (GetFocus() != which->EKilobytesCtrl)
-		which->SKilobytesCtrl->SetPos((new_value % MEGABYTE) / KILOBYTE);
+		which->SKilobytesCtrl->SetPos((new_value % MEGABYTE_BIN) / KILOBYTE_BIN);
 	if (GetFocus() != which->EMegabytesCtrl)
-		which->SMegabytesCtrl->SetPos(new_value / MEGABYTE);
+		which->SMegabytesCtrl->SetPos(new_value / MEGABYTE_BIN);
 }
 
 //

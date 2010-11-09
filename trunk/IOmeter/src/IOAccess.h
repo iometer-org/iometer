@@ -62,9 +62,7 @@
 					    // byte alignment (because the alignment isn't a
 					    // power of two)
 
-#ifdef FORCE_STRUCT_ALIGN
-#include "pack8.h"
-#endif
+#include "pack.h"
 
 typedef struct {
 	int random;
@@ -75,7 +73,7 @@ typedef struct {
 	DWORD align;
 	DWORD reply;
 	DWORDLONG align_mask;
-} ACCESS;
+} STRUCT_ALIGN_IOMETER ACCESS;
 
 struct Access_Spec {
 	int of_size;		// Indicates how many percent this Access_Spec
@@ -89,11 +87,9 @@ struct Access_Spec {
 	DWORD align;
 	DWORD reply;
 	DWORD size;
-};
+} STRUCT_ALIGN_IOMETER;
 
-#ifdef FORCE_STRUCT_ALIGN
-#include "unpack8.h"
-#endif
+#include "unpack.h"
 
 #define Access_Specs Access_Spec*
 #define MAX_ACCESS_SPECS	100	// Maximum number of specs in a total specification.
@@ -116,6 +112,7 @@ class Access {
 
 	int max_transfer;	// Maximum size of a transfer request for a test.
 
+	BOOL HasWrite();
       private:
 
 	ACCESS access_grid[MAX_ACCESS_SPECS];

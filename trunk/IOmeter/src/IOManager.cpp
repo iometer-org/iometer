@@ -183,6 +183,8 @@ Manager::~Manager()
 	prt->Close();
 	delete prt;
 
+	Delete_Random_Data();
+
 #if defined(IOMTR_OS_LINUX) || defined(IOMTR_OS_OSX) || defined(IOMTR_OS_SOLARIS)
 	if (data != NULL)
 		free(data);
@@ -228,19 +230,19 @@ BOOL Manager::Login(char* port_name, int login_port_number)
 {
 	Port *login_port;
 	Message msg, reply;
-	Data_Message data_msg;
+	Data_Message *data_msg;
 	size_t name_size = MAX_NETWORK_NAME;
-	int year, month, day;
+	int major, minor, subminor;
 
+	data_msg = new Data_Message;
 	// Creating login messages that include the machine name and Dynamo version.
 	// The version number is included in two places for backward compatibility.
 	msg.purpose = LOGIN;
-	strcpy(data_msg.data.manager_info.version, m_pVersionStringWithDebug);
-#ifdef _DEBUG
-	cout << "dynamo version: " << data_msg.data.manager_info.version << ", data_msg size: " << sizeof(data_msg) << endl;
-#endif
-	sscanf(data_msg.data.manager_info.version, "%d.%d.%d", &year, &month, &day);
-	msg.data = (year * 10000) + (month * 100) + day;
+	strcpy(data_msg->data.manager_info.version, m_pVersionStringWithDebug);
+	data_msg->size = DATA_MESSAGE_SIZE;
+
+	sscanf(data_msg->data.manager_info.version, "%d.%d.%d", &major, &minor, &subminor);
+	msg.data = common_encode_version(major, minor, subminor);
 
 	if (manager_name[0] != '\0') {
 		if (strlen(manager_name) > MAX_NETWORK_NAME) {
@@ -249,7 +251,7 @@ BOOL Manager::Login(char* port_name, int login_port_number)
 			exit(1);
 		}
 
-		strcpy(data_msg.data.manager_info.names[0], manager_name);
+		strcpy(data_msg->data.manager_info.names[0], manager_name);
 		name_size = strlen(manager_name);
 	} else {
 #if defined(IOMTR_OS_LINUX) || defined(IOMTR_OS_NETWARE) || defined(IOMTR_OS_OSX) || defined(IOMTR_OS_SOLARIS)
@@ -258,19 +260,19 @@ BOOL Manager::Login(char* port_name, int login_port_number)
 			cout << "*** Exiting... gethostname() returned error " << errno << endl;
 			exit(1);
 		}
-		name_size = strlen(data_msg.data.manager_info.names[0]);
+		name_size = strlen(data_msg->data.manager_info.names[0]);
 #elif defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)
 		GetComputerName(manager_name, (LPDWORD) & name_size);
-		data_msg.data.manager_info.timer_resolution = perf_data[WHOLE_TEST_PERF].timer_resolution;
+		data_msg->data.manager_info.timer_resolution = perf_data[WHOLE_TEST_PERF].timer_resolution;
 #else
 #warning ===> WARNING: You have to do some coding here to get the port done!
 #endif
-		strcpy(data_msg.data.manager_info.names[0], manager_name);
+		strcpy(data_msg->data.manager_info.names[0], manager_name);
 	}
-	strcpy(data_msg.data.manager_info.names[1], prt->network_name);
-	data_msg.data.manager_info.port_number = prt->network_port;
-	data_msg.data.manager_info.timer_resolution = perf_data[WHOLE_TEST_PERF].timer_resolution;
-	data_msg.data.manager_info.processors = perf_data[WHOLE_TEST_PERF].processor_count;
+	strcpy(data_msg->data.manager_info.names[1], prt->network_name);
+	data_msg->data.manager_info.port_number = prt->network_port;
+	data_msg->data.manager_info.timer_resolution = perf_data[WHOLE_TEST_PERF].timer_resolution;
+	data_msg->data.manager_info.processors = perf_data[WHOLE_TEST_PERF].processor_count;
 
 #if defined(IOMTR_CPU_SPARC)
 #if defined(IOMTR_OS_SOLARIS)
@@ -294,11 +296,34 @@ BOOL Manager::Login(char* port_name, int login_port_number)
 #endif
 #endif
 
+#if _DEBUG
+	{
+		Test_Spec ts;
+
+		printf("Debugging structure sizes...\n");
+		printf(" Sizes: data_msg=%d\n",sizeof(Data_Message) );
+		printf(" Sizes: bool=%d, int=%d, long=%d, dword=%d, ulonglong=%d, dwordlong=%d, long*=%d\n", 
+			sizeof (BOOL), sizeof(int), sizeof(LONG), sizeof(DWORD), sizeof(unsigned long long), sizeof(DWORDLONG), sizeof(LONG*));
+		printf(" Sizes: Message_Data=%d, Manager_Info=%d, Target_Spec=%d, Access_Spec=%d,\n"
+			   "        Test_Spec=%d, Manager_Results=%d, Worker_Results=%d\n",
+			sizeof(Message_Data), sizeof(Manager_Info), sizeof(Target_Spec), sizeof(Access_Spec), sizeof(Test_Spec),
+			sizeof(Manager_Results), sizeof(Worker_Results));
+
+		printf(" Test_Spec member offsets: def_assign=%" IOMTR_FORMAT_SPEC_POINTER "d, name=%" IOMTR_FORMAT_SPEC_POINTER "d, access=%" IOMTR_FORMAT_SPEC_POINTER "d\n",
+				(DWORD_PTR) ((unsigned char *) &ts.default_assignment - (unsigned char *) &ts), (DWORD_PTR) ((unsigned char *) &ts.name - (unsigned char *) &ts), (DWORD_PTR) ((unsigned char *)&ts.access - (unsigned char *) &ts));
+
+		printf(" Sizes: Disk_Spec=%d, TCP_Spec=%d, VI_Spec=%d\n", sizeof(Disk_Spec), sizeof(TCP_Spec), sizeof(VI_Spec));
+	}
+#endif
+
+
+
+
 	// Sending login request message.
 	cout << "Sending login request..." << endl;
-	cout << "   " << data_msg.data.manager_info.names[0] << endl;
-	cout << "   " << data_msg.data.manager_info.names[1]
-	    << " (port " << data_msg.data.manager_info.port_number << ")" << endl;
+	cout << "   " << data_msg->data.manager_info.names[0] << endl;
+	cout << "   " << data_msg->data.manager_info.names[1]
+	    << " (port " << data_msg->data.manager_info.port_number << ")" << endl;
 
 	if (prt->type == PORT_TYPE_TCP) {
 		login_port = new PortTCP;
@@ -316,13 +341,15 @@ BOOL Manager::Login(char* port_name, int login_port_number)
 
 	if (IsBigEndian()) {
 		(void)reorder(msg);
-		(void)reorder(data_msg, DATA_MESSAGE_MANAGER_INFO, SEND);
+		(void)reorder(*data_msg, DATA_MESSAGE_MANAGER_INFO, SEND);
 	}
 #if defined (IOMTR_OS_LINUX) && defined (IOMTR_CPU_XSCALE)
-	Manager_Info_double_swap(&data_msg.data.manager_info);
+	Manager_Info_double_swap(&data_msg->data.manager_info);
 #endif
 	login_port->Send(&msg);
-	login_port->Send(&data_msg, DATA_MESSAGE_SIZE);
+	login_port->Send(data_msg, DATA_MESSAGE_SIZE);
+
+	delete data_msg;
 
 	// wait to receive reply to login request, then get the incoming message...
 	if (login_port->Receive(&reply) == PORT_ERROR) {
@@ -579,6 +606,12 @@ int Manager::Report_VIs(Target_Spec * vi_spec)
 void Manager::Prepare_Disks(int target)
 {
 	int i, loop_start, loop_finish;
+
+	// Check if the random data buffer has been created. If not, allocate and fill it
+	if (randomDataBuffers.empty())
+	{
+		GenerateRandomData();
+	}
 
 	if (target == ALL_WORKERS) {
 		// Preparing all grunts at the same time.  This requires a great
@@ -856,6 +889,7 @@ BOOL Manager::Process_Message()
 #endif
 		Prepare_Disks(msg.data);
 		break;
+
 		// Signalling to stop disk preparation.
 	case STOP_PREPARE:
 #if _DETAILS
@@ -992,6 +1026,14 @@ void Manager::Start_Test(int target)
 {
 	int g;
 
+	IsWrite = FALSE;
+
+	// Check if the random data buffer has been created. If not, allocate and fill it
+	if (randomDataBuffers.empty())
+	{
+		GenerateRandomData();
+	}
+
 	cout << "Starting..." << endl << flush;
 
 	// Start all the grunts.  This creates the grunt threads.
@@ -1009,6 +1051,104 @@ void Manager::Start_Test(int target)
 	// Reply that test has started.
 	msg.data = TRUE;
 	prt->Send(&msg);
+}
+
+void Manager::GenerateRandomData() 
+{
+	cout << "   Generating random data..." << endl;
+
+	//Find the first grunt with a target and use the spec.random from it to seed the PRNG
+	DWORDLONG SeedVal;
+
+	Delete_Random_Data();
+	for (int i=0;i<grunt_count;i++)
+	{
+		if(grunts[i]->target_count > 0)
+		{
+			if(grunts[i]->Need_Random_Buffer()) 
+			{
+				SeedVal = grunts[i]->Get_Target_Spec_Random_Value(0);
+				cout << "   Seeding Random Data Random Number Generator from Target Spec to:" << (unsigned int)SeedVal << endl;
+
+				map<DWORDLONG,unsigned char*>::iterator it = randomDataBuffers.find(SeedVal);
+				if(it != randomDataBuffers.end()) 
+				{
+					cout << "   Using existing random data." << endl;
+					grunts[i]->Set_Random_Data_Buffer(randomDataBuffers[SeedVal], RANDOM_BUFFER_SIZE);
+				} 
+				else 
+				{
+					srand(SeedVal);
+
+	//random data used for writes
+#if defined(IOMTR_OSFAMILY_NETWARE)
+					randomDataBuffers[SeedVal] = NXMemAlloc(RANDOM_BUFFER_SIZE, 1);
+
+#elif defined(IOMTR_OSFAMILY_UNIX)
+#if defined(IOMTR_OS_LINUX)
+					posix_memalign((void **)&randomDataBuffers[SeedVal], sysconf(_SC_PAGESIZE), RANDOM_BUFFER_SIZE);
+
+#elif defined(IOMTR_OS_SOLARIS) || defined(IOMTR_OS_OSX)
+					randomDataBuffers[SeedVal] = (unsigned char *) valloc(RANDOM_BUFFER_SIZE);
+
+#else
+					#warning ===> WARNING: You have to do some coding here to get the port done! 
+#endif
+
+#elif defined(IOMTR_OSFAMILY_WINDOWS)
+					randomDataBuffers[SeedVal] = (unsigned char*)VirtualAlloc(NULL, RANDOM_BUFFER_SIZE, MEM_COMMIT|MEM_RESERVE, PAGE_READWRITE);
+
+#else
+					#warning ===> WARNING: You have to do some coding here to get the port done!
+#endif
+
+					if (randomDataBuffers[SeedVal] != NULL) 
+					{
+						for( int x = 0; x < RANDOM_BUFFER_SIZE; x++)
+							randomDataBuffers[SeedVal][x] = (unsigned char)rand();
+
+						grunts[i]->Set_Random_Data_Buffer(randomDataBuffers[SeedVal], RANDOM_BUFFER_SIZE);
+						cout << "   Done generating random data." << endl;
+					} 
+					else 
+					{
+						// Could not allocate a larger buffer.  Signal failure.
+						cout << "   Error allocating random data buffer..." << endl;
+					}
+
+				}
+			}
+		}
+	}
+}
+
+//
+// Deletes all random data buffers
+//
+void Manager::Delete_Random_Data()
+{
+	if (!randomDataBuffers.empty())
+	{
+		map<DWORDLONG,unsigned char*>::iterator it;
+
+		for ( it=randomDataBuffers.begin() ; it != randomDataBuffers.end(); it++ )
+		{
+#if defined(IOMTR_OS_LINUX) || defined(IOMTR_OS_OSX) || defined(IOMTR_OS_SOLARIS)
+			free((*it).second);
+
+#elif defined(IOMTR_OS_NETWARE)
+			NXMemFree((*it).second);
+
+#elif defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)
+			VirtualFree((*it).second, 0, MEM_RELEASE);
+	
+#else
+#warning ===> WARNING: You have to do some coding here to get the port done!
+#endif
+		}
+
+		randomDataBuffers.clear();
+	}
 }
 
 //
@@ -1052,6 +1192,8 @@ void Manager::Begin_IO(int target)
 //
 void Manager::Stop_Test(int target)
 {
+	IsWrite = FALSE;
+
 	if (target == ALL_WORKERS) {
 		for (int i = 0; i < grunt_count; i++) {
 			grunts[i]->Stop_Test();
@@ -1147,6 +1289,9 @@ BOOL Manager::Set_Access(int target, const Test_Spec * spec)
 {
 	int g;			// loop control variable
 
+	if(spec->access->reads < 100)
+		IsWrite = TRUE;
+
 	// Recursively assign all workers the same access specification.
 	if (target == ALL_WORKERS) {
 		cout << "All workers running Access Spec: " << spec->name << endl;
@@ -1205,6 +1350,7 @@ BOOL Manager::Set_Access(int target, const Test_Spec * spec)
 		if (!grunts[g]->data_size) {
 			grunts[g]->read_data = data;
 			grunts[g]->write_data = data;
+			grunts[g]->saved_write_data_pointer = data;
 		}
 	}
 	return TRUE;

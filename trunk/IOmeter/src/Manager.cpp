@@ -83,7 +83,7 @@
 //       [1] = http://msdn.microsoft.com/library/default.asp?url=/library/en-us/vclib/html/_mfc_debug_new.asp
 //
 #if defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)
-#ifdef _DEBUG
+#ifdef IOMTR_SETTING_MFC_MEMALLOC_DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
@@ -509,16 +509,18 @@ void Manager::UpdateTargetLists()
 void Manager::InitTargetList(CTypedPtrArray < CPtrArray, Target_Spec * >*targets)
 {
 	int i;
-	Data_Message data_msg;
+	Data_Message *data_msg;
 	Target_Spec *target_spec;
 
+	data_msg = new Data_Message;
+
 	// Receive the target specifications in a data message.
-	ReceiveData(&data_msg);
+	ReceiveData(data_msg);
 
 	// Add the targets to the specified array.
-	for (i = 0; i < data_msg.count; i++) {
+	for (i = 0; i < data_msg->count; i++) {
 		target_spec = new Target_Spec;
-		memcpy(target_spec, &data_msg.data.targets[i], sizeof(Target_Spec));
+		memcpy(target_spec, &data_msg->data.targets[i], sizeof(Target_Spec));
 
 		// Initialize the target specs to the default settings.
 		target_spec->queue_depth = 1;
@@ -527,6 +529,8 @@ void Manager::InitTargetList(CTypedPtrArray < CPtrArray, Target_Spec * >*targets
 
 		targets->Add(target_spec);
 	}
+
+	delete data_msg;
 }
 
 //
@@ -605,9 +609,12 @@ void Manager::SaveResults(ostream * file, int access_index, int result_type)
 	    << "," << results[WHOLE_TEST_PERF].IOps
 	    << "," << results[WHOLE_TEST_PERF].read_IOps
 	    << "," << results[WHOLE_TEST_PERF].write_IOps
-	    << "," << results[WHOLE_TEST_PERF].MBps
-	    << "," << results[WHOLE_TEST_PERF].read_MBps
-	    << "," << results[WHOLE_TEST_PERF].write_MBps
+	    << "," << results[WHOLE_TEST_PERF].MBps_Bin
+	    << "," << results[WHOLE_TEST_PERF].read_MBps_Bin
+	    << "," << results[WHOLE_TEST_PERF].write_MBps_Bin
+	    << "," << results[WHOLE_TEST_PERF].MBps_Dec
+	    << "," << results[WHOLE_TEST_PERF].read_MBps_Dec
+	    << "," << results[WHOLE_TEST_PERF].write_MBps_Dec
 	    << "," << results[WHOLE_TEST_PERF].transactions_per_second
 	    << "," << results[WHOLE_TEST_PERF].connections_per_second
 	    << "," << results[WHOLE_TEST_PERF].ave_latency
@@ -695,7 +702,7 @@ void Manager::SaveResults(ostream * file, int access_index, int result_type)
 void Manager::UpdateResults(int which_perf)
 {
 	Worker *worker;
-	Data_Message data_msg;
+	Data_Message *data_msg;
 	CPU_Results *cpu_results;
 	Net_Results *net_results;
 	_int64 start_perf_time, end_perf_time;
@@ -718,14 +725,19 @@ void Manager::UpdateResults(int which_perf)
 			return;
 	}
 
-	// Get results from manager.
-	if (ReceiveData(&data_msg) == PORT_ERROR)
-		return;
+	data_msg = new Data_Message;
 
-	cpu_results = &(data_msg.data.manager_results.cpu_results);
-	net_results = &(data_msg.data.manager_results.net_results);
-	start_perf_time = data_msg.data.manager_results.time_counter[FIRST_SNAPSHOT];
-	end_perf_time = data_msg.data.manager_results.time_counter[LAST_SNAPSHOT];
+	// Get results from manager.
+	if (ReceiveData(data_msg) == PORT_ERROR)
+	{
+		delete data_msg;
+		return;
+	}
+
+	cpu_results = &(data_msg->data.manager_results.cpu_results);
+	net_results = &(data_msg->data.manager_results.net_results);
+	start_perf_time = data_msg->data.manager_results.time_counter[FIRST_SNAPSHOT];
+	end_perf_time = data_msg->data.manager_results.time_counter[LAST_SNAPSHOT];
 
 	// Reset aggregate related utilizations.
 	for (stat = 0; stat < CPU_RESULTS; stat++)
@@ -790,9 +802,12 @@ void Manager::UpdateResults(int which_perf)
 		results[which_perf].raw.write_count += worker->results[which_perf].raw.write_count;
 
 		// Recording throughput results.
-		results[which_perf].MBps += worker->results[which_perf].MBps;
-		results[which_perf].read_MBps += worker->results[which_perf].read_MBps;
-		results[which_perf].write_MBps += worker->results[which_perf].write_MBps;
+		results[which_perf].MBps_Bin += worker->results[which_perf].MBps_Bin;
+		results[which_perf].read_MBps_Bin += worker->results[which_perf].read_MBps_Bin;
+		results[which_perf].write_MBps_Bin += worker->results[which_perf].write_MBps_Bin;
+		results[which_perf].MBps_Dec += worker->results[which_perf].MBps_Dec;
+		results[which_perf].read_MBps_Dec += worker->results[which_perf].read_MBps_Dec;
+		results[which_perf].write_MBps_Dec += worker->results[which_perf].write_MBps_Dec;
 		results[which_perf].raw.bytes_read += worker->results[which_perf].raw.bytes_read;
 		results[which_perf].raw.bytes_written += worker->results[which_perf].raw.bytes_written;
 
@@ -897,6 +912,8 @@ void Manager::UpdateResults(int which_perf)
 	} else {
 		results[which_perf].ave_connection_latency = (double)0;
 	}
+
+	delete data_msg;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -967,6 +984,16 @@ void Manager::SetConnectionRate(BOOL test_connection_rate, TargetType type)
 		GetWorker(w, type)->SetConnectionRate(test_connection_rate);
 }
 
+void Manager::SetDataPattern(int data_pattern, TargetType type)
+{
+	int w, wkr_count;
+
+	// Loop through all the workers.
+	wkr_count = WorkerCount(type);
+	for (w = 0; w < wkr_count; w++)
+		GetWorker(w, type)->SetDataPattern(data_pattern);
+}
+
 void Manager::SetTransPerConn(int trans_per_conn, TargetType type)
 {
 	int w, wkr_count;
@@ -977,6 +1004,25 @@ void Manager::SetTransPerConn(int trans_per_conn, TargetType type)
 		GetWorker(w, type)->SetTransPerConn(trans_per_conn);
 }
 
+void Manager::SetUseFixedSeed(BOOL use_fixed_seed, TargetType type)
+{
+	int w, wkr_count;
+
+	// Loop through all the workers.
+	wkr_count = WorkerCount(type);
+	for (w = 0; w < wkr_count; w++)
+		GetWorker(w, type)->SetUseFixedSeed(use_fixed_seed);
+}
+
+void Manager::SetFixedSeedValue(DWORDLONG fixed_seed_value, TargetType type)
+{
+	int w, wkr_count;
+
+	// Loop through all the workers.
+	wkr_count = WorkerCount(type);
+	for (w = 0; w < wkr_count; w++)
+		GetWorker(w, type)->SetFixedSeedValue(fixed_seed_value);
+}
 ///////////////////////////////////////////////
 //
 // Functions to retrieve worker information
@@ -1014,6 +1060,33 @@ int Manager::GetConnectionRate(TargetType type)
 }
 
 //
+// Returns if the user has chosen to use random data
+//
+int Manager::GetDataPattern(TargetType type)
+{
+	BOOL wkr_result;
+	int w, wkr_count;
+
+	// If there are no workers, return immediately.
+	if (!(wkr_count = WorkerCount(type)))
+		return DATA_PATTERN_FULL_RANDOM; //Full random data pattern
+
+	// Find the first worker of the specified type's transaction per
+	// connection value.
+	wkr_result = GetWorker(0, type)->GetDataPattern(type);
+
+	// Compare the value with all the other workers of the same type.
+	for (w = 1; w < wkr_count; w++) {
+		if (wkr_result != GetWorker(w, type)->GetDataPattern(type)) {
+			// The value isn't the same.
+			return AMBIGUOUS_VALUE;
+		}
+	}
+	// All workers have the same value.
+	return wkr_result;
+}
+
+//
 // Returns a valid transaction per connection value if all the manager's
 // workers of the specified type have the same value.
 //
@@ -1032,6 +1105,53 @@ int Manager::GetTransPerConn(TargetType type)
 	// Compare the value with all the other workers of the same type.
 	for (w = 1; w < wkr_count; w++) {
 		if (wkr_result != GetWorker(w, type)->GetTransPerConn(type)) {
+			// The value isn't the same.
+			return AMBIGUOUS_VALUE;
+		}
+	}
+	// Return the first worker's value if all other workers have the same.
+	return wkr_result;
+}
+
+int Manager::GetUseFixedSeed(TargetType type)
+{
+	int w, wkr_count, wkr_result;
+
+	// If there are no workers, return immediately.
+	if (!(wkr_count = WorkerCount(type)))
+		return AMBIGUOUS_VALUE;
+
+	// Find the first worker of the specified type's transaction per
+	// connection value.
+	wkr_result = GetWorker(0, type)->GetUseFixedSeed(type);
+
+	// Compare the value with all the other workers of the same type.
+	for (w = 1; w < wkr_count; w++) {
+		if (wkr_result != GetWorker(w, type)->GetUseFixedSeed(type)) {
+			// The value isn't the same.
+			return AMBIGUOUS_VALUE;
+		}
+	}
+	// All workers have the same value.
+	return wkr_result;
+}
+
+DWORDLONG Manager::GetFixedSeedValue(TargetType type)
+{
+	int w, wkr_count;
+	DWORDLONG wkr_result;
+
+	// If there are no workers, return immediately.
+	if (!(wkr_count = WorkerCount(type)))
+		return AMBIGUOUS_VALUE;
+
+	// Find the first worker of the specified type's transaction per
+	// connection value.
+	wkr_result = GetWorker(0, type)->GetFixedSeedValue(type);
+
+	// Compare the value with all the other workers of the same type.
+	for (w = 1; w < wkr_count; w++) {
+		if (wkr_result != GetWorker(w, type)->GetFixedSeedValue(type)) {
 			// The value isn't the same.
 			return AMBIGUOUS_VALUE;
 		}

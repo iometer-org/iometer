@@ -146,7 +146,7 @@ class TargetDisk:public Target {
 	void Set_Size(DWORDLONG maximum_size = 0);
 	void Set_Starting_Sector(DWORDLONG starting_sector = 0);
 
-	BOOL Prepare(void *buffer, DWORDLONG * prepare_offset, DWORD bytes, volatile TestState * test_state);
+	BOOL Prepare(DWORDLONG * prepare_offset, volatile TestState * test_state, int sector_size, unsigned char* _random_data_buffer, long long _random_data_buffer_size);
 
 	BOOL Open(volatile TestState * test_state, int open_flag = 0);
 	BOOL Close(volatile TestState * test_state);

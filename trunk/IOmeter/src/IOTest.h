@@ -79,10 +79,7 @@
 
 #define PHYSICAL_DRIVE_PREFIX	"PHYSICALDRIVE:"
 
-
-#ifdef FORCE_STRUCT_ALIGN
-#include "pack8.h"
-#endif
+#include "pack.h"
 
 //
 // Specifications for a single test for one worker.
@@ -91,7 +88,7 @@ struct Test_Spec {
 	char name[MAX_WORKER_NAME];
 	int default_assignment;
 	Access_Spec access[MAX_ACCESS_SPECS];
-};
+} STRUCT_ALIGN_IOMETER;
 
 //
 // Different type of I/O targets and workers.
@@ -158,15 +155,6 @@ const int NETWORK_COMPATIBILITY_MASK = GenericTCPType | GenericVIType;
 //
 struct Disk_Spec {
 #ifdef USE_NEW_DISCOVERY_MECHANISM
-	//
-	// Maintain better packing: ; with MS the underlying datatype is always 32bit
-	// Though we don't really need to define the reserved field, it's there just becuase
-	//
-	unsigned has_partitions : 1;// rawdisk has partitions (set in TargetDisk::Set_Sizes)
-	unsigned ready : 1;		   // migrated the member from below
-	unsigned not_mounted : 1; // volume is recognized but unmounted (set in iomanager)
-							 // add whatever else and deduct from reserved
-	unsigned reserved : 29; // assuming int is 32bits
 
 	// This member is used during the Windows disk discovery phase.
 	// It was easiest to put it here. Can be used by other OSes for 
@@ -174,14 +162,16 @@ struct Disk_Spec {
 	// todo: byteordering!
 	DWORD disk_reserved[5];
 
-#else
-	BOOL ready;
+	BOOL has_partitions;// rawdisk has partitions (set in TargetDisk::Set_Sizes)
+	BOOL not_mounted; // volume is recognized but unmounted (set in iomanager)
 #endif
+
+	BOOL ready;
 
 	int sector_size;
 	DWORDLONG maximum_size;
 	DWORDLONG starting_sector;
-};
+} STRUCT_ALIGN_IOMETER;
 
 //
 // TCP specific specifications for TCP networks accessed during a test.
@@ -192,7 +182,7 @@ struct TCP_Spec {
 
 	char remote_address[MAX_NAME];
 	unsigned int remote_port;
-};
+} STRUCT_ALIGN_IOMETER;
 
 #define VI_ADDRESS_SIZE				16
 // (Note that current VI hardware only supports a 4 byte 
@@ -228,7 +218,7 @@ struct VI_Spec {
 #endif
 #endif
 
-};
+} STRUCT_ALIGN_IOMETER;
 
 //
 // Possible specifications for a generic target to have.
@@ -242,12 +232,11 @@ struct Target_Spec {
 	char actual_name[MAX_NAME]; // For Windows, this is the real device string
 	char basic_name[MAX_NAME]; // For Windows, used internally for sorting.
 
-	// Maintain better packing; see comment above
-	unsigned read_only:1; // self explanatory
-	unsigned test_connection_rate:1; // same as below
-	unsigned reserved:30;
+	BOOL read_only;
+	BOOL reserved;
 #endif
 
+	BOOL test_connection_rate;
 	TargetType type;
 
 	// Target type specific specifications.
@@ -260,9 +249,8 @@ struct Target_Spec {
 	// Target independent test specifications.
 	int queue_depth;
 
-#ifndef USE_NEW_DISCOVERY_MECHANISM // move above
-	BOOL test_connection_rate;
-#endif
+	// Data pattern type for writes
+	int DataPattern;
 
 	int trans_per_conn;
 
@@ -271,10 +259,12 @@ struct Target_Spec {
 #endif
 	// Random value used to keep connections in synch.
 	DWORDLONG random;
-};
 
-#ifdef FORCE_STRUCT_ALIGN
-#include "unpack8.h"
-#endif
+	// Variables for Using Fixed Seed for RNG
+	BOOL use_fixed_seed;
+	DWORDLONG fixed_seed_value;
+} STRUCT_ALIGN_IOMETER;
+
+#include "unpack.h"
 
 #endif

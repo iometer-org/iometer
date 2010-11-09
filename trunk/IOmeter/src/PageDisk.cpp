@@ -79,7 +79,7 @@
 //       [1] = http://msdn.microsoft.com/library/default.asp?url=/library/en-us/vclib/html/_mfc_debug_new.asp
 //
 #if defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)
-#ifdef _DEBUG
+#ifdef IOMTR_SETTING_MFC_MEMALLOC_DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
@@ -93,6 +93,9 @@ IMPLEMENT_DYNCREATE(CPageDisk, CPropertyPage)
 
 CPageDisk::CPageDisk():CPropertyPage(CPageDisk::IDD)
 {
+	m_RepeatingBytesMessageBox_Shown = false;
+	m_PseudoRandomMessageBox_Shown = false;
+	m_FullRandomMessageBox_Shown = false;
 	//{{AFX_DATA_INIT(CPageDisk)
 	//}}AFX_DATA_INIT
 }
@@ -108,8 +111,11 @@ void CPageDisk::DoDataExchange(CDataExchange * pDX)
 	DDX_Control(pDX, EQueueDepth, m_EQueueDepth);
 	DDX_Control(pDX, SConnectionRate, m_SConnectionRate);
 	DDX_Control(pDX, CConnectionRate, m_CConnectionRate);
+	DDX_Control(pDX, CDataPattern, m_CDataPattern);
+	DDX_Control(pDX, CUseFixedSeed, m_CUseFixedSeed);
 	DDX_Control(pDX, TTargets, m_TTargets);
 	DDX_Control(pDX, EConnectionRate, m_EConnectionRate);
+	DDX_Control(pDX, EFixedSeed, m_EFixedSeed);
 	DDX_Control(pDX, EDiskStart, m_EDiskStart);
 	DDX_Control(pDX, EDiskSize, m_EDiskSize);
 	//}}AFX_DATA_MAP
@@ -129,11 +135,15 @@ BEGIN_MESSAGE_MAP(CPageDisk, CPropertyPage)
     ON_EN_SETFOCUS(EConnectionRate, OnSetfocusEConnectionRate)
     ON_NOTIFY(UDN_DELTAPOS, SConnectionRate, OnDeltaposSConnectionRate)
     ON_BN_CLICKED(CConnectionRate, OnCConnectionRate)
+	ON_CBN_SELCHANGE(CDataPattern, OnSelChangedDataPattern)
     ON_NOTIFY(NM_SETFOCUS, TTargets, OnSetfocusTTargets)
 ON_NOTIFY(TVN_SELCHANGING, TTargets, OnSelchangingTTargets)
     //}}AFX_MSG_MAP
-	ON_EN_CHANGE(EDiskSize, &CPageDisk::OnEnChangeEdisksize)
-	ON_EN_CHANGE(EDiskStart, &CPageDisk::OnEnChangeEdiskstart)
+	ON_EN_CHANGE(EDiskSize, OnEnChangeEdisksize) // removed &CPageDisk::XYZ syntax -- WDK does not like it
+	ON_EN_CHANGE(EDiskStart, OnEnChangeEdiskstart)
+	ON_EN_KILLFOCUS(EFixedSeed, OnKillfocusEFixedSeed)
+	ON_BN_CLICKED(CUseFixedSeed, OnCUseFixedSeed)
+	ON_EN_SETFOCUS(EFixedSeed, OnSetfocusEFixedSeed)
 END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CPageDisk message handlers
@@ -162,9 +172,11 @@ void CPageDisk::Reset()
 	// Clear the target list.
 	m_TTargets.DeleteAllItems();
 
-	// Display the conneciton rate and disk settings.
+	// Display the conneciton rate, disk settings, and random data check.
 	ShowConnectionRate();
 	ShowSettings();
+	ShowDataPattern();
+	ShowFixedSeedValue();
 
 	selected = NULL;
 	highlighted = NULL;
@@ -235,10 +247,18 @@ void CPageDisk::EnableWindow(BOOL enable)
 	// Enable the connection rate check box.
 	m_CConnectionRate.EnableWindow(enable);
 
+	// Enable the random data combo box and set the default value
+	m_CDataPattern.EnableWindow(enable);
+
 	// Enable the connection rate edit box and spin control if the connection 
 	// rate check box is checked.
 	m_EConnectionRate.EnableWindow(enable && m_CConnectionRate.GetCheck() == 1);
 	m_SConnectionRate.EnableWindow(enable && m_CConnectionRate.GetCheck() == 1);
+
+	// Enable the Use Fixed Seed check box and Edit Box.
+	m_CUseFixedSeed.EnableWindow(enable);
+	m_EFixedSeed.EnableWindow(enable && m_CUseFixedSeed.GetCheck() == 1);
+
 
 	// Enable the disk parameter controls.
 	m_EDiskStart.EnableWindow(enable);
@@ -285,6 +305,10 @@ void CPageDisk::ShowData()
 	ShowFocus();
 	// Show the connection rate settings.
 	ShowConnectionRate();
+	// Show data pattern setting
+	ShowDataPattern();
+	// Show the Fixed Seed settings.
+	ShowFixedSeedValue();
 	// Show the disk specific settings.
 	ShowSettings();
 	// Enable the apropriate windows and redraw the page.
@@ -510,6 +534,86 @@ void CPageDisk::ShowConnectionRate()
 	}
 }
 
+void CPageDisk::ShowDataPattern()
+{
+	Manager *manager;
+	Worker *worker;
+	int data_pattern = 1;
+
+	switch (theApp.pView->m_pWorkerView->GetSelectedType()) {
+	case WORKER:
+		// update controls with worker's data
+		worker = theApp.pView->m_pWorkerView->GetSelectedWorker();
+		if (IsType(worker->Type(), GenericDiskType)) {
+			data_pattern = worker->GetDataPattern(GenericDiskType);
+		}
+		break;
+	case MANAGER:
+		manager = theApp.pView->m_pWorkerView->GetSelectedManager();
+		data_pattern = manager->GetDataPattern(GenericDiskType);
+		break;
+	default:
+		data_pattern = theApp.manager_list.GetDataPattern(GenericDiskType);
+		break;
+	}
+	m_CDataPattern.SetCurSel(data_pattern);
+}
+
+//
+// Displays the fixed seed value for the current selection in the
+// worker view.  If the selection is a manager or all managers, displays
+// a value if all the children's values are the same.
+//
+void CPageDisk::ShowFixedSeedValue()
+{
+	Manager *manager;
+	Worker *worker;
+	DWORDLONG fixed_seed_value = 0;
+	BOOL use_fixed_seed = 0;
+
+	switch (theApp.pView->m_pWorkerView->GetSelectedType()) {
+	case WORKER:
+		// update controls with worker's data
+		worker = theApp.pView->m_pWorkerView->GetSelectedWorker();
+		if (IsType(worker->Type(), GenericDiskType)) {
+			fixed_seed_value = worker->GetFixedSeedValue(GenericDiskType);
+			use_fixed_seed = worker->GetUseFixedSeed(GenericDiskType);
+		}
+		break;
+	case MANAGER:
+		manager = theApp.pView->m_pWorkerView->GetSelectedManager();
+		fixed_seed_value = manager->GetFixedSeedValue(GenericDiskType);
+		use_fixed_seed = manager->GetUseFixedSeed(GenericDiskType);
+		break;
+	default:
+		fixed_seed_value = theApp.manager_list.GetFixedSeedValue(GenericDiskType);
+		use_fixed_seed = theApp.manager_list.GetUseFixedSeed(GenericDiskType);
+		break;
+	}
+	// If the fixed seed values are different between a manager's
+	// workers, set the state of the check box to AUTO3STATE and disable the
+	// edit box and spin control.
+	SetDlgItemInt64(EFixedSeed, fixed_seed_value, false);
+	if (use_fixed_seed == AMBIGUOUS_VALUE) {
+		m_CUseFixedSeed.SetButtonStyle(BS_AUTO3STATE);
+		m_EFixedSeed.SetPasswordChar(32);
+		m_EFixedSeed.Invalidate(TRUE);
+
+		// Set check box to undetermined state.
+		CheckDlgButton(CUseFixedSeed, 2);
+	} else {
+		m_CUseFixedSeed.SetButtonStyle(BS_AUTOCHECKBOX);
+		CheckDlgButton(CUseFixedSeed, use_fixed_seed);
+
+		if (use_fixed_seed == ENABLED_VALUE && fixed_seed_value != (DWORDLONG)AMBIGUOUS_VALUE) {
+			m_EFixedSeed.SetPasswordChar(0);
+		} else {
+			m_EFixedSeed.SetPasswordChar(32);
+			m_EFixedSeed.Invalidate();
+		}
+	}
+}
+	
 //
 // Shows the selected item's disk starting sector, size, and queue depth.
 //
@@ -520,6 +624,7 @@ void CPageDisk::ShowSettings()
 	DWORDLONG disk_size;
 	DWORDLONG disk_start;
 	int queue_depth;
+	int data_pattern;
 
 	// Get the values for the disk settings from memory.
 	switch (theApp.pView->m_pWorkerView->GetSelectedType()) {
@@ -528,17 +633,20 @@ void CPageDisk::ShowSettings()
 		disk_size = worker->GetDiskSize(GenericDiskType);
 		disk_start = worker->GetDiskStart(GenericDiskType);
 		queue_depth = worker->GetQueueDepth(GenericDiskType);
+		data_pattern = worker->GetDataPattern(GenericDiskType);
 		break;
 	case MANAGER:
 		manager = theApp.pView->m_pWorkerView->GetSelectedManager();
 		disk_size = manager->GetDiskSize(GenericDiskType);
 		disk_start = manager->GetDiskStart(GenericDiskType);
 		queue_depth = manager->GetQueueDepth(GenericDiskType);
+		data_pattern = manager->GetDataPattern(GenericDiskType);
 		break;
 	default:
 		disk_size = theApp.manager_list.GetDiskSize(GenericDiskType);
 		disk_start = theApp.manager_list.GetDiskStart(GenericDiskType);
 		queue_depth = theApp.manager_list.GetQueueDepth(GenericDiskType);
+		data_pattern = theApp.manager_list.GetDataPattern(GenericDiskType);
 	}
 	// If there is a displayable value, display it.  Otherwise, hide the content
 	// of the edit box.
@@ -547,7 +655,7 @@ void CPageDisk::ShowSettings()
 		m_EDiskSize.Invalidate();
 	} else {
 		m_EDiskSize.SetPasswordChar(0);
-		SetDlgItemInt64(EDiskSize, disk_size);
+		SetDlgItemInt64(EDiskSize, disk_size, false);
 	}
 
 	if (disk_start == AMBIGUOUS_VALUE) {
@@ -555,7 +663,7 @@ void CPageDisk::ShowSettings()
 		m_EDiskStart.Invalidate();
 	} else {
 		m_EDiskStart.SetPasswordChar(0);
-		SetDlgItemInt64(EDiskStart, disk_start);
+		SetDlgItemInt64(EDiskStart, disk_start, false);
 	}
 
 	if (queue_depth == AMBIGUOUS_VALUE) {
@@ -564,6 +672,12 @@ void CPageDisk::ShowSettings()
 	} else {
 		m_EQueueDepth.SetPasswordChar(0);
 		SetDlgItemInt(EQueueDepth, queue_depth);
+	}
+
+	if (data_pattern == AMBIGUOUS_VALUE) {
+		m_CDataPattern.SetCurSel(-1);
+	} else {
+		m_CDataPattern.SetCurSel(data_pattern);
 	}
 }
 
@@ -1229,6 +1343,46 @@ void CPageDisk::OnCConnectionRate()
 	EnableWindow();
 }
 
+void CPageDisk::OnSelChangedDataPattern()
+{
+	switch (m_CDataPattern.GetCurSel()) {
+		case DATA_PATTERN_REPEATING_BYTES:
+			if(m_RepeatingBytesMessageBox_Shown==false)
+				AfxMessageBox("'Repeating bytes' is defined as: Each IO having a unique set of repeating bytes (ex: First IO is all A's, second IO is all B's)\n\nThe command to command delay is slightly (~12%, but can be longer in high IO environments) longer with this configuration.");
+			m_RepeatingBytesMessageBox_Shown = true;
+			break;
+		case DATA_PATTERN_PSEUDO_RANDOM:
+			if(m_PseudoRandomMessageBox_Shown==false)
+				AfxMessageBox("'Pseudo random' is defined as: A buffer being filled with random data and is reused for every write IO.\n\nNote: This was the behavior of all IOMeter versions up to and including 2006.07.27");
+			m_PseudoRandomMessageBox_Shown = true;
+			break;
+		case DATA_PATTERN_FULL_RANDOM:
+			if(m_FullRandomMessageBox_Shown==false)
+				AfxMessageBox("'Full random' is defind as: A 16MB buffer is generated by IOMeter which is filled with random data. Each write IO randomly indexes into this buffer.\n\nNote: The 16MB buffer may impact performance tests that are sensitive to memory utilization. Drives that implement dedupe compression may still compress this data.");
+			m_FullRandomMessageBox_Shown = true;
+			break;
+	}
+
+	Manager *manager;
+	Worker *worker;
+
+	// Seeing what kind of item is selected.
+	switch (theApp.pView->m_pWorkerView->GetSelectedType()) {
+		case WORKER:
+			worker = theApp.pView->m_pWorkerView->GetSelectedWorker();
+			worker->SetDataPattern(m_CDataPattern.GetCurSel());
+			break;
+		case MANAGER:
+			manager = theApp.pView->m_pWorkerView->GetSelectedManager();
+			manager->SetDataPattern(m_CDataPattern.GetCurSel(), GenericDiskType);
+			break;
+		case ALL_MANAGERS:
+			theApp.manager_list.SetDataPattern(m_CDataPattern.GetCurSel(), GenericDiskType);
+			break;
+	}
+	EnableWindow();
+}
+
 void CPageDisk::OnSelchangingTTargets(NMHDR * pNMHDR, LRESULT * pResult)
 {
 	NM_TREEVIEW *pNMTreeView = (NM_TREEVIEW *) pNMHDR;
@@ -1337,3 +1491,74 @@ void CPageDisk::OnEnChangeEdiskstart()
 
 	// TODO:  Add your control notification handler code here
 }
+
+//
+// Enables and disables the Fixed Seed edit box depending on the check box state.
+void CPageDisk::OnCUseFixedSeed()
+{
+	Manager *manager;
+	Worker *worker;
+
+	// change the check box to true/false only (having clicked, cannot 
+	// return to intermediate state)
+	m_CUseFixedSeed.SetButtonStyle(BS_AUTOCHECKBOX);
+	if (IsDlgButtonChecked(CUseFixedSeed) == 1 && GetDlgItemInt64(EFixedSeed) != AMBIGUOUS_VALUE) {
+		// Fixed Seed is enabled.  Update the edit box.
+		m_EFixedSeed.SetPasswordChar(0);
+	} else {
+		m_EFixedSeed.SetPasswordChar(32);
+	}
+	// Seeing what kind of item is selected.
+	switch (theApp.pView->m_pWorkerView->GetSelectedType()) {
+	case WORKER:
+		worker = theApp.pView->m_pWorkerView->GetSelectedWorker();
+		worker->SetUseFixedSeed(m_CUseFixedSeed.GetCheck());
+		break;
+	case MANAGER:
+		manager = theApp.pView->m_pWorkerView->GetSelectedManager();
+		manager->SetUseFixedSeed(m_CUseFixedSeed.GetCheck(), GenericDiskType);
+		break;
+	case ALL_MANAGERS:
+		theApp.manager_list.SetUseFixedSeed(m_CUseFixedSeed.GetCheck(), GenericDiskType);
+		break;
+	}
+	EnableWindow();
+}
+
+
+void CPageDisk::OnKillfocusEFixedSeed()
+{
+	Manager *manager;
+	Worker *worker;
+
+	// Restores the previous value if the edit box was left blank.
+	if (!m_EFixedSeed.LineLength()) {
+		ShowFixedSeedValue();
+		return;
+	}
+	// Seeing what kind of item is selected.
+	switch (theApp.pView->m_pWorkerView->GetSelectedType()) {
+	case WORKER:
+		worker = theApp.pView->m_pWorkerView->GetSelectedWorker();
+		worker->SetFixedSeedValue(GetDlgItemInt64(EFixedSeed));
+		break;
+	case MANAGER:
+		manager = theApp.pView->m_pWorkerView->GetSelectedManager();
+		manager->SetFixedSeedValue(GetDlgItemInt64(EFixedSeed), GenericDiskType);
+		break;
+	case ALL_MANAGERS:
+		theApp.manager_list.SetFixedSeedValue(GetDlgItemInt64(EFixedSeed), GenericDiskType);
+		break;
+	}
+
+	EnableWindow();
+}
+
+void CPageDisk::OnSetfocusEFixedSeed()
+{
+	// Select everything in the edit box.
+	EditSetfocus(&m_EFixedSeed);
+}
+
+
+

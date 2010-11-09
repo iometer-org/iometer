@@ -101,7 +101,7 @@ class ICF_ifstream:public ifstream {
 	BOOL GetPair(CString & key, CString & value);
 
 	static BOOL ExtractFirstInt(CString & string, int &number);
-	static BOOL ExtractFirstInt64(CString & string, __int64 &number);
+	static BOOL ExtractFirstUInt64(CString & string, unsigned __int64 &number);
 	static BOOL ExtractFirstIntVersion(CString & string, int &number);
 	static CString ExtractFirstToken(CString & string, BOOL spaces = FALSE);
 };

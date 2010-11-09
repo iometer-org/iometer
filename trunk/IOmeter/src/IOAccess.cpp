@@ -168,3 +168,13 @@ BOOL Access::Random(int access_percent, int random_percent)
 {
 	return (random_percent < access_grid[access_percent].random);
 }
+
+BOOL Access::HasWrite()
+{
+	for(int i=0; i < MAX_ACCESS_SPECS; i++) {
+		if(access_grid[i].read < 100)
+			return TRUE;
+	}
+
+	return FALSE;
+}

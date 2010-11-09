@@ -88,7 +88,7 @@
 //       [1] = http://msdn.microsoft.com/library/default.asp?url=/library/en-us/vclib/html/_mfc_debug_new.asp
 //
 #if defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)
-#ifdef _DEBUG
+#ifdef IOMTR_SETTING_MFC_MEMALLOC_DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
@@ -115,6 +115,7 @@ Worker::Worker(Manager * mgr, TargetType wkr_type)
 	spec.queue_depth = 1;
 	spec.test_connection_rate = FALSE;
 	spec.trans_per_conn = 1;
+	spec.DataPattern = DATA_PATTERN_REPEATING_BYTES;
 
 	if (IsType(wkr_type, GenericServerType)) {
 		SetLocalNetworkInterface(0, (TargetType) (wkr_type & NETWORK_COMPATIBILITY_MASK));
@@ -258,8 +259,10 @@ void Worker::AddTarget(Target_Spec * target_info)
 	target->spec.trans_per_conn = spec.trans_per_conn;
 
 	// Copy default settings specific to the target's type.
-	if (IsType(target->spec.type, GenericDiskType))
+	if (IsType(target->spec.type, GenericDiskType)) {
 		memcpy(&target->spec.disk_info, &spec.disk_info, sizeof(Disk_Spec));
+		target->spec.DataPattern = spec.DataPattern;
+	}
 	else if (IsType(target->spec.type, VIClientType))
 		target->spec.vi_info.outstanding_ios = spec.vi_info.outstanding_ios;
 	else if (!IsType(target->spec.type, GenericClientType)) {
@@ -464,20 +467,22 @@ TargetType Worker::Type()
 BOOL Worker::SetAccess(int access_entry)
 {
 	Message msg;
-	Data_Message data_msg;
+	Data_Message *data_msg;
 
 	// Network clients are set by their server.
 	if (IsType(Type(), GenericClientType))
 		return TRUE;
 
+	data_msg = new Data_Message;
+
 	// If the worker has an access spec for the specified entry, use it.
 	// If there is no entry, send the idle spec.
 	if (access_entry < AccessSpecCount()) {
 		// Copy the spec into a message and send it.
-		memcpy((void *)&(data_msg.data.spec), (void *)(GetAccessSpec(access_entry)), sizeof(Test_Spec));
+		memcpy((void *)&(data_msg->data.spec), (void *)(GetAccessSpec(access_entry)), sizeof(Test_Spec));
 	} else {
 		// Otherwise, send the idle spec.
-		memcpy((void *)&(data_msg.data.spec),
+		memcpy((void *)&(data_msg->data.spec),
 		       (void *)(theApp.access_spec_list.Get(IDLE_SPEC)), sizeof(Test_Spec));
 	}
 
@@ -485,7 +490,7 @@ BOOL Worker::SetAccess(int access_entry)
 	msg.purpose = SET_ACCESS;
 	msg.data = GetIndex();
 	manager->Send(&msg);
-	manager->SendData(&data_msg);
+	manager->SendData(data_msg);
 	manager->Receive(&msg);
 
 	// Set the access spec for the corresponing client, if any.
@@ -493,10 +498,11 @@ BOOL Worker::SetAccess(int access_entry)
 		msg.purpose = SET_ACCESS;
 		msg.data = net_partner->GetIndex();
 		net_partner->manager->Send(&msg);
-		net_partner->manager->SendData(&data_msg);
+		net_partner->manager->SendData(data_msg);
 		net_partner->manager->Receive(&msg);
 	}
 
+	delete data_msg;
 	return msg.data;	// msg.data indicates success.
 }
 
@@ -508,7 +514,7 @@ BOOL Worker::SetTargets()
 {
 	Target *target;
 	Message msg;
-	Data_Message data_msg;
+	Data_Message *data_msg;
 	VI_DISCRIMINATOR_TYPE vi_discriminator;
 	int vi_discriminator_length;
 	VIP_NET_ADDRESS *vi_addr;
@@ -518,7 +524,9 @@ BOOL Worker::SetTargets()
 	if (IsType(Type(), GenericClientType))
 		return TRUE;
 
-	data_msg.count = 0;
+	data_msg = new Data_Message;
+
+	data_msg->count = 0;
 
 	// Loop through all targets and add them to the message if active.
 	target_count = TargetCount(ActiveType);
@@ -526,7 +534,12 @@ BOOL Worker::SetTargets()
 		target = GetTarget(i, ActiveType);
 
 		// Initialize random number generator.
-		target->spec.random = timer_value();
+		// If Using a fixed seed is specified use that value, else get a timestamp to use as a seed value
+		target->spec.use_fixed_seed = spec.use_fixed_seed;
+		if(spec.use_fixed_seed)
+			target->spec.random = spec.fixed_seed_value;
+		else
+			target->spec.random = timer_value();
 
 		// Initialize unique discriminator for VI targets.
 		if (IsType(target->spec.type, VIClientType)) {
@@ -561,55 +574,55 @@ BOOL Worker::SetTargets()
 #endif
 		}
 		// Copy active targets into set target data message.
-		memcpy(&data_msg.data.targets[data_msg.count++], &target->spec, sizeof(Target_Spec));
+		memcpy(&data_msg->data.targets[data_msg->count++], &target->spec, sizeof(Target_Spec));
 	}
 
 	// Send the message of targets to set to Dynamo and get the reply.
 	manager->Send(GetIndex(), SET_TARGETS);
-	manager->SendData(&data_msg);
+	manager->SendData(data_msg);
 
 	// Reply message indicates if targets were set successfully along with
 	// additional error data or target settings that can only be determined
 	// by Dynamo (such as TCP port numbers).
 	manager->Receive(&msg);
-	manager->ReceiveData(&data_msg);
+	manager->ReceiveData(data_msg);
 
 	// If a network server set its targets correctly, set its client.
 	// This currently assumes one client per server.
 	if (msg.data && IsType(Type(), GenericServerType) && TargetCount()) {
 		// Set the client's targets if we're not just resetting targets.
-		if (data_msg.count) {
-			data_msg.count = 1;
+		if (data_msg->count) {
+			data_msg->count = 1;
 
 			if (IsType(targets[0]->spec.type, TCPClientType)) {
 				// Record port used by server
-				targets[0]->spec.tcp_info.local_port = data_msg.data.targets[0].tcp_info.local_port;
+				targets[0]->spec.tcp_info.local_port = data_msg->data.targets[0].tcp_info.local_port;
 
 				// Set the server's client to use the server as a target.
-				memcpy(&data_msg.data.targets[0], &targets[0]->spec, sizeof(Target_Spec));
+				memcpy(&data_msg->data.targets[0], &targets[0]->spec, sizeof(Target_Spec));
 
 				// Set the client's remote port to the server's local port
-				data_msg.data.targets[0].tcp_info.remote_port = targets[0]->spec.tcp_info.local_port;
+				data_msg->data.targets[0].tcp_info.remote_port = targets[0]->spec.tcp_info.local_port;
 
 				// Reverse the local and remote addresses for the client.
 				// The *server* is a client's target.
-				strcpy(data_msg.data.targets[0].name, targets[0]->spec.tcp_info.remote_address);
-				strcpy(data_msg.data.targets[0].tcp_info.remote_address, targets[0]->spec.name);
-				data_msg.data.targets[0].type = TCPServerType;
+				strcpy(data_msg->data.targets[0].name, targets[0]->spec.tcp_info.remote_address);
+				strcpy(data_msg->data.targets[0].tcp_info.remote_address, targets[0]->spec.name);
+				data_msg->data.targets[0].type = TCPServerType;
 			} else if (IsType(targets[0]->spec.type, VIClientType)) {
 				// Set the server's client to use the server as the target.
-				memcpy(&data_msg.data.targets[0], &targets[0]->spec, sizeof(Target_Spec));
+				memcpy(&data_msg->data.targets[0], &targets[0]->spec, sizeof(Target_Spec));
 
 				// Reverse the local and remote addresses for the client.
 				// The *server* is a client's target.
 				// Set client's local VI NIC to use.
-				strcpy(data_msg.data.targets[0].name, target->spec.vi_info.remote_nic_name);
+				strcpy(data_msg->data.targets[0].name, target->spec.vi_info.remote_nic_name);
 				// Set address that client should connect to on remote side.
-				memcpy(&data_msg.data.targets[0].vi_info.remote_address,
+				memcpy(&data_msg->data.targets[0].vi_info.remote_address,
 				       &targets[0]->spec.vi_info.local_address, VI_ADDRESS_SIZE);
-				memcpy(&data_msg.data.targets[0].vi_info.local_address,
+				memcpy(&data_msg->data.targets[0].vi_info.local_address,
 				       &targets[0]->spec.vi_info.remote_address, VI_ADDRESS_SIZE);
-				data_msg.data.targets[0].type = VIServerType;
+				data_msg->data.targets[0].type = VIServerType;
 			} else {
 				ErrorMessage("Unsupported client target type in Worker::" "SetTargets().");
 				return FALSE;
@@ -617,12 +630,14 @@ BOOL Worker::SetTargets()
 		}
 		// Send the message of targets to set to Dynamo and get the reply.
 		net_partner->manager->Send(net_partner->GetIndex(), SET_TARGETS);
-		net_partner->manager->SendData(&data_msg);
+		net_partner->manager->SendData(data_msg);
 
 		// Reply message indicates if targets were set successfully.
 		net_partner->manager->Receive(&msg);
-		net_partner->manager->ReceiveData(&data_msg);
+		net_partner->manager->ReceiveData(data_msg);
 	}
+
+	delete data_msg;
 
 	return (msg.data);
 }
@@ -677,9 +692,12 @@ void Worker::SaveResults(ostream * file, int access_index, int result_type)
 	(*file) << "," << results[WHOLE_TEST_PERF].IOps
 	    << "," << results[WHOLE_TEST_PERF].read_IOps
 	    << "," << results[WHOLE_TEST_PERF].write_IOps
-	    << "," << results[WHOLE_TEST_PERF].MBps
-	    << "," << results[WHOLE_TEST_PERF].read_MBps
-	    << "," << results[WHOLE_TEST_PERF].write_MBps
+	    << "," << results[WHOLE_TEST_PERF].MBps_Bin
+	    << "," << results[WHOLE_TEST_PERF].read_MBps_Bin
+	    << "," << results[WHOLE_TEST_PERF].write_MBps_Bin
+	    << "," << results[WHOLE_TEST_PERF].MBps_Dec
+	    << "," << results[WHOLE_TEST_PERF].read_MBps_Dec
+	    << "," << results[WHOLE_TEST_PERF].write_MBps_Dec
 	    << "," << results[WHOLE_TEST_PERF].transactions_per_second
 	    << "," << results[WHOLE_TEST_PERF].connections_per_second
 	    << "," << results[WHOLE_TEST_PERF].ave_latency
@@ -802,9 +820,12 @@ void Worker::SaveResults(ostream * file, int access_index, int result_type)
 		    << "," << target->results[WHOLE_TEST_PERF].IOps
 		    << "," << target->results[WHOLE_TEST_PERF].read_IOps
 		    << "," << target->results[WHOLE_TEST_PERF].write_IOps
-		    << "," << target->results[WHOLE_TEST_PERF].MBps
-		    << "," << target->results[WHOLE_TEST_PERF].read_MBps
-		    << "," << target->results[WHOLE_TEST_PERF].write_MBps
+		    << "," << target->results[WHOLE_TEST_PERF].MBps_Bin
+		    << "," << target->results[WHOLE_TEST_PERF].read_MBps_Bin
+		    << "," << target->results[WHOLE_TEST_PERF].write_MBps_Bin
+		    << "," << target->results[WHOLE_TEST_PERF].MBps_Dec
+		    << "," << target->results[WHOLE_TEST_PERF].read_MBps_Dec
+		    << "," << target->results[WHOLE_TEST_PERF].write_MBps_Dec
 		    << "," << target->results[WHOLE_TEST_PERF].transactions_per_second
 		    << "," << target->results[WHOLE_TEST_PERF].connections_per_second
 		    << "," << target->results[WHOLE_TEST_PERF].ave_latency
@@ -865,7 +886,7 @@ void Worker::SaveResults(ostream * file, int access_index, int result_type)
 //
 void Worker::UpdateResults(int which_perf)
 {
-	Data_Message data_msg;
+	Data_Message *data_msg;
 	double run_time;
 	Worker_Results *new_wkr_results;
 	Results *device_results;	// Results for a specific target.
@@ -876,16 +897,18 @@ void Worker::UpdateResults(int which_perf)
 	if ((which_perf < 0) || (which_perf >= MAX_PERF))
 		return;
 
+	data_msg = new Data_Message;
+
 	// Initializing worker's results.
 	ResetResults(which_perf);
 	timer_resolution = manager->timer_resolution;
 
 	// Receive the update from Dynamo.  The manager should have already made
 	// the request.
-	if (manager->ReceiveData(&data_msg) == PORT_ERROR)
+	if (manager->ReceiveData(data_msg) == PORT_ERROR)
 		return;
 
-	new_wkr_results = &(data_msg.data.worker_results);
+	new_wkr_results = &(data_msg->data.worker_results);
 	raw = &(results[which_perf].raw);
 	raw->counter_time = new_wkr_results->time[LAST_SNAPSHOT] - new_wkr_results->time[FIRST_SNAPSHOT];
 	
@@ -963,11 +986,16 @@ void Worker::UpdateResults(int which_perf)
 		// Calculating MB/s and IO/s data rates.
 		if (run_time) {
 			// Calculating results on a per drive basis.
-			device_results->read_MBps = ((double)(_int64)
-						     raw_device_results->bytes_read / (double)MEGABYTE) / run_time;
-			device_results->write_MBps = ((double)(_int64)
-						      raw_device_results->bytes_written / (double)MEGABYTE) / run_time;
-			device_results->MBps = device_results->read_MBps + device_results->write_MBps;
+			device_results->read_MBps_Bin = ((double)(_int64)
+						     raw_device_results->bytes_read / (double)MEGABYTE_BIN) / run_time;
+			device_results->write_MBps_Bin = ((double)(_int64)
+						      raw_device_results->bytes_written / (double)MEGABYTE_BIN) / run_time;
+			device_results->MBps_Bin = device_results->read_MBps_Bin + device_results->write_MBps_Bin;
+			device_results->read_MBps_Dec = ((double)(_int64)
+						     raw_device_results->bytes_read / (double)MEGABYTE_DEC) / run_time;
+			device_results->write_MBps_Dec = ((double)(_int64)
+						      raw_device_results->bytes_written / (double)MEGABYTE_DEC) / run_time;
+			device_results->MBps_Dec = device_results->read_MBps_Dec + device_results->write_MBps_Dec;
 			device_results->read_IOps = ((double)(_int64)
 						     raw_device_results->read_count) / run_time;
 			device_results->write_IOps = ((double)(_int64)
@@ -989,18 +1017,24 @@ void Worker::UpdateResults(int which_perf)
 			raw->transaction_count += raw_device_results->transaction_count;
 
 			// Calculated results.
-			results[which_perf].MBps += device_results->MBps;
-			results[which_perf].read_MBps += device_results->read_MBps;
-			results[which_perf].write_MBps += device_results->write_MBps;
+			results[which_perf].MBps_Bin += device_results->MBps_Bin;
+			results[which_perf].read_MBps_Bin += device_results->read_MBps_Bin;
+			results[which_perf].write_MBps_Bin += device_results->write_MBps_Bin;
+			results[which_perf].MBps_Dec += device_results->MBps_Dec;
+			results[which_perf].read_MBps_Dec += device_results->read_MBps_Dec;
+			results[which_perf].write_MBps_Dec += device_results->write_MBps_Dec;
 			results[which_perf].IOps += device_results->IOps;
 			results[which_perf].read_IOps += device_results->read_IOps;
 			results[which_perf].write_IOps += device_results->write_IOps;
 			results[which_perf].transactions_per_second += device_results->transactions_per_second;
 			results[which_perf].connections_per_second += device_results->connections_per_second;
 		} else {
-			device_results->MBps = (double)0;
-			device_results->read_MBps = (double)0;
-			device_results->write_MBps = (double)0;
+			device_results->MBps_Bin = (double)0;
+			device_results->read_MBps_Bin = (double)0;
+			device_results->write_MBps_Bin = (double)0;
+			device_results->MBps_Dec = (double)0;
+			device_results->read_MBps_Dec = (double)0;
+			device_results->write_MBps_Dec = (double)0;
 			device_results->IOps = (double)0;
 			device_results->read_IOps = (double)0;
 			device_results->write_IOps = (double)0;
@@ -1107,6 +1141,8 @@ void Worker::UpdateResults(int which_perf)
 
 	if (IsType(Type(), GenericClientType))
 		delete device_results;
+
+	delete data_msg;
 }
 
 //
@@ -1349,6 +1385,18 @@ void Worker::SetConnectionRate(BOOL test_connection_rate)
 		GetTarget(i)->spec.test_connection_rate = test_connection_rate;
 }
 
+void Worker::SetDataPattern(int data_pattern)
+{
+	int i, target_count;
+
+	spec.DataPattern = data_pattern;
+
+	// Loop through all the worker's targets.
+	target_count = TargetCount(GenericDiskType);
+	for (i = 0; i < target_count; i++)
+		GetTarget(i)->spec.DataPattern = data_pattern;
+}
+
 void Worker::SetTransPerConn(int trans_per_conn)
 {
 	int i, target_count;
@@ -1359,6 +1407,33 @@ void Worker::SetTransPerConn(int trans_per_conn)
 	target_count = TargetCount();
 	for (i = 0; i < target_count; i++)
 		GetTarget(i)->spec.trans_per_conn = trans_per_conn;
+}
+
+// Sets whether to use Fixed RNG Seed Values for the worker. 
+// If use_fixed_seed is TRUE, it means that a fixed seed will be
+// used.  If FALSE, the default RNG seed will be used.
+void Worker::SetUseFixedSeed(BOOL use_fixed_seed)
+{
+	int i, target_count;
+
+	spec.use_fixed_seed = use_fixed_seed;
+
+	// Loop through all the worker's targets.
+	target_count = TargetCount();
+	for (i = 0; i < target_count; i++)
+		GetTarget(i)->spec.use_fixed_seed = use_fixed_seed;
+}
+
+void Worker::SetFixedSeedValue(DWORDLONG fixed_seed_value)
+{
+	int i, target_count;
+
+	spec.fixed_seed_value = fixed_seed_value;
+
+	// Loop through all the worker's targets.
+	target_count = TargetCount();
+	for (i = 0; i < target_count; i++)
+		GetTarget(i)->spec.fixed_seed_value = fixed_seed_value;
 }
 
 ///////////////////////////////////////////////
@@ -1418,6 +1493,41 @@ int Worker::GetConnectionRate(TargetType type)
 		return ENABLED_VALUE;
 	else
 		return DISABLED_VALUE;
+}
+
+BOOL Worker::GetDataPattern(TargetType type)
+{
+	if (IsType(Type(), GenericClientType))
+		return net_partner->GetDataPattern(type);
+
+	return spec.DataPattern;
+}
+
+int Worker::GetUseFixedSeed(TargetType type)
+{
+	if (IsType(Type(), GenericClientType))
+		return net_partner->GetUseFixedSeed(type);
+
+	if (!IsType(Type(), type))
+		return AMBIGUOUS_VALUE;
+
+	// Assume that all targets have the same value.
+	if (spec.use_fixed_seed)
+		return ENABLED_VALUE;
+	else
+		return DISABLED_VALUE;
+}
+
+DWORDLONG Worker::GetFixedSeedValue(TargetType type)
+{
+	if (IsType(Type(), GenericClientType))
+		return net_partner->GetFixedSeedValue(type);
+
+	if (!IsType(Type(), type))
+		return AMBIGUOUS_VALUE;
+
+	// Assume all targets have the same value.
+	return spec.fixed_seed_value;
 }
 
 DWORDLONG Worker::GetDiskStart(TargetType type)
@@ -1964,17 +2074,18 @@ BOOL Worker::SaveConfig(ostream & outfile, BOOL save_aspecs, BOOL save_targets)
 
 	outfile << "'Default target settings for worker" << endl;
 
-	outfile << "'Number of outstanding IOs,test connection rate,transactions per connection" << endl;
-
+	outfile << "'Number of outstanding IOs,test connection rate,transactions per connection,use fixed seed,fixed seed value" << endl;
 	outfile << "\t" << GetQueueDepth(Type())
-	    << "," << (GetConnectionRate(Type())? "ENABLED" : "DISABLED")
-	    << "," << GetTransPerConn(Type()) << endl;
+		<< "," << (GetConnectionRate(Type())? "ENABLED" : "DISABLED")
+		<< "," << GetTransPerConn(Type()) 
+		<< "," << (GetUseFixedSeed(Type())? "ENABLED" : "DISABLED")
+		<< "," << GetFixedSeedValue(Type()) << endl;
 
 	if (IsType(spec.type, GenericDiskType)) {
-		outfile << "'Disk maximum size,starting sector" << endl;
+		outfile << "'Disk maximum size,starting sector,Data pattern" << endl;
 
 		outfile << "\t" << GetDiskSize(Type())
-		    << "," << GetDiskStart(Type()) << endl;
+		    << "," << GetDiskStart(Type()) << "," << GetDataPattern(Type()) << endl;
 	}
 
 	if (IsType(spec.type, GenericNetType)) {
@@ -2114,7 +2225,7 @@ BOOL Worker::LoadConfigDefault(ICF_ifstream & infile)
 	CString key, value;
 	CString token;
 	int temp_number;
-	__int64 temp_num64;
+	DWORDLONG temp_num64;
 
 	while (1) {
 		if (!infile.GetPair(key, value)) {
@@ -2125,9 +2236,14 @@ BOOL Worker::LoadConfigDefault(ICF_ifstream & infile)
 
 		if (key.CompareNoCase("'End default target settings for worker") == 0) {
 			return TRUE;	// This is the only normal exit.
-		} else if (key.
-			   CompareNoCase("'Number of outstanding IOs,test connection rate,transactions per connection")
-			   == 0) {
+
+		//Check for two keys here, this will allow backwards compatabilty to icf files before the use fixed seed changes
+		//For backwards compatability with builds of Iomter that do not support the fixed seed value
+		//SaveConfig() Only print out the new ICF values if the worker is using fixed seeds.
+		//NOTE: If different workers have different UseFixedSeed values, the output line here could be different
+		} else if (key.CompareNoCase("'Number of outstanding IOs,test connection rate,transactions per connection") == 0
+				|| key.CompareNoCase("'Number of outstanding IOs,test connection rate,transactions per connection,use fixed seed,fixed seed value") == 0) 
+			{
 			if (!ICF_ifstream::ExtractFirstInt(value, temp_number)) {
 				ErrorMessage("Error while reading file.  "
 					     "\"Number of outstanding IOs\" should be specified as an integer value.");
@@ -2156,14 +2272,38 @@ BOOL Worker::LoadConfigDefault(ICF_ifstream & infile)
 			}
 
 			SetTransPerConn(temp_number);
-		} else if (key.CompareNoCase("'Disk maximum size,starting sector") == 0) {
+
+			//Load the Use Fixed Seed flag and value if this icf has those values
+			if(key.CompareNoCase("'Number of outstanding IOs,test connection rate,transactions per connection,use fixed seed,fixed seed value") == 0) {
+				token = ICF_ifstream::ExtractFirstToken(value);
+				if (token.CompareNoCase("ENABLED") == 0)
+					SetUseFixedSeed(TRUE);
+				else if (token.CompareNoCase("DISABLED") == 0)
+					SetUseFixedSeed(FALSE);
+				else {
+					ErrorMessage("Error restoring worker " + (CString) name + ".  "
+							 "\"Use fixed seed\" should be set to ENABLED or DISABLED.");
+					return FALSE;
+				}
+
+				if (!ICF_ifstream::ExtractFirstUInt64(value, temp_num64)) {
+					ErrorMessage("Error while reading file.  "
+							 "\"Fixed seed value\" should "
+							 "be specified as an integer value.");
+					return FALSE;
+				}
+				SetFixedSeedValue(temp_num64);
+			}
+
+
+		}  else if (key.CompareNoCase("'Disk maximum size,starting sector") == 0) {
 			if (!IsType(Type(), GenericDiskType)) {
 				ErrorMessage("Error restoring worker " + (CString) name + ".  "
 					     "Cannot specify \"Disk maximum size,starting sector\" for a non-disk worker.");
 				return FALSE;
 			}
 
-			if (!ICF_ifstream::ExtractFirstInt64(value, temp_num64)) {
+			if (!ICF_ifstream::ExtractFirstUInt64(value, temp_num64)) {
 				ErrorMessage("Error while reading file.  "
 					     "\"Disk maximum size\" should be specified as an integer value.");
 				return FALSE;
@@ -2171,13 +2311,43 @@ BOOL Worker::LoadConfigDefault(ICF_ifstream & infile)
 
 			SetDiskSize(temp_num64);
 
-			if (!ICF_ifstream::ExtractFirstInt64(value, temp_num64)) {
+			if (!ICF_ifstream::ExtractFirstUInt64(value, temp_num64)) {
 				ErrorMessage("Error while reading file.  "
 					     "\"Starting sector\" should be specified as an integer value.");
 				return FALSE;
 			}
 
 			SetDiskStart(temp_num64);
+		} else if (key.CompareNoCase("'Disk maximum size,starting sector,Data pattern") == 0) {
+			if (!IsType(Type(), GenericDiskType)) {
+				ErrorMessage("Error restoring worker " + (CString) name + ".  "
+					     "Cannot specify \"Disk maximum size,starting sector\" for a non-disk worker.");
+				return FALSE;
+			}
+
+			if (!ICF_ifstream::ExtractFirstUInt64(value, temp_num64)) {
+				ErrorMessage("Error while reading file.  "
+					     "\"Disk maximum size\" should be specified as an integer value.");
+				return FALSE;
+			}
+
+			SetDiskSize(temp_num64);
+
+			if (!ICF_ifstream::ExtractFirstUInt64(value, temp_num64)) {
+				ErrorMessage("Error while reading file.  "
+					     "\"Starting sector\" should be specified as an integer value.");
+				return FALSE;
+			}
+
+			SetDiskStart(temp_num64);
+
+			if (!ICF_ifstream::ExtractFirstInt(value, temp_number)) {
+				ErrorMessage("Error while reading file.  "
+					     "\"Data pattern\" should be specified as an integer value.");
+				return FALSE;
+			}
+
+			SetDataPattern(temp_number);
 		} else if (key.CompareNoCase("'Local network interface") == 0) {
 			if (!IsType(Type(), GenericNetType)) {
 				ErrorMessage("Error restoring worker " + (CString) name + ".  "

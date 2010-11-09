@@ -956,8 +956,10 @@ BOOL TargetDisk::Set_Sizes(BOOL open_disk)
 
 		SetLastError(0);
 
+#ifdef USE_NEW_DISCOVERY_MECHANISM
 		spec.disk_info.has_partitions = FALSE;
-		
+#endif
+
 		// Try the EX version first
 		if (DeviceIoControl(disk_file, IOCTL_DISK_GET_DRIVE_LAYOUT_EX, NULL, 0,
 				disk_layout_info_ex, sizeof(disk_layout_info_ex), &disk_info_size, NULL)){
@@ -1010,7 +1012,7 @@ BOOL TargetDisk::Set_Sizes(BOOL open_disk)
 		// Getting information on the size of the drive.
 		size = 0;
 		spec.disk_info.sector_size = 0;
-
+		
 		// Try the EX version first
 		if (DeviceIoControl(disk_file, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX, NULL, 0,
 			&disk_geo_info_ex, sizeof(disk_geo_info_ex), &disk_info_size, NULL)) {
@@ -1180,7 +1182,7 @@ void TargetDisk::Set_Sector_Info()
 // returns only when all queued I/Os have completed.  
 // Return value is TRUE for success, FALSE if any error occurred.
 //
-BOOL TargetDisk::Prepare(void *buffer, DWORDLONG * prepare_offset, DWORD bytes, volatile TestState * test_state)
+BOOL TargetDisk::Prepare(DWORDLONG * prepare_offset, volatile TestState * test_state, int sector_size, unsigned char* _random_data_buffer, long long _random_datat_buffer_size)
 {
 	BOOL write_ok;
 	int num_outstanding;
@@ -1189,6 +1191,47 @@ BOOL TargetDisk::Prepare(void *buffer, DWORDLONG * prepare_offset, DWORD bytes, 
 	BOOL busy[PREPARE_QDEPTH];
 	BOOL retval;
 	int i;
+	void *buffer = NULL;
+	DWORD bytes;
+	DWORDLONG rand_seed;
+
+	// Save current spec.random so that it can be reset back to the same seed value after preparing disks
+	// This allows the PRNG to be the same when doing the actual IO, whether the disk is prepped or not and the user specifies fixed seed
+	rand_seed = spec.random;
+
+	// Allocate a large (64k for 512 byte sector size) buffer for the preparation.
+	bytes = sector_size * 128;
+#if defined(IOMTR_OSFAMILY_NETWARE)
+	NXMemFree(buffer);
+	errno = 0;
+	if (!(buffer = NXMemAlloc(bytes, 1)))
+#elif defined(IOMTR_OSFAMILY_UNIX)
+	free(buffer);
+	errno = 0;
+	if (!(buffer = valloc(bytes)))
+#elif defined(IOMTR_OSFAMILY_WINDOWS)
+	VirtualFree(buffer, 0, MEM_RELEASE);
+	if (!(buffer = VirtualAlloc(NULL, bytes, MEM_COMMIT, PAGE_READWRITE)))
+#else
+#warning ===> WARNING: You have to do some coding here to get the port done!
+#endif
+	{
+		cout << "*** Could not allocate buffer to prepare disk." << endl;
+		return FALSE;
+	}
+
+	switch (spec.DataPattern) {
+		case DATA_PATTERN_REPEATING_BYTES:
+			// Do nothing here...a new random byte will be chosen below for each IO
+			break;
+		case DATA_PATTERN_PSEUDO_RANDOM:
+			for( DWORD x = 0; x < bytes; x++)
+				((unsigned char*)buffer)[x] = (unsigned char)Rand(0xff);
+			break;
+		case DATA_PATTERN_FULL_RANDOM:
+			//Nothing to do here
+			break;
+	}
 
 #ifdef _DEBUG
 	cout << "into function TargetDisk::Prepare()" << endl;
@@ -1269,7 +1312,26 @@ BOOL TargetDisk::Prepare(void *buffer, DWORDLONG * prepare_offset, DWORD bytes, 
 					olap[i].OffsetHigh = (DWORD) (*prepare_offset >> 32);
 
 					// Fill the buffer with some new random data so we aren't writing all zeros each time
-					memset(buffer, rand(), bytes);
+					switch (spec.DataPattern) {
+						case DATA_PATTERN_REPEATING_BYTES:
+							memset(buffer, rand(), bytes);
+							break;
+						case DATA_PATTERN_PSEUDO_RANDOM:
+							break; // Nothing to do here, buffer was set above
+						case DATA_PATTERN_FULL_RANDOM:
+							//Buffer offset must be DWORD-aligned in memory, otherwise the transfer fails
+							//Choose a pointer into the buffer
+							long long mem_offset = (long long)Rand(_random_datat_buffer_size-bytes);
+
+							//See how far it is from being DWORD-aligned
+							long long remainder = mem_offset & (sizeof(DWORD) - 1);
+
+							//Align the pointer using the remainder
+							mem_offset = mem_offset - remainder;
+
+							buffer = &_random_data_buffer[mem_offset];
+							break;
+					}
 
 					// Do the asynchronous write.
 					if (WriteFile(disk_file, (char *)buffer, bytes, &bytes_written, &(olap[i]))) {
@@ -1389,9 +1451,19 @@ BOOL TargetDisk::Prepare(void *buffer, DWORDLONG * prepare_offset, DWORD bytes, 
 		CloseHandle(olap[i].hEvent);
 	}
 
+	// Restore spec.random to what it was upon entering this fuction - if using fixed seed
+	// This allows the PRNG to be the same when doing the actual IO, whether the disk is prepped or not and the user specifies fixed seed
+	if(spec.use_fixed_seed)
+	{
+		cout << "   Resetting Targets random seed back to(" << rand_seed << ") after disk preperation." << endl;
+		spec.random = rand_seed;
+	}
+		
+
 #ifdef _DEBUG
 	cout << "out of member function TargetDisk::Prepare()" << endl;
 #endif
+
 	return retval;
 }
 

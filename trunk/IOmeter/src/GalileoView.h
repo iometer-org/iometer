@@ -305,9 +305,12 @@ class CGalileoView:public CView {
 	afx_msg void OnMDisplayMaxRIO();
 	afx_msg void OnMDisplayMaxTrans();
 	afx_msg void OnMDisplayMaxWIO();
-	afx_msg void OnMDisplayMBsMBPS();
-	afx_msg void OnMDisplayMBsRMBPS();
-	afx_msg void OnMDisplayMBsWMBPS();
+	afx_msg void OnMDisplayMBsMBPSBin();
+	afx_msg void OnMDisplayMBsRMBPSBin();
+	afx_msg void OnMDisplayMBsWMBPSBin();
+	afx_msg void OnMDisplayMBsMBPSDec();
+	afx_msg void OnMDisplayMBsRMBPSDec();
+	afx_msg void OnMDisplayMBsWMBPSDec();
 	afx_msg void OnMDisplayNetPacketErrors();
 	afx_msg void OnMDisplayNetPacketsPS();
 	afx_msg void OnMDisplayNetRetransPS();

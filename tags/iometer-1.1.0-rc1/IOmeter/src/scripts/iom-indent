@@ -1,0 +1,10 @@
+#!/bin/sh
+#
+# Copied from Linux kernel.
+#
+# This code is licenced under the GPL.
+#
+# Note:
+# Linux kernel suggests to use -l80 but I believe -l120 is better in Iometer case.
+# Any modern monitors and editors (even my vi under gnome) can support a much longer line.
+indent -bad -kr -i8 -ts8 -sob -l120 -ss -ncs "$@"

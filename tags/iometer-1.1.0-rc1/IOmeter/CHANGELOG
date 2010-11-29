@@ -1,0 +1,472 @@
+12345678901234567890123456789012345678901234567890123456789012345678901234567890
+         1         2         3         4         5         6         7         8
+----+----|----+----|----+----|----+----|----+----|----+----|----+----|----+----|
+
+
+ChangeLog (IOMETER2 - 2008.06.18rc1):
+==================================
+
+-All of the following changes pertain to Windows. Infrastructure is in place to
+ enable this for other OSes but some coding is still required
+ -The following defines must be turned on for successful compatibility with the
+  IOMeter GUI: USE_NEW_DISCOVERY_MECHANISM, FORCE_STRUCT_ALIGN (more info below)
+
+-New disk detection and common structure changes (USE_NEW_DISCOVERY_MECHANISM)
+ -volume mount point support
+ -improved raw disk detection and soft raid awareness
+ -improved networking detection
+ -backwards compatiblity for older versions of Windows
+ -new display names for disks in Iometer GUI (e.g. inquiry info for raw disks)
+ -display raw disks with partitions using /force_raw option in dynamo
+  -iometer hierarchically chains raw disks to corresponding volumes if any
+  -other OSes need to do some coding to enable this, else works as before
+
+-Abstracted timer code
+ -added speed step detection
+ -default timer for x86 is Windows high-perf counter (Intel)
+ -Win64 attempts the TSC first and falls back to high-perf counter
+  -use /no_rdtsc in dynamo to disable the use of TSC and force high-perf cntr
+ -other OSes need to do some coding to enable this, else works as before
+
+-CPU affinity (IOMTR_SETTING_CPU_AFFINITY)
+ -existing cmdline option trims the affinity set to whatever you specify
+ -each worker is now affinitized to a single CPU
+ -CPUs are round robined within a given affinity mask
+ -other OSes need to do some coding to enable, else default behavior
+
+-Full 64bit disk sizes supported 
+ -including specifying start offset in GUI
+
+-Structure packing (FORCE_STRUCT_ALIGN)
+ -structure are 8byte aligned with compiler directive
+ -should not need padding members for compatibility for other OSes
+
+-Project/solution files
+ -created new Visual Studio 2005 solution files in \msvc
+  -binaries get deposited within there
+ -ddk binaries will end up in \ddk once you run the first build
+
+
+
+ChangeLog (IOMETER2 - 200X.XX.XX):
+==================================
+
+- New features:
+   - Added a simple INSTALL file about how to install iometer and dynamo on 
+     various platforms.
+   - Patch by Kris Murray and Allen Wayne from Intel on randomizing the written
+     data. The previous implementation of writing 0's causes an un-desired side-effect 
+     on some media, especially flash-based devices. The writing of random data 
+     creates a realistic workload for these new devices. (Also data patten will have impact
+     on protocol like iSCSI as well).
+- Bug fixes:
+   - Patch by Ming Zhang to fix the way to get CPU utilization statistics under
+     Linux.
+   - Patch by Ming Zhang to get CPU count from /proc/cpuinfo under Linux. Old
+     glibc way is buggy for 64bit Linux and XEN.
+
+- Cleanup:
+   -
+
+ChangeLog (IOMETER2 - 2006.07.27):
+==================================
+
+- Applied patches:
+   - Patch by Ming Zhang to allow dynamo connect to iometer when iometer started
+     with a specified non-default port.
+   - Patch by Ming Zhang to fix recv() return value processing error in Peek();
+   - Patch by Ming Zhang to allocate memory under Linux as 4KB aligned.
+   - Patch by Keith Moyer to add a ramp/run time remaining notification to the 
+     status bar during appropriate periods.
+   - Patch by Ming Zhang to support optional display BigMeter when iometer starts.
+   - Patch by Ming Zhang to allow iometer and dynamo use specified port.
+   - Patch by Ming Zhang to fix 2 memory leaks in ICFOpenDialog and ICFSaveDialog
+     class.
+   - Patch by Ming Zhang to exclude the disk if can not detect the disk size
+     information under Linux.
+   - Patch by Fabian Tillier to fix DDK path.
+   - Patch by Christensen ReedX K to update iomtr_kstat module with newer
+     2.6.x kernel.
+   - Patch by Christensen ReedX K to use O_DIRECT as default for Linux.
+   - Patch by Ming Zhang to use sysconf for processor count.
+   - Patch by Ming Zhang to use unify method for version string.
+   - Patch by Saner Pool to filter invalid commas, new line, and cariage
+     return in .csv output.
+   - By Ganderson, initialize iocq structure member for all platform.
+   - By Rick Altherr, fixed the Mac OSX compile.
+   - By Ming Zhang, fixed the Windows compile broken by MacOS port.
+   - #1239881 : iometer-2004.07.30-post.DS1.Rick002OsXPortTry2.patch by
+     Rick Altherr (Patch that implements the Mac OS X / PPC port).
+   - #1186329 : iometer-2004.07.30-post.DS1.Rick001AioCancelTry2.patch by
+     Rick Altherr (Patch that fixes an Completion Queue issue and ensures
+     that all AIO requests are canceled if the Grunt has finished a test).
+   - #1186314 : iometer-2004.07.30-post.DS1.Ming017CharDevicesForRaw.patch
+     by Ming Zhang (Patch that adds support for char devices to support
+     raw devices).
+   - #1186307 : iometer-2004.07.30-post.DS1.Ming016KStatErrorMessage.patch
+     by Ming Zhang (Tiny patch that cleans up an error message that is
+     related to the kstat module one can optionally use on Linux).
+   - #1186304 : iometer-2004.07.30-post.DS1.Ming015DebugDefine.patch by
+     Ming Zhang (Cleanup the _DEBUG define usage in the Makefiles).
+   - #1186297 : iometer-2004.07.30-post.DS1.Ming014ExcludeSwapDevices.patch
+     by Ming Zhang (Prevents swap devices from showing up under Linux).
+   - #1184792 : iometer-2004.07.30-post.Daniel002CodeCleanup.patch by
+     Daniel Scheibli (Collective patch that brings different minor
+     cleanups to logic and coding style).
+   - #1184764 : iometer-2004.07.30-post.Ming013BlkGetSize64.patch by
+     Ming Zhang (Tiny patch that corrects the BLKGETSIZE64 prototype
+     definition).
+   - #1184759 : iometer-2004.07.30-post.Ming012CpuAffinitityOffByDefault.patch
+     by Ming Zhang (Tiny patch that switches off the CPU affinity
+     support by default).
+   - #1184758 : iometer-2004.07.30-post.Ming011SolarisWarnings.patch
+     by Ming Zhang (Small patch that gets rid of some compiler warnings
+     on Solaris).
+   - #1184741 : iometer-2004.07.30-post.Henry002Ia64LinuxAndDdkCleanup.patch
+     by Henryx W. Tieman (Does some cleanup on the Windows/IA64 build
+     using the DDK and brings basic support for a Linux/IA64 port).
+   - #1184731 : iometer-2004.07.30-post.Ming010CpuAffinity.patch by
+     Ming Zhang (adds CPU affinity support for Linux and Windows).
+   - #1184707 : iometer-2004.07.30-post.Ming009SysLogSupport.patch by
+     Ming Zhang (adds syslog support/reporting for Linux and Solaris).
+   - #1184691 : iometer-2004.07.30-post.Ming008LoginWarning.patch by
+     Ming Zhang (Minor patch that adds an additional warning during
+     the login process).
+   - #1088711 : iometer-2004.07.30-post.Andy001BugFixFor1088486.patch
+     by Andy Currid (Implements a bug fix in regards to IO completions -
+     see bug report #1088486).
+   - #1184671 : iometer-2004.07.30-post.Ming006ParseParamStruct.patch
+     by Ming Zhang (Patch that introduces the dynamo_param structure
+     which contains the arguments given to the dynamo executable).
+   - #1184668 : iometer-2004.07.30-post.Thayne001NetwareFollowUp.patch
+     by Thayne Harmon (Significant patch applying some adjustments as
+     well as adding support for network statistics).
+   - #1184663 : iometer-2004.07.30-post.Ming005TargetDiskOverflow.patch
+     by Ming Zhang (Patch applying the fix submitted by moozart@gmx.de
+     which resolves a serious overflow in the IOTargetDisk.cpp file).
+   - #1184661 : iometer-2004.07.30-post.Ming004AdjustPrintMessage.patch
+     by Ming Zhang (Tiny patch that corrects a message printed).
+   - #1184655 : iometer-2004.07.30-post.Ming003Gcc34Support.patch by
+     Ming Zhang (Adds support for the gcc 3.4 compiler).   
+   - iometer-2004.07.30-post.Ming002AbsolutePathForDevices.patch by
+     Ming Zhang (Small patch that now reports the raw device names
+     with leading RAW_DEVICE_DIR instead of the constant "/dev").
+   - iometer-2004.07.30-post.Daniel001RemoveReportedAsLogical.patch
+     by Daniel Scheibli (Minor cleanup that removes the no longer
+     used Report_As_Logical() function).
+   - em64t.patch by Henryx W. Tieman (Adds the x86_64 port for AMD
+     Operton and Intel Xeon with EM64T running Linux or Windows).
+   - iometer-2004.07.30-post.Ming001AnyBlockDevice.patch by Ming Zhang
+     (adds command line arguments to the Linux and Solaris variant of
+     Dynamo, to allow the user to specify block devices which are not
+     detected by the automatic detection).
+   - iometer-2003.12.16-post.DS3-netware.patch by Thayne Harmon (Fixes
+     the detection of the volumens - for the NetWare port).
+   - IOGrunt.patch by Lamont Cranston (Prevents a shifting queue for
+     the transaction slots in IOGrunt and that way ensures that two
+     runs of the same test are closer together).
+   - invalid_spec.patch by Lamont Cranston (Allows the user to set any
+     request sizes, sector allignment etc. - even if it doesn't match the
+     storage devices block size. While in interactive mode, the user
+     must confirm his will - in batch mode invalid specifications gets
+     executed without requiring any kind of confirmation / force flag).
+   - scross_spec_list.patch by Lamont Cranston (Ensures that the access
+     specification list gets scrolled during the run - so the active
+     access specification can always be seen).
+   - linux_kstat_build_fix.patch by Lamont Cranston (Fixes a minor bug
+     in the build of the linux_kstat version for Linux 2.4).
+   - IOTargetDisk_cpp.patch by Lamont Cranston (Closes the files in
+     getSizeOfPhysDisk() and getSectorSizeOfPhysDisk() under Linux
+     and explain the use of the BLKBSZGET define.
+   - disk_full.patch by Lamont Cranston (fixes handling of the disk full
+     condition when preparing logical drives).
+   - iometer2.Lamont001ConstructorCleanup.patch by Daniel Scheibli
+     (bundles the changes contributed by Lamont Cranston - it introduces
+     the new IOManagerWin.cpp file).
+- Cleanup:
+   - Use snprintf instead of sprinf to reduce the risk of buffer overrun.
+   - Cleanup the use of _DEBUG and _DETAILS.
+   - Renamed Dynamo and Iometer subdirectories to solve the name conflict
+     under case insensitive file system.
+   - Adjusted some variable types to fit 64bit OS and compiler.
+   - Recovered all corrupted binary files.
+   - Added new VS project management file for VS.net.
+   - Various cleanup to remove compile warning with new version GCC.
+   - Removed wrongly included IOManageSolario.o from Makefile-Linux.ppc.
+   - Indent all source code to have better code style.
+   - Renamed Makefile-Solaris.Sparc into Makefile-Solaris.sparc
+   - Modified an #ifdef in IOPerformanceLinux.cpp to make it work for
+     the XScale processor as well.
+   - Addded the IOManagerWin.cpp file to the Iometer.dsp project file
+     to make Dynamo build with MS VC++.
+   - Added a check for null pointers in case a Manager could not be
+     added to his list in Galileo[App|Globals].cpp
+   - Corrected the macro definition for BLKGETSIZE64 in IOCommon.h
+- Documentation:
+   - Added further stuff to the Coding Style section of the DEVGUIDE.
+   - Added the initial drop of the DocBook sources of the first part of
+     the Iometer Users Guide (converted from OpenOffice - by James Rogers).
+- Others:
+   - Added a perl script to draw simple graph like what Wizard.mdb does, a
+     free alternative solution.
+   - Changed the "Help About..." button of the Iometer Wizard to reflect
+     the current status (Open Source,...) of Iometer.
+   - Converted the Iometer Wizard to the file format of the 2000 version
+     of MS Access and fixed the (Excel) version check of the Graph Wizard
+     part (as suggested by Joseph R Gruher).
+   - Modified the About dialog to point to the Intel Open Source License
+     only.
+
+
+
+<BRANCH OUT IOMETER1/>
+======================
+
+
+
+ChangeLog (IOMETER1 - basis for 2004.07.30):
+============================================
+
+- Applied patches:
+   - iometer-2003.12.16-post.DS2.DanielGlobalAccessSpecs.patch by
+     Daniel Scheibli (adds a set of sample Global Access Specifications).
+   - iometer-netware.patch by Thayne Harmon (modifies the usage output
+     to reflect volume exclusion, adoped Makefile to use Code Warrier 8).
+   - iometer-2003.12.16-post.DS2.DanielIcfVersionStringWithDash.patch
+     by Daniel Scheibli (Enables support for trailing dashes in the
+     version string of loaded ICF file).
+   - iometer-2003.12.16-post.DS2.DanielEnforceParameters.patch by
+     Daniel Scheibli (enforces usage of parameter -m when -i was
+     specified).
+   - iometer-netware.patch by Thayne Harmon (adds two minor changes
+     to the code and Makefile for the Netware/IA32 port).
+   - iometer-2003.12.16-post.DS2.patch by Thayne Harmon (adds some more
+     changes and functionality for the Netware/IA32 port).
+   - iometer.ppc.patch by Dan Bar Dov (adds support for Dynamo to run
+     on Linux / PowerPC).
+   - netware_cpp.patch by Thayne Harmon (adds a part of the Netware
+     support - actually it adds the code file changes).
+   - netware_h.patch by Thayne Harmon (adds a part of the Netware
+     support - actually it adds the header file changes).
+   - netwareonly_cpp.patch by Thayne Harmon (adds a part of the
+     Netware support - actually it adds new Netware specific files).
+   - iometer-121603ds2-iomtrkstat-xscale.patch by Ming Zhang (adds
+     Linux on XScale support for Intel IQ80321 and IQ80331 to the
+     iomtr_kstat module).
+   - iometer-121603ds2-xscale.patch by Ming Zhang (adds Linux on 
+     XScale support for Intel IQ80321 and IQ80331).
+   - iometer-121603-ds2-report_tcp.patch by Ming Zhang (rewrite of the
+     Report_TCP() function for Linux - more robust when the hostname is
+     not setup properly).
+   - iometer-1216ds2-getnicounter.patch by Ming Zhang (bugfix for
+     reading the /proc/net/dev file under Linux).     
+   - iometer-2003.12.16-post.DS1-SolarisMultipleSwapDevices.patch
+     by Daniel Scheibli (rework of the Get_All_Swap_Devices()
+     function for Solaris - fixing a few minor inconsistencies).
+   - iometer-2003.12.16-post.DS1-AlwaysSendCompletionQueue.patch
+     by Daniel Scheibli (implements the code changes suggested by 
+     Dough Haigh to solve the performance drop in network tests on
+     Solaris - see bug report #881675).
+   - iometer-1216.post.ds1.kstat-patch by Ming Zhang (major collective 
+     patch which
+     a.) introduces the iomtr_kstat kernel module for Linux 
+     b.) adds support for parsing the Linux 2.4 and 2.6 style
+         /proc/stat file - as suggested by Dmitry Yusupov
+     c.) increases the block size detection for Linux as
+         suggested by Dimtry Yusupov
+     d.) enables TCP statistics for Linux
+     e.) adds first suoport for the XScale processor)
+   - iometer-2003.12.16-IoMtrGlobalDefines5.patch by Daniel Scheibli
+     (introduces the IOMTR_SETTING_* global defines to include additional
+     code like the VI stuff).
+   - iometer-2003.12.16-SwitchesNowRequired.patch by Daniel Scheibli
+     (code cleanup of the dynamo parameter handling; switches are no
+     longer option but required now)
+- Cleanup:
+   - Corrected the CPU speed detection output as it was proposed
+     Kenneth Morse (rounding issue).
+   - Changed the "truly batch oriented" patch behaviour (basically rolled
+     back the changes due to the bug report of Kris Strecker).
+   - Removed an old left over _DETAIL define depended code (for debugging)
+     in IOGrunt.cpp.
+- Documentation:
+   - Added first comments about porting the Dynamo part to the Developers
+     Guide.
+   - Added first comments about the coding style to the Developers Guide.
+- Others:
+   - Changed "manager_network_name" to "manager_computer_name" in the
+     usage of Dynamo to reflect the value questioned here (as suggested
+     by Tony Renna).
+   - Modified the Iometer icon to use the new black one instead of the
+     old color lightning/spectrum thing.
+   - Added an installer for Iometer on Windows (based on the Nullsoft
+     Scriptable Install System - NSIS).
+   - Changed the Registry Key for the Windows GUI to "iometer.org".
+   - Modified the About dialog to reflect the Open Source status of Iometer.
+   - Changed the license of the iomtr_kstat module to the GPL.
+   - Added md5sum's for each package to the project homepage.
+   - Extended the build environment with capabilities to handle Java.
+
+
+
+ChangeLog (IOMETER1 - 2003.12.16):
+==================================
+
+- Applied patches:
+   - iometer-2003.05.10-IoMtrGlobalDefines4.patch by Daniel Scheibli
+     (Last of the IOMTR_* global defines patches)
+   - iometer_large_work_file.patch.txt by Russell Redd (fixes the GUI 
+     to ensure that "Maximum Disk Size" values are handled propably)
+   - iometer-2003.05.10-IoMtrGlobalDefines3.patch by Daniel Scheibli
+     (introduces the IOMTR_* global defines to consolidate the different
+     global defines coming with the different platforms - ease future
+     ports).
+   - iometer-2003.05.10-Win64OnAmd64.patch by Daniel Scheibli (Integrates
+     the changes contributed by Vedran Degoricija to ensure, that the
+     executables can be build for Windows 64 Bit on AMD64).
+   - Patch provided by Robert H Creecy to fix the segmentation fault which
+     happened when running on Solaris while having multiple swap devices
+     configured.
+   - Patch provided by Sander Pool to get the Iometer "truly batch
+     oriented".
+   - iometer-2003.05.10-UsingDdkAndWin64.patch by Daniel Scheibli
+     (Integrates the changes contributed by Vedran Degoricija to
+     ensure, that the executables can be build using the MS DDK
+     on i386 and IA64 as well).
+   - iometer-2003.05.10-IoMtrGlobalDefines2.patch by Daniel Scheibli
+     (introduces the IOMTR_* global defines to consolidate the different
+     global defines coming with the different platforms - ease future
+     ports).
+   - iometer-2003.05.10-IsBigEndianFunction.patch by Daniel Scheibli
+     (Does endian type detection for CPU during runtime. This function
+     replaces the [BIG|LITTLE]_ENDIAN_ARCH global defines).
+   - iometer-2003.05.10-Solaris9onI386.patch by Daniel Scheibli
+     (Assimilates the patch submitted by Robert Jones to build with
+     Solaris 9 on x86 (i386)).
+   - iometer-2003.05.10-IoTimeConsolidation.patch by Daniel Scheibli
+     (Cleanup for the IOTime.* files - getting rid of IOTime.h also).
+   - iometer-2003.05.10-IoMtrGlobalDefines1.patch by Daniel Scheibli
+     (introduces the IOMTR_* global defines to consolidate the different
+     global defines coming with the different platforms - ease future
+     ports).
+- Cleanup:
+   - Modified the EULA (End User License Agreement) to reflect the
+     Open Source status.
+- Documentation:
+   - Moved to Open Office as the official editing tool for the 
+     documentation (especially for the Iometer User's Guide).
+   - Added a remark into the .../README file (containing additions for
+     running Dynamo on a Linux machine with NTPL support).
+- Others:
+   - Added the source and makefile provided by Vedran Degoricija to get
+     the Iometer and Dynamo executable build using the Microsoft Driver
+     Development Kit (DDK).
+
+
+
+ChangeLog (IOMETER1 - 2003.05.10):
+==================================
+
+- Applied patches:
+  - iometer-2003.02.15-ResultEndTimeHighRes.patch by Daniel Scheibli
+    (modifies the result file output to contain the milliseconds as well).
+  - iometer-2003.05.04-CIOB5.patch by Matt Robinson (modifies the mechanisms
+    for read and writes in IOMeter so that different buffers are used each
+    time to avoid cache line collisions and performance lock-ups with some
+    chipsets).
+  - iometer-2003.02.15-ResultEndTime.patch by Daniel Scheibli (modifies the
+    result file output to append the current timestamp after each block of
+    results).
+  - iometer-2003.02.15-HandleDummy0.patch by Daniel Scheibli (modifies the
+    Get_NI_Counter function to handle interfaces without leading blanks
+    (like dummy0) as well).
+  - iometer-2003.02.15-NoPipe.patch by Daniel Scheibli (removes the Windows
+    Pipes support for communication which simplifies the code).
+  - iometer-2003.02.15_Get_NI_Counter.patch by Joe Eiler (brings the
+    handling for network interfaces that does not contain statistics in
+    /proc/net/dev - as for example with Intel Link Aggreation).    
+  - iometer-2003.02.15_Exclude_Filesys.patch by Joe Eiler (additional
+    command line parameter for Dynamo to pass into file systems which
+    should be hidden).
+  - iometer-2003.02.15_Extra_Processor_Info.patch by Joe Eiler (brings new
+    processor speed values as well as improvements for the GHz CPU detection).
+- Cleanup:
+   - Updated the handling of the global debug flag (_DEBUG) in the source
+     files (check for platform etc.).
+   - Changed LINUX_DEBUG and NDEBUG to _DEBUG which is the generic define
+     used for this effort.
+   - Dropped different unneeded defines in IOVersion.h
+   - Dropped clean_ctlm.c, because we can use the recode tool instead.
+   - Merged rdtsc.c into IOTime.cpp
+   - Cleaned up some compiler warnings on Solaris
+   - Changes NO_LINUX_VI to NO_DYNAMO_VI so Solaris build can use it also
+   - Dropped the IOCq.cpp file, because it was empty.
+- Documentation:
+   - Rewrite of the .../README file (containing additions for the Iometer
+     User's Guide as well as text for a future Developers Guide).
+- Others:
+   - Improved error messages for better support in IOPortTCP.cpp (due to
+     the recurrent support requests).
+   - Made some minor changes to get Iometer to compile with VC++ 7 (.NET)
+     Note: No MSVC++ project files have been checked in, you will have to let
+           VC++ convert the project for you.  This worked for fine for me.
+   - Added the Wizard.mdb file from the old days (version 1999.10.20).
+   - rewrote the Solaris Makefile to match the Linux stuff
+   - Added the output of the major and minor number during the detection of
+     the sector size (of physical disks).
+
+
+
+ChangeLog (IOMETER1 - 2003.02.15):
+==================================
+
+- Applied patches:
+   - iometer.patch by Matt D. Robinson (ensures, that there is an allocated
+     buffer for each worker thread - needed for large amounts of I/O through
+     ServerWorks chipsets).
+- Bugfixes:
+   - Different changes to get Dynamo compiled with gcc 3.2 - in the past there
+     was some problem known as cout << hex error (include <sstream> instead of
+     include <strstream.h> etc).
+   - Modified the sector size detection for physical disks under Linux in that
+     way, that major and minor number are recognised (was the major number
+     only).
+   - Added CPU time in user mode with low priority (nice) to the user mode
+     utilization as well as the total CPU utilization.
+- Cleanup:
+   - Dropped the IOMessage.cpp and IOTest.cpp file, because they are empty.
+- Others:
+   - Under Linux, NFS devices are now supported by default (in older versions
+     they was excluded per default).
+
+
+
+ChangeLog (IOMETER1 - 2003.02.08):
+==================================
+
+- Applied patches:
+   - iometer-initial-datatypes.patch
+   - iometer-initial-largefile.patch (allows >2GB files under Linux)
+   - proc-speed-fix.txt (addresses the 2 GHz CPU issue)
+   - Created Iometer.dsw, Iometer.dsp and Dynamo.dsp by merging the files
+     contributed earlier by Matt D. Robinson and Jeffery Bahr (allows to
+     compile Iometer and Dynamo under Windows).
+- Bugfixes:
+   - Added support for the CPU utilization and Interrupts statistic on Linux
+- Cleanup:
+   - Different changes to Makefile-Linux
+- New functionality:
+   - Addition parameter for Dynamo (optional), to pass the network name Iometer
+     should use to communicate with Dynamo. That way it is possible to run the
+     communication over the second NIC for example.
+- Others:
+   - Added the .../src/res tree as well as the .../Docs tree as found in the
+     CVS tree at Sourceforge.
+   - Started a Todo list with issues needed to be addressed for the code
+     cleanup. The file is named .../TODO.
+   - Started a modest documentation of the source structure which can be found
+     in .../README.
+
+
+
+

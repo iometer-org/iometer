@@ -1,0 +1,215 @@
+<sect3 id="targets">
+<title>Targets</title>
+
+<mediaobject>
+<imageobject role="html">
+<imagedata fileref="images/targets.jpg" format="JPG" align="left"/>
+</imageobject>
+<imageobject role="fo">
+<imagedata fileref="images/targets.jpg" format="JPG" align="left"/>
+</imageobject>
+</mediaobject>
+
+<para>
+The Targets list displays the disk drives available to the worker or 
+manager selected in the Topology panel. Disks that are selected (checked) 
+in the Targets list will be used by the worker(s) during the test.
+</para><para>
+Yellow disk icons represent logical drives (i.e. those with a drive 
+letter). They are shown only if they are writeable. Disk workers access 
+logical drives by reading and writing to the file 
+<emphasis>iobw.tst</emphasis> in the root directory of the drive. If this 
+file exists, the drive is shown with a plain yellow icon. If the file 
+doesn't exist, the icon has a red slash through it.
+</para><para>
+If you select a drive that does not have an iobw.tst file, Iometer will 
+begin the test by creating this file and expanding it until the drive is 
+full (this is shown as .Preparing Drives. in the status bar). You can 
+change the size of this file to control how much of the disk Iometer can 
+use by setting the Maximum Disk Size control to the desired size (in 
+sectors).
+</para><para>
+Blue disk icons represent physical drives. They are shown only if they 
+contain nothing but free space (no defined partitions). Disk workers 
+access physical drives by writing direct to the raw disk. Physical drives 
+do not use an iobw.tst file. Running with physical drives is recommended.
+</para><para>
+You can select any number of drives; by default, no drives are selected. 
+Click on a single drive to select it; Shift-click to select a range of 
+drives; Control-click to add a drive to or remove a drive from the current 
+selection. You can also use the arrow keys, Home and End keys, and the 
+space bar to move the highlight and  select/deselect disks, or press 
+<emphasis>Control-A</emphasis> to select all drives (this requires the 
+keyboard focus to be in the Disk Targets tab).
+</para>
+<itemizedlist>
+<listitem><para>
+If a disk worker is selected in the Topology panel, the Targets list  
+displays the disks available to that worker. Drives that you select in the 
+Targets list are used by that worker during the test.
+</para></listitem>
+<listitem><para>
+If a manager is selected in the Topology panel, the Targets list displays 
+the disks available to that manager. Drives that you select in the Targets 
+list are used by that manager's disk workers during the test. (Network 
+workers are not affected.) The selected drives are distributed in a 
+round-robin fashion among the manager's disk workers; any previous drive 
+assignments for those workers are replaced by the new assignment.
+</para><para>
+For example, suppose the selected manager has four disk workers and
+you select seven drives. In this case, drives 1 and 5 will be used by 
+Worker 1; drives 2 and 6 will be used by Worker 2, drives 3 and 7 will be 
+used by Worker 3, and drive 4 will be used by Worker 4.
+</para><para>
+Note that if you click on a manager, the selected disks for that manager's 
+workers are shown only if the drives are distributed among the workers in 
+a round-robin fashion. If this is not the case, all the check boxes are 
+gray, and you must click on an individual worker to see its selected 
+disks.
+</para></listitem>
+<listitem><para>
+If <emphasis>All Managers</emphasis> is selected in the Topology panel, 
+the Targets list is disabled.
+</para></listitem>
+</itemizedlist>
+</sect3>
+
+<sect3 id="disksize">
+<title>Maximum Disk Size</title>
+
+<mediaobject>
+<imageobject role="html">
+<imagedata fileref="images/maxdisk.jpg" format="JPG" align="left"/>
+</imageobject>
+<imageobject role="fo">
+<imagedata fileref="images/maxdisk.jpg" format="JPG" align="left"/>
+</imageobject>
+</mediaobject>
+
+<para>
+The Maximum Disk Size control specifies how many disk sectors are used by 
+the selected worker(s). The default is 0, meaning the entire disk or  
+\iobw.tst file (beginning with the Starting Disk Sector). If you specify a 
+value other than zero, Iometer uses the specified number of 512-byte disk 
+sectors, beginning with the Starting Disk Sector. If the specified value 
+would extend beyond the end of the disk or file, it is silently ignored, 
+and the default of 0 is used.
+</para><para>
+For example, if Starting Disk Sector is 5 and Maximum Disk Size is 10, 
+the selected worker(s) will use sectors 5-14 of the disk or \iobw.tst 
+file.
+</para><para>
+When preparing an unprepared logical drive (that is, the iobw.tst file 
+does not exist), Iometer uses the sum of the values of the Maximum Disk 
+Size + Starting Disk Sector controls as an upper bound on the size of 
+iobw.tst. The iobw.tst file is created with this size (or available space, 
+if smaller). If the file already exists (the drive has already been 
+prepared), changing this control will not resize iobw.tst.
+</para>
+<note><title>Note</title>
+<para>
+When two or more workers are assigned to the same unprepared logical
+drive, the Maximum Disk Size + Starting Disk Sector of the first worker
+determines the size of iobw.tst.
+</para></note>
+
+</sect3>
+
+<sect3 id="start">
+<title>Starting Disk Sector</title>
+
+<mediaobject>
+<imageobject role="html">
+<imagedata fileref="images/startdisk.jpg" format="JPG" align="left"/>
+</imageobject>
+<imageobject role="fo">
+<imagedata fileref="images/startdisk.jpg" format="JPG" align="left"/>
+</imageobject>
+</mediaobject>
+
+<para>
+The Starting Disk Sector control specifies the lowest-numbered disk 
+sector used by the selected worker(s) during the test. The default is 0, 
+meaning the first 512-byte sector in the disk or \iobw.tst file.
+</para>
+</sect3>
+
+<sect3 id="numio">
+<title># of Outstanding I/Os</title>
+
+<mediaobject>
+<imageobject role="html">
+<imagedata fileref="images/numio.jpg" format="JPG" align="left"/>
+</imageobject>
+<imageobject role="fo">
+<imagedata fileref="images/numio.jpg" format="JPG" align="left"/>
+</imageobject>
+</mediaobject>
+
+<para>
+The # of Outstanding I/Os control specifies the maximum number of 
+outstanding asynchronous I/O operations per disk the selected worker(s) 
+will attempt to have active at one time. (The actual queue depth seen by 
+the disks may be less if the operations complete very quickly.) The 
+default value is 1.
+</para><para>
+Note that the value of this control applies to each selected worker and 
+each selected disk. For example, suppose you select a manager with 4 disk 
+workers in the Topology panel, select 8 disks in the Disk Targets tab, and 
+specify a # of Outstanding I/Os of 16. In this case, the disks will be 
+distributed among the workers (2 disks per worker), and each worker will 
+generate a maximum of 16 outstanding I/Os to each of its disks. The system 
+as a whole will have a maximum of 128 outstanding I/Os at a time (4 
+workers * 2 disks/worker * 16 outstanding I/Os per disk) from this manager.
+</para><para>
+This control can be overridden by the # of Outstanding I/Os control group 
+in the Test Setup tab (depending on the Cycling Options).
+</para>
+<note><title>Note</title>
+<para>
+If the total number of outstanding I/Os in the system is very large, 
+Iometer or Windows may hang, thrash, or crash. The exact value of 
+<emphasis>very large</emphasis> depends on the disk driver and the amount 
+of physical memory available. This problem is due to limitations in 
+Windows and some disk drivers, and is not a problem with the Iometer 
+software. The problem is seen in Iometer and not in other applications 
+because Iometer makes it easy to specify a number of outstanding I/Os that 
+is much larger than typical applications produce.
+</para></note>
+</sect3>
+
+<sect3 id="testrate">
+<title>Test Connection Rate</title>
+
+<mediaobject>
+<imageobject role="html">
+<imagedata fileref="images/testcon.jpg" format="JPG" align="left"/>
+</imageobject>
+<imageobject role="fo">
+<imagedata fileref="images/testcon.jpg" format="JPG" align="left"/>
+</imageobject>
+</mediaobject>
+
+<para>
+The Test Connection Rate control specifies how often the worker(s) open 
+and close their disk(s). The default is off, meaning that all the disks 
+are opened at the beginning of the test and are not closed until the end 
+of the test. If you turn this control on, you can specify a number of 
+transactions to perform between opening and closing. (A transaction is an 
+I/O request and the corresponding reply, if any; see the Reply field in
+the Edit Access Specification dialog for more information).
+</para><para>
+If Test Connection Rate is on, the worker opens all its disks at the 
+beginning of the test. When the specified number of transactions has been 
+performed to a particular disk, that disk is closed, and is re-opened 
+again just before the next I/O to the disk. The number of transactions can 
+be zero, in which case the worker just opens and closes the disks 
+repeatedly.
+</para><para>
+Each open + transactions + close sequence is called a connection. The 
+time from the initiation of the open to the completion of the 
+corresponding close is recorded for each connection, and the maximum and 
+average connection time and the average connections per second are 
+reported.
+</para>
+</sect3>

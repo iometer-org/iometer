@@ -1,0 +1,255 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta name="Author" content="Daniel Scheibli">
+<title>Iometer project - Documentation - Known Issues</title>
+<link rel="stylesheet" type="text/css" href="../format.css">
+<link rel="SHORTCUT ICON" href="../graphics/iometer.ico">
+</head>
+
+<body>
+
+<p><img src="../graphics/logosmall.png" width=199 height=85 border=0 /></p>
+
+<div class="mdiv">
+  <h3>Known Issues</h3>
+
+  <p class="block">This document lists know issues about the
+  latest stable version of Iometer and provides you with
+  suggestions to bypass them.</p>
+
+  <table border="0" cellpadding="5" cellspacing="0">
+    <tr>
+      <td class="tdh">2004.07.30</td>
+    </tr>
+    <tr>
+      <td class="block">
+      <!-- ---------------------------------------------------------------- -->
+      <table class="inner" border="1" cellpadding="2" cellspacing="3">
+        <tr>
+	  <td class="block"><b>OS / platform</td>
+	  <td class="block"><b>issue / workaround</b></td>
+	  <td class="block"><b>scope</b></td>
+	</tr>
+        <tr>
+	  <td class="block" valign="top">Linux / IA32</td>
+          <td class="block"><i>Segmentation fault with Red Hat 9</i><BR>
+	                    <font size="-3">&#160;</font><BR>
+	                    <i>Issue:</i> Running Dynamo on a Linux machine
+			    with a glibc (GNU libc) version 2.3 or higher
+			    (having NPTL support) - Red Hat 9 for instance - it
+			    comes to a segmentation fault after ending a test.
+			    This hapens due to the shift from LinuxThreads to
+			    NPTL (Native POSIX Thread Library) and the
+			    incompatibilities coming with that.<BR>
+	                    <font size="-3">&#160;</font><BR>
+			    <i>Workaround:</i><BR>
+			    a.) Update the glibc with the version and
+			        proceedings described by Red Hat in
+				<a href="https://rhn.redhat.com/errata/RHSA-2003-325.html">https://rhn.redhat.com/errata/RHSA-2003-325.html</a>.<br>
+			    b.) Before starting the Dynamo you have to run
+			        the following command:<BR>
+			        <tt>export LD_ASSUME_KERNEL=2.4.1</tt><br></td>
+	  <td class="block" valign="top">2004.07.30 and older</td>
+	</tr>
+      </table>
+      <!-- ---------------------------------------------------------------- -->      
+      </td>
+    </tr>
+  </table>
+
+  <p class="desc">List of known issues for version 2004.07.30.<br><br></p>
+
+
+
+
+
+
+  <table border="0" cellpadding="5" cellspacing="0">
+    <tr>
+      <td class="tdh">2003.12.16</td>
+    </tr>
+    <tr>
+      <td class="block">
+      <!-- ---------------------------------------------------------------- -->
+      <table class="inner" border="1" cellpadding="2" cellspacing="3">
+        <tr>
+	  <td class="block"><b>OS / platform</td>
+	  <td class="block"><b>issue / workaround</b></td>
+	  <td class="block"><b>scope</b></td>
+	</tr>
+        <tr>
+	  <td class="block" valign="top"><i>all</i></td>
+          <td class="block"><i>Iometer crashes in batch mode when waiting
+	                    for a dynamo</i><BR>
+	                    <font size="-3">&#160;</font><BR>
+	                    <i>Issue:</i> When running Iometer in batch mode,
+			    one gives a number of seconds to wait for the
+			    Dynamo instances defined in the configuration file
+			    (ICF). Due to a change since 2003.05.10, the Iometer
+			    is crashing when a Dynamo instance is not jumping in
+			    fast enough.<BR>
+	                    <font size="-3">&#160;</font><BR>
+			    <i>Workaround:</i><BR>
+                            a.) Ensure that the Dynamo instances are attaching
+			        fast enough.<BR>
+			    b.) Apply the needed change on source code level
+			    (file WaitingForManagers.cpp line 297 - 299):<BR>
+	                    <font size="-3">&#160;</font><BR>
+			    correction: Remove <tt>if(theApp.IsBatchMode())
+			    { exit(1); }</tt><BR>
+	                    <font size="-3">&#160;</font><BR>
+                            c.) Download the latest code from the CVS tree and
+			        go with that one.<BR>
+                            d.) Use version 2003.05.10.<BR>
+	  <td class="block" valign="top">2003.12.16 only</td>
+	</tr>
+        <tr>
+	  <td class="block" valign="top">Windows / IA32</td>
+          <td class="block"><i>wizard.mdb can not be opened</i><BR>
+	                    <font size="-3">&#160;</font><BR>
+	                    <i>Issue:</i> Trying to open wizard.mdb, MS Access
+			    is complaining and not able to repair the file. This
+			    is due to an corrupt image of this file in the
+			    iometer-2003.12.16.win32-setup.exe package.<BR>
+	                    <font size="-3">&#160;</font><BR>
+			    <i>Workaround:</i> Download the wizard.mdb directly
+			    from the CVS server that can be accessed via the
+			    sourceforge.net page - the correct md5sum (for the
+			    1.1 revision of the file) is
+			    99faa1d0a50c6c6268d62505f917bae4.</td>
+	  <td class="block" valign="top">2003.12.16 only</td>
+	</tr>
+        <tr>
+	  <td class="block" valign="top">Windows / IA32</td>
+          <td class="block"><i>wizard.mdb complains about Excel version</i><BR>
+	                    <font size="-3">&#160;</font><BR>
+	                    <i>Issue:</i> The wizard.mdb is checking for a
+			    minimum version of Excel when creating the graphs.
+			    The original code didn't had a two digit version
+			    number (coming with MS Access 2000) in mind.<BR>
+	                    <font size="-3">&#160;</font><BR>
+			    <i>Workaround:</i> Download the latest wizard.mdb
+			    (revision 1.3 or higher) directly from the CVS server
+			    that can be accessed via the sourceforge.net page.</td>
+	  <td class="block" valign="top">2003.12.16 only</td>
+	</tr>
+        <tr>
+	  <td class="block" valign="top">Linux / IA32</td>
+          <td class="block"><i>Segmentation fault with Red Hat 9</i><BR>
+	                    <font size="-3">&#160;</font><BR>
+	                    <i>Issue:</i> Running Dynamo on a Linux machine
+			    with a glibc (GNU libc) version 2.3 or higher
+			    (having NPTL support) - Red Hat 9 for instance - it
+			    comes to a segmentation fault after ending a test.
+			    This hapens due to the shift from LinuxThreads to
+			    NPTL (Native POSIX Thread Library) and the
+			    incompatibilities coming with that.<BR>
+	                    <font size="-3">&#160;</font><BR>
+			    <i>Workaround:</i><BR>
+			    a.) Update the glibc with the version and
+			        proceedings described by Red Hat in
+				<a href="https://rhn.redhat.com/errata/RHSA-2003-325.html">https://rhn.redhat.com/errata/RHSA-2003-325.html</a>.<br>
+			    b.) Before starting the Dynamo you have to run
+			        the following command:<BR>
+			        <tt>export LD_ASSUME_KERNEL=2.4.1</tt><br></td>
+	  <td class="block" valign="top">2003.12.16 and older</td>
+	</tr>
+      </table>
+      <!-- ---------------------------------------------------------------- -->      
+      </td>
+    </tr>
+  </table>
+
+  <p class="desc">List of known issues for version 2003.12.16.<br><br></p>
+
+  <table border="0" cellpadding="5" cellspacing="0">
+    <tr>
+      <td class="tdh">2003.05.10</td>
+    </tr>
+    <tr>
+      <td class="block">
+      <!-- ---------------------------------------------------------------- -->
+      <table class="inner" border="1" cellpadding="2" cellspacing="3">
+        <tr>
+	  <td class="block"><b>OS / platform</td>
+	  <td class="block"><b>issue / workaround</b></td>
+	  <td class="block"><b>scope</b></td>
+	</tr>
+        <tr>
+	  <td class="block" valign="top"><i>all</i></td>
+          <td class="block"><i>iobw.tst doesn't match the given
+	                    &quot;Maximum Disk Size&quot; value</i><BR>
+	                    <font size="-3">&#160;</font><BR>
+	                    <i>Issue:</i> When preparing a new filesystem
+			    with an value for &quot;Maximum Disk Size&quot;
+			    (field in the Target tab of the Iometer GUI) other
+			    then zero and bigger then 2 GB, then there is an
+			    variable overflow. This overflow results in another
+			    size of the iobw.tst file which then might be much
+			    smaller.<BR>
+	                    <font size="-3">&#160;</font><BR>
+			    <i>Workaround:</i><BR>
+                            a.) Before starting your test, create the iobw.tst
+			        file (with the wished size) yourself using a
+				tool (e.g. the dd tool under Unix). Then use
+				zero as &quot;Maximum Disk Size&quot; - that
+				way the worker uses the existing iobw.tst file
+				and adapt to its size.<BR>
+			    b.) Download the Iometer sources and apply the
+			        iometer_large_work_file patch (#821482) which
+				was provided by Russell Reed.</td>
+	  <td class="block" valign="top">2003.05.10 and older</td>
+	</tr>
+        <tr>
+	  <td class="block" valign="top">Linux / IA32</td>
+          <td class="block"><i>Segmentation fault with Red Hat 9</i><BR>
+	                    <font size="-3">&#160;</font><BR>
+	                    <i>Issue:</i> Running Dynamo on a Linux machine
+			    with a glibc (GNU libc) version 2.3 or higher
+			    (having NPTL support) - Red Hat 9 for instance - it
+			    comes to a segmentation fault after ending a test.
+			    This hapens due to the shift from LinuxThreads to
+			    NPTL (Native POSIX Thread Library) and the
+			    incompatibilities coming with that.<BR>
+	                    <font size="-3">&#160;</font><BR>
+			    <i>Workaround:</i><BR>
+			    a.) Update the glibc with the version and
+			        proceedings described by Red Hat in
+				<a href="https://rhn.redhat.com/errata/RHSA-2003-325.html">https://rhn.redhat.com/errata/RHSA-2003-325.html</a>.<br>
+			    b.) Before starting the Dynamo you have to run
+			        the following command:<BR>
+			        <tt>export LD_ASSUME_KERNEL=2.4.1</tt><br></td>
+	  <td class="block" valign="top">2003.05.10 and older</td>
+	</tr>
+        <tr>
+	  <td class="block" valign="top">Solaris / SPARC</td>
+          <td class="block"><i>Segmentation fault when having multiple swap devices</i><BR>
+	                    <font size="-3">&#160;</font><BR>
+	                    <i>Issue:</i> Running Dynamo on a Solaris machine,
+			    a detection of the swap devices is done. If you
+			    have multiple swap devices configured, the Dynamo
+			    crashes with a segmentation fault.<BR>
+	                    <font size="-3">&#160;</font><BR>
+			    <i>Workaround:</i><BR>
+			    a.) Configure only one swap device<BR>
+			    b.) Apply the needed changes (provided by Robert
+			    H. Creecy) on source code level (file
+			    IOManagerSolaris.cpp line 1198):<BR>
+	                    <font size="-3">&#160;</font><BR>
+			    wrong: <tt>strs = (char *)malloc(num+1 * MAX_NAME);</tt><BR>
+			    correct: <tt>strs = (char *)malloc((num+1) * MAX_NAME);</tt></td>
+	  <td class="block" valign="top">2003.05.10 and older</td>
+	</tr>
+      </table>
+      <!-- ---------------------------------------------------------------- -->      
+      </td>
+    </tr>
+  </table>
+
+  <p class="desc">List of known issues for version 2003.05.10.</p>
+
+</div>
+<br><br><br>
+</body>
+</html>

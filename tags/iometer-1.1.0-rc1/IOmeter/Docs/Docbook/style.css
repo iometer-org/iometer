@@ -1,0 +1,35 @@
+/*
+  style.css - a CSS stylesheet for use with HTML output produced by
+  tldp-xsl stylesheets.  Written by Emma Jane Hogbin.  Comments
+  added by David Horton.
+*/
+
+
+body {
+
+/*
+   Style the HMTL <body> tag with a sans-serif font and 5% margin to
+   make text easier to read in a web browser.
+*/
+
+  font-family: sans-serif;
+  margin: 5%;
+}
+
+
+pre {
+
+/*
+   Style <pre> tags with a light gray background and a small indention.
+   HTML <pre> tags are used to represent Docbook XML tags like
+   <programlisting> and <screen>
+*/
+
+	background: #E0E0E0;
+	margin: 0 5%;
+	padding: 5px;
+}
+
+
+/* Add any desired customizations below. */
+

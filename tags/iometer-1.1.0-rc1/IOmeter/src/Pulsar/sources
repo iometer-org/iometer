@@ -1,0 +1,70 @@
+TARGETNAME=DYNAMO
+TARGETPATH=..\ddk\$(DDKBUILDENV)
+TARGETTYPE=PROGRAM
+
+USE_MFC=1
+USE_STL=1		# requires to use revision stl70 unless using nolibs
+USE_NATIVE_EH=1
+USE_LIBCMT=1
+UMTYPE=console
+UMENTRY=main
+
+MSC_WARNING_LEVEL=/W2
+#/W3 /WX
+
+
+#        newer DDKS have some SDK components
+#        |                new for Vista DDK, ok to use stl70
+#        |                |                          still requires headers from the real SDK
+#        |                |                          |
+INCLUDES=$(SDK_INC_PATH); $(SDK_INC_PATH)\crt\stl70; $(MSSDK)\INCLUDE;..
+
+C_DEFINES=$(C_DEFINES) -D_PULSAR_ -DDOSWIN32 -DUSE_NEW_DISCOVERY_MECHANISM -DIOMTR_SETTING_CPU_AFFINITY -DFORCE_STRUCT_ALIGN
+# -DUSE_NEW_DISCOVERY_MECHANISM (for new disk detect)
+# -DFORCE_STRUCT_ALIGN (structure member alignment)
+# -DIOMTR_SETTING_CPU_AFFINITY (turns on cpu affinity code
+# -D_DETAILS (for more verbosity)
+# -D_DEBUG (for normal debug)
+# -DDEBUG (for DEBUG_NEW only)
+# -DUSING_DDK (not needed with vista ddk)
+
+TARGETLIBS=$(SDK_LIB_PATH)\KERNEL32.LIB	\
+	$(SDK_LIB_PATH)\MSWSOCK.LIB	\
+	$(SDK_LIB_PATH)\NETAPI32.LIB	\
+	$(SDK_LIB_PATH)\SETUPAPI.LIB	\
+	$(SDK_LIB_PATH)\USER32.lib	\
+	$(SDK_LIB_PATH)\VERSION.LIB	\
+	$(SDK_LIB_PATH)\WS2_32.LIB
+
+# Not needed after the Aug 2010 release 
+#LINKER_STACKSIZE=-stack:0x200000,0x100000
+
+SOURCES= ..\ByteOrder.cpp	\
+	..\IOAccess.cpp			\
+	..\IOCompletionQ.cpp	\
+	..\IOCQAIO.cpp			\
+	..\IOCQVI.cpp			\
+	..\IOGlobals.cpp		\
+	..\IOGrunt.cpp			\
+	..\IOManager.cpp		\
+	..\IOManagerWin.cpp		\
+	..\IOPerformance.cpp	\
+	..\IOPort.cpp			\
+	..\IOPortTCP.cpp		\
+	..\IOTarget.cpp			\
+	..\IOTargetDisk.cpp		\
+	..\IOTargetTCP.cpp		\
+	..\IOTargetVI.cpp		\
+	..\IOTime.cpp 			\
+	..\IOVIPL.cpp			\
+	..\NetTCP.cpp			\
+	..\NetVI.cpp			\
+	..\Network.cpp			\
+	..\Pulsar.cpp			\
+	..\stdafx.cpp			\
+	..\VINic.cpp			\
+	..\Pulsar.rc
+
+SXS_APPLICATION_MANIFEST=dynamo.manifest
+SXS_ASSEMBLY_NAME=dynamo
+SXS_ASSEMBLY_LANGUAGE=0000

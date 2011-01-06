@@ -906,6 +906,19 @@ inline char *Strip(char *pcString)
 	return(pcString);
 }
 
+// Detecting endianness of the architecture is needed for encoding network
+// protocol data correctly. Unlike many applications, Iometer does not use
+// the usual htonl() etc. functions to convert between host byte order and 
+// network byte order. Instead it uses it's own functions.
+//
+// Detecting endianness at runtime (as opposed to compile time) is now a
+// feature (as opposed to optimization potential), as it allows to ship a
+// single Dynamo binary for PPC and x86 based OS X machines.
+//
+// Once there is a rewrite of the network protocol, this should be cleaned
+// up by using network byte order, htonl() etc. That will eliminate the
+// need for explicit endianness detection.
+
 inline int IsBigEndian(void)
 {
  union EndianUnion

@@ -673,7 +673,7 @@ void Manager::SaveResults(ostream * file, int access_index, int result_type)
 
 	// Save individual CPU results.
 	for (int cpu = 0; cpu < processors; cpu++) {
-		(*file) << "PROCESSOR" << "," << "CPU " << cpu << ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,";
+		(*file) << "PROCESSOR" << "," << "CPU " << cpu << ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,";
 
 		for (stat = 0; stat < CPU_UTILIZATION_RESULTS; stat++)
 			(*file) << "," << results[WHOLE_TEST_PERF].individual_CPU_utilization[cpu][stat];

@@ -1455,7 +1455,7 @@ BOOL ManagerList::LoadConfigPreprocess(const CString & infilename, BOOL * flags,
 BOOL ManagerList::LoadConfig(const CString & infilename, BOOL load_aspecs, BOOL load_targets, BOOL replace)
 {
 	ICF_ifstream infile;
-	long version;
+	DWORDLONG version;
 	CString key, value;
 	int counter;
 	Manager *mgr;

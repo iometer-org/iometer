@@ -467,7 +467,7 @@ BOOL CPageSetup::SaveConfig(ostream & outfile)
 //
 BOOL CPageSetup::LoadConfig(const CString & infilename)
 {
-	long version;
+	DWORDLONG version;
 	CString key, value;
 	CString token;
 	ICF_ifstream infile(infilename);

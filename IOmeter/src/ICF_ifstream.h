@@ -95,7 +95,7 @@ class ICF_ifstream:public ifstream {
 	} ICF_ifstream(const CString & infilename):ifstream(infilename) {
 	}
 
-	long GetVersion();
+	DWORDLONG GetVersion();
 	BOOL SkipTo(CString identifier);
 	CString GetNextLine();
 	BOOL GetPair(CString & key, CString & value);

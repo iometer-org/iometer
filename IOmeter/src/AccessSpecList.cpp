@@ -848,7 +848,7 @@ BOOL AccessSpecList::SaveConfig(ostream & outfile)
 BOOL AccessSpecList::LoadConfig(const CString & infilename, BOOL replace)
 {
 	ICF_ifstream infile(infilename);
-	long version;
+	DWORDLONG version;
 	BOOL retval;
 
 	if (replace) {

@@ -121,9 +121,11 @@ extern "C"
 
 // New version format:
 // x.y.z
-//    x = major version - always 1 for now
+//    x = major version (up to 1900) - always 1 for now
 //    y = minor version (up to 66536)
 //    z = subminor version
+//
+// NOTE: Do NOT use major version numbers >1900 - Doing so will cause problems loading ICF files
 
 #define IOVER_FILEVERSION				"1.1.0\0" // increment subminor to reflect a compatible fix
 #define IOVER_PRODUCTVERSION			"1.1.0\0" // subminor always stays 0 here

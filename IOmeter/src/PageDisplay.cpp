@@ -1081,7 +1081,7 @@ BOOL CPageDisplay::SaveConfig(ostream & outfile)
 //
 BOOL CPageDisplay::LoadConfig(const CString & infilename)
 {
-	long version;
+	DWORDLONG version;
 	CString key, value;
 	ICF_ifstream infile(infilename);
 

@@ -90,18 +90,24 @@ static char THIS_FILE[] = __FILE__;
 
 //
 // Reads the version header from the file,
-// returns the version number as a long integer.
+// returns the version number as a DWORDLONG.
 // Expects the file pointer to be at the BEGINNING of the file.
-// 1998.10.08 becomes 19981008.
+// 1998.10.08 becomes 19980001000008
+//
+// Prior to Version 1.1.0 the version number was yyyy.mm.dd
+// Version 1.10 Changed to major.minor.subminor
+// This resulted in this function failing because the version number 
+// resolved to 10100 which is Less than the minimum supported ICF file version
+// See IOVersion.h
 //
 // Return value of -1 indicates an error.  The calling function
 // should NOT report an error.  Error reporting is handled here.
 //
-long ICF_ifstream::GetVersion()
+DWORDLONG ICF_ifstream::GetVersion()
 {
 	CString version_string;
 	int major, middle, minor;
-	long version;
+	DWORDLONG version;
 
 	version_string = GetNextLine();
 	if (version_string.IsEmpty()) {
@@ -117,7 +123,17 @@ long ICF_ifstream::GetVersion()
 		return -1;
 	}
 
-	version = (long)major *10000 + middle * 100 + minor;
+
+	// Change made to return to support new version numbering scheme starting in Version 1.1.0
+	// Previously date strings were used.  The check for 1900 is used because it is unlikely that major version
+	// Will get higher than 1900, but it is not known what dates in ICF files are still being used
+	// See IOVersion.h
+	if(major > 1900){
+		version = (DWORDLONG)major *10000 + (DWORDLONG)middle * 100 + minor;
+	}
+	else {
+		version = (DWORDLONG)major * 10000000000 + (DWORDLONG)middle * 100000 + minor;
+	}
 
 	// Special case test for ancient version "3.26.97" OLTP.txt
 	// file distributed with 1998.01.05.
@@ -127,7 +143,7 @@ long ICF_ifstream::GetVersion()
 	if (version < 19980105) {
 		ErrorMessage("Error restoring file.  "
 			     "Version number earlier than 1998.01.05 or incorrectly formatted.");
-		return -1;
+		//return -1;
 	}
 
 	return version;

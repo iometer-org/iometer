@@ -19,8 +19,10 @@ Version 1.1.0 (GA?)
    - (All) Patch by Daniel Scheibli to fix the PROCESSOR row format in 
      the CSV file output (see Bug Tracker ID 3141400).
 - Documentation:
-   - none
+   - Converted Iometer User's Manual from Star Office based file (.sxw)
+     to the Open Document Format (.odt)
 - Others:
+   - Renamed CHANGELOG file into CHANGELOG.txt
    - Rework of CHANGELOG file to clarify changes since version 2006.07.27.
 
 

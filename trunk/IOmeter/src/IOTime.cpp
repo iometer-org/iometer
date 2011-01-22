@@ -134,10 +134,6 @@ DWORDLONG timer_value(void)
 	__asm__ __volatile__("rdtsc":"=a"(lo), "=d"(hi));
 
 	return (lo | ((DWORDLONG) hi << 32));
-	// Alternative code (returning the cpu cycle counter too)
-	//      unsigned long long int x;
-	//      __asm__ volatile (".byte 0x0f, 0x31" : "=A" (x));
-	//      return(x);
 }
 #elif defined(IOMTR_CPU_PPC)
 #define CPU_FTR_601                     0x00000100
@@ -208,9 +204,6 @@ DWORDLONG timer_value(void)
 	return temp;
 }
 #else
-  // Was the following 2 lines in before, but for which CPU (nevertheless it is useless!)?
-  //    /* Totally cheesy rewrite of rdtsc! */
-  //    return((DWORDLONG)time(NULL) * 200);
 #warning ===> WARNING: You have to do some coding here to get the port done!
 #endif
 // ----------------------------------------------------------------------------
@@ -381,10 +374,10 @@ timer_type TimerType = TIMER_OSHPC;
 // NOTE:
 // This is the orginal code converted to the new timer format, but it 
 // should not really be used. Despite the architecture specfic macro, there
-// is really no code differece between x86, x64 and PPC -- see more comments 
+// is really no code differece between i386, x86-64 and PPC -- see more comments 
 // below.
 
-// This does not seem like a verry efficient method of getting clock cycles
+// This does not seem like a very efficient method of getting clock cycles
 // since it involves unnecessary math. I think this can be removed in favor of
 // the x86 version below -- need to test.
 
@@ -414,15 +407,15 @@ double oshpc_freq()
 
 uint64_t rdtsc()
 {
-	ULARGE_INTEGER uli;
+    ULARGE_INTEGER uli;
     uint32_t better_not_change;
     do {
-          __asm__ __volatile__ ("mftbu %0" : "=r"(uli.HighPart));
-          __asm__ __volatile__ ("mftb %0"  : "=r"(uli.LowPart) );
-          __asm__ __volatile__ ("mftbu %0" : "=r"(better_not_change));
-     } while (uli.HighPart != better_not_change);
+        __asm__ __volatile__ ("mftbu %0" : "=r"(uli.HighPart));
+        __asm__ __volatile__ ("mftb %0"  : "=r"(uli.LowPart) );
+        __asm__ __volatile__ ("mftbu %0" : "=r"(better_not_change));
+    } while (uli.HighPart != better_not_change);
 
-   return uli.QuadPart; 
+    return uli.QuadPart; 
 }
 
 #else
@@ -445,7 +438,6 @@ double oshpc_freq()
 {
 	mach_timebase_info_data_t info;  
 	
-
 	// Note:
 	// Mach_timebase_info seems to report 1/1, thus, the mach_absolute_time is 
 	// already in nanosecs??
@@ -459,7 +451,7 @@ double oshpc_freq()
 	if (info.denom != 1 || info.numer != 1)
 	{
 		cout << "Warning: mach_timebase_info() has reported non-1 values --"
-			 << "contact the IOmeter team, numerator: " << info.numer 
+			 << "contact the Iometer team, numerator: " << info.numer 
 			 << " denominator: " << info.denom << "." << endl;
 	}
 #endif
@@ -468,7 +460,7 @@ double oshpc_freq()
 
 // 
 // There are no other functional differences in the code between PPC and x86, 
-// so use the IOMTR_CPU_I386 definition is there just to satisfy iocommon.h 
+// so use the IOMTR_CPU_I386 definition is there just to satisfy IOCommon.h 
 // requirements and can be safely used to build all architectures....
 //
 #if defined(__ppc__) || defined(__ppc64__)
@@ -507,9 +499,9 @@ uint64_t rdtsc()
 // COMMON TIMER CODE
 //
 
-// !!!!Delete/modify this ifdef once other OSes have implemented similar fuctionality!!!
+// !!!!Delete/modify this ifdef once other OSes have implemented similar functionality!!!
 #if defined(IOMTR_OSFAMILY_WINDOWS) || defined(IOMTR_OS_OSX)
-// !!!!Delete/modify this ifdef once other OSes have implemented similar fuctionality!!!
+// !!!!Delete/modify this ifdef once other OSes have implemented similar functionality!!!
 
 //
 // Please follow the timer conventions as defined by the above windows section.
@@ -612,7 +604,7 @@ int64_t rdtsc_freq()
 	{
 
 		cout << "##########################################################################" << endl;
-		cout << " Detected speed-stepping CPU. Disable power saving mode when using IOmeter." << endl;
+		cout << " Detected speed-stepping CPU. Disable power saving mode when using Iometer." << endl;
 		cout << "##########################################################################" << endl;
 
 #if _DEBUG

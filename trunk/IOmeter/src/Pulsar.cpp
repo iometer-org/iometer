@@ -4,9 +4,10 @@
 /* ##                                                                     ## */
 /* ## ------------------------------------------------------------------- ## */
 /* ##                                                                     ## */
-/* ##  Job .......: This is file contains is basically the interface      ## */
-/* ##               for dynamo.  It handles parameter parsing, usage      ## */
-/* ##               info and the actual main() method.                    ## */
+/* ##  Job .......: This file contains the main code file for the         ## */
+/* ##               Dynamo process. It contains the main() function       ## */
+/* ##               and covers functionality like argument parsing,       ## */
+/* ##               usage help etc.                                       ## */
 /* ##                                                                     ## */
 /* ## ------------------------------------------------------------------- ## */
 /* ##                                                                     ## */

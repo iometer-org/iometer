@@ -12,6 +12,10 @@ Version 1.1.0 (GA?)
 - Improvements:
    - n.a.
 - Bug fixes:
+   - (OS X) Specialized the OS X makefile (Makefile-OSX.all) into
+     Makefile-OSX.ppc and Makefile-OSX.i386, because otherwise builds 
+     on x86 are breaking due to the CPU architecture specific timer 
+     code.
    - (All) Patch by Ryan Bever to fix the version check being performed 
      when loading a ICF files. The new version format caused the check 
      to fail when loading ICF files that were written by former versions 

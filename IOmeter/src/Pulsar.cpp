@@ -160,15 +160,14 @@ int do_syslog = FALSE;
 
 
 struct dynamo_param param;	// global scope so other modules have access to it
-							// needed specifically for timer_type and disk_contorl
+				// needed specifically for timer_type and disk_contorl
 
 /////////////////////////////////////////////////////////////////////////////
 // Forward declarations
 /////////////////////////////////////////////////////////////////////////////
+
 static void Syntax(const char *errmsg = NULL);
-
 static void ParseParam(int argc, char *argv[], struct dynamo_param *param);
-
 static void Banner();
 
 /////////////////////////////////////////////////////////////////////////////
@@ -176,6 +175,8 @@ static void Banner();
 
 // Temporary global data for Syntax() to use
 const char *g_pVersionStringWithDebug = NULL;
+
+
 
 #if defined(IOMTR_OS_LINUX)
 int InitIoctlInterface(void)
@@ -214,7 +215,7 @@ int InitCCNTInterface(void)
 	if (res < 0) {
 		cerr << "Fail to find CCNT interface." << endl;
 		cerr << "Please compile your kernel with CCNT (cycle counter) support" << endl;
-		cerr << "   and create corresponding /dev/ccnt node by ccntmknod script." << endl;
+		cerr << "and create corresponding /dev/ccnt node by ccntmknod script." << endl;
 	}
 	return res;
 }
@@ -227,6 +228,8 @@ void CleanupCCNTInterface(int fd)
 
 #endif				// IOMTR_CPU_XSCALE
 #endif				// IOMTR_OS_LINUX
+
+
 
 #if defined(IOMTR_OS_LINUX) || defined(IOMTR_OS_OSX) || defined(IOMTR_OS_SOLARIS)
 int check_dev(char *devname)
@@ -249,6 +252,8 @@ int check_dev(char *devname)
 #else
 #warning ===> WARNING: You have to do some coding here to get the port done!
 #endif
+
+
 
 #if defined(IOMTR_SETTING_CPU_AFFINITY)
 static int iomtr_set_cpu_affinity(ULONG_PTR affinity_mask)
@@ -347,9 +352,11 @@ static int iomtr_set_cpu_affinity(unsigned long affinity_mask)
 }
 #endif
 
+
+
 /* ######################################################################### */
 /* ##                                                                     ## */
-/* ##   M A I N ( )                                                       ## */
+/* ##  main( )                                                            ## */
 /* ##                                                                     ## */
 /* ######################################################################### */
 
@@ -578,7 +585,6 @@ int CDECL main(int argc, char *argv[])
 		} 
 		FreeSid(AdminGroup); 
 	}
-
 #endif
 
 	// Ensure, that the endian type of the CPU is detectable
@@ -617,6 +623,14 @@ CleanUp:
 	if (error) exit(error);
 	return (0);
 }
+
+
+
+/* ######################################################################### */
+/* ##                                                                     ## */
+/* ##  Banner( )                                                          ## */
+/* ##                                                                     ## */
+/* ######################################################################### */
 
 void Banner()
 {
@@ -660,9 +674,10 @@ void Banner()
 }
 
 
+
 /* ######################################################################### */
 /* ##                                                                     ## */
-/* ##   S Y N T A X ( )                                                   ## */
+/* ##   Syntax( )                                                         ## */
 /* ##                                                                     ## */
 /* ######################################################################### */
 
@@ -786,11 +801,14 @@ void Syntax(const char *errmsg /*=NULL*/ )
 	exit(0);
 }
 
+
+
 /* ######################################################################### */
 /* ##                                                                     ## */
-/* ##   P A R S E P A R A M ( )                                           ## */
+/* ##   ParseParam( )                                                     ## */
 /* ##                                                                     ## */
 /* ######################################################################### */
+
 static void ParseParam(int argc, char *argv[], struct dynamo_param *param)
 {
 	// Local variables
@@ -997,8 +1015,12 @@ static void ParseParam(int argc, char *argv[], struct dynamo_param *param)
 
 	// Enforce switch combinations
 	if (bParamIometer && !bParamDynamo) {
-		Syntax("When specifying the Iometer address, the Manager network name parameter is mandatory.");
+		Syntax("Specifying the Iometer address, the Manager network name parameter becomes mandatory.");
 	}
 
 	return;
 }
+
+
+
+

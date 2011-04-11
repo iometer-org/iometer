@@ -412,7 +412,8 @@ void ManagerList::SaveResults(ostream * file, int access_index, int result_type)
 	// Writing result header information.
 	(*file) << "'Results" << endl
 	    << "'Target Type,Target Name,Access Specification Name,# Managers,"
-	    << "# Workers,# Disks,IOps,Read IOps,Write IOps,MBps (Binary),Read MBps (Binary),Write MBps (Binary),"
+	    << "# Workers,# Disks,IOps,Read IOps,Write IOps,MiBps (Binary),Read MiBps (Binary),Write MiBps (Binary),"
+
 		<< "MBps (Decimal),Read MBps (Decimal),Write MBps (Decimal),Transactions per Second,Connections per Second,"
 	    << "Average Response Time,Average Read Response Time,"
 	    << "Average Write Response Time,Average Transaction Time,"

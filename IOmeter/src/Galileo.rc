@@ -182,10 +182,10 @@ BEGIN
     LTEXT           "Fixed Seed Value",IDC_STATIC,214,128,56,8
 END
 
-IDD_DISPLAY DIALOG  0, 0, 383, 210
+IDD_DISPLAY DIALOGEX 0, 0, 383, 210
 STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Results Display"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
     CONTROL         "Start of Test",RAvgWholeTest,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,135,14,52,10
     CONTROL         "Last Update",RAvgLastUpdate,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,135,27,53,10
@@ -217,27 +217,27 @@ BEGIN
     LTEXT           "All Managers",TWorker1,130,53,63,8,SS_NOTIFY
     LTEXT           "All Managers",TWorker2,130,79,63,8,SS_NOTIFY
     RTEXT           "oo",IDC_STATIC,359,29,13,8,NOT WS_GROUP
-    CTEXT           "Worker1Rate",TRate1,223,53,48,8
+    CTEXT           "Worker1Rate",TRate1,191,53,120,8,SS_WORDELLIPSIS
     RTEXT           "Wrk1MAX",TRate1MAX,329,53,34,8
-    CTEXT           "Worker2Rate",TRate2,223,79,48,8
+    CTEXT           "Worker2Rate",TRate2,191,79,120,8,SS_WORDELLIPSIS
     RTEXT           "Wrk2MAX",TRate2MAX,329,79,34,8
     GROUPBOX        "Update Frequency (seconds)",IDC_STATIC,195,2,186,40
     GROUPBOX        "Display",IDC_STATIC,2,45,379,163
     CONTROL         "Progress1",PRate3,"msctls_progress32",PBS_SMOOTH | WS_BORDER,130,112,234,13
     LTEXT           "All Managers",TWorker3,130,104,63,8,SS_NOTIFY
-    CTEXT           "Worker3Rate",TRate3,223,104,48,8
+    CTEXT           "Worker3Rate",TRate3,191,104,120,8,SS_WORDELLIPSIS
     RTEXT           "Wrk3MAX",TRate3MAX,329,104,34,8
     CONTROL         "Progress1",PRate4,"msctls_progress32",PBS_SMOOTH | WS_BORDER,130,136,234,13
     LTEXT           "All Managers",TWorker4,130,128,63,8,SS_NOTIFY
-    CTEXT           "Worker4Rate",TRate4,223,128,48,8
+    CTEXT           "Worker4Rate",TRate4,191,128,120,8,SS_WORDELLIPSIS
     RTEXT           "Wrk4MAX",TRate4MAX,329,128,34,8
     CONTROL         "Progress1",PRate5,"msctls_progress32",PBS_SMOOTH | WS_BORDER,130,162,234,13
     LTEXT           "All Managers",TWorker5,130,154,63,8,SS_NOTIFY
-    CTEXT           "Worker5Rate",TRate5,223,154,48,8
+    CTEXT           "Worker5Rate",TRate5,191,154,120,8,SS_WORDELLIPSIS
     RTEXT           "Wrk5MAX",TRate5MAX,329,154,34,8
     CONTROL         "Progress1",PRate6,"msctls_progress32",PBS_SMOOTH | WS_BORDER,130,187,234,13
     LTEXT           "All Managers",TWorker6,130,179,63,8,SS_NOTIFY
-    CTEXT           "Worker6Rate",TRate6,223,179,48,8
+    CTEXT           "Worker6Rate",TRate6,191,179,120,8,SS_WORDELLIPSIS
     RTEXT           "Wrk6MAX",TRate6MAX,329,179,34,8
     CTEXT           "Drag managers and workers\nfrom the Topology window\nto the progress bar of your choice. ",IDC_STATIC,12,12,114,26
     GROUPBOX        "Results Since",IDC_STATIC,129,2,61,40

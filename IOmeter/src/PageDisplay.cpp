@@ -164,7 +164,7 @@ BEGIN_MESSAGE_MAP(CPageDisplay, CPropertyPage)
     ON_BN_CLICKED(BBigMeter3, OnBBigMeter3)
     ON_BN_CLICKED(BBigMeter4, OnBBigMeter4)
     ON_BN_CLICKED(BBigMeter5, OnBBigMeter5)
-ON_BN_CLICKED(BBigMeter6, OnBBigMeter6)
+	ON_BN_CLICKED(BBigMeter6, OnBBigMeter6)
     //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -504,9 +504,9 @@ unsigned int CPageDisplay::ReportMaxRange(double max_range_needed)
 		max_rate *= (double)10;
 	}
 
-	// The maximum range for the progress bar is 64K.
-	if (max_rate > 60000)
-		max_rate = 60000;
+	// The maximum range for the progress bar is defined in the common header
+	if (max_rate > MAX_GUI_IOPS)
+		max_rate = MAX_GUI_IOPS;
 
 	return (unsigned int)max_rate;
 }
@@ -523,27 +523,27 @@ BOOL CPageDisplay::GetDisplayData(Results * results, int result_type, double *re
 	switch (result_type) {
 	case MBPS_BIN_RESULT:
 		*result_value = results->MBps_Bin;
-		result_text->Format("%.2f", results->MBps_Bin);
+		result_text->Format("%.2f MiBPS (%.2f MBPS)", results->MBps_Bin, results->MBps_Dec);
 		break;
 	case READ_MBPS_BIN_RESULT:
 		*result_value = results->read_MBps_Bin;
-		result_text->Format("%.2f", results->read_MBps_Bin);
+		result_text->Format("%.2f MiBPS (%.2f MBPS)", results->read_MBps_Bin, results->read_MBps_Dec);
 		break;
 	case WRITE_MBPS_BIN_RESULT:
 		*result_value = results->write_MBps_Bin;
-		result_text->Format("%.2f", results->write_MBps_Bin);
+		result_text->Format("%.2f MiBPS (%.2f MBPS)", results->write_MBps_Bin, results->write_MBps_Dec);
 		break;
 	case MBPS_DEC_RESULT:
 		*result_value = results->MBps_Dec;
-		result_text->Format("%.2f", results->MBps_Dec);
+		result_text->Format("%.2f MBPS (%.2f MiBPS)", results->MBps_Dec, results->MBps_Bin);
 		break;
 	case READ_MBPS_DEC_RESULT:
 		*result_value = results->read_MBps_Dec;
-		result_text->Format("%.2f", results->read_MBps_Dec);
+		result_text->Format("%.2f MBPS (%.2f MiBPS)", results->read_MBps_Dec, results->read_MBps_Bin);
 		break;
 	case WRITE_MBPS_DEC_RESULT:
 		*result_value = results->write_MBps_Dec;
-		result_text->Format("%.2f", results->write_MBps_Dec);
+		result_text->Format("%.2f MBPS (%.2f MiBPS)", results->write_MBps_Dec, results->write_MBps_Bin);
 		break;
 
 	case IOPS_RESULT:
@@ -1214,3 +1214,4 @@ void CPageDisplay::OnRAvgWholeTest()
 		theApp.manager_list.UpdateResults(WHOLE_TEST_PERF);
 	Update();
 }
+

@@ -658,7 +658,7 @@ BOOL Grunt::Set_Access(const Test_Spec * spec)
 }
 
 // Do not do this yet
-#if 0 // defined(IOMTR_SETTING_CPU_AFFINITY)
+#if defined(IOMTR_SETTING_CPU_AFFINITY)
 //
 // The idea is to set each of the worker threads to their own CPU, within the 
 // constraint of any other cpu affinity we have been passed at the cmd line.
@@ -700,11 +700,8 @@ void Grunt::Set_Affinity(DWORD_PTR affinity)
 #error ===> ERROR: You have to add affinity code here
 
 #endif
-
-#ifdef _DETAILS
-			cout << "Worker " << worker_index << ", setting thread affinity mask to " 
+			cout << "Worker " << worker_index << "setting thread affinity mask to 0x" 
 				 << hex << effective_affinity << endl;
-#endif
 			break;
 		}
 		effective_affinity = effective_affinity << (DWORD_PTR) 0x1;

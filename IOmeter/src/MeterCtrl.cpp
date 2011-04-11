@@ -114,6 +114,7 @@ CMeterCtrl::CMeterCtrl()
 	value = 0;
 	min_range = 0;
 	max_range = 100;
+	auto_range = TRUE;
 
 	// Setting the low watermark to -1 to indicate that it has not been set 
 	// yet.  This prevents the low watermark from always being zero.
@@ -196,8 +197,9 @@ int CMeterCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 //
 // Set the range of the meter and updates the display.
 //
-void CMeterCtrl::SetRange(int range1, int range2)
+void CMeterCtrl::SetRange(int range1, int range2, BOOL range_auto)
 {
+	auto_range = range_auto;
 	// Disallow setting the ranges to the same value.
 	if (range1 == range2)
 		return;
@@ -332,6 +334,7 @@ void CMeterCtrl::UpdateLabelInfo()
 void CMeterCtrl::SetValue(double new_value)
 {
 	BOOL update_watermark = FALSE;
+	int temp_value;
 
 	// If the value is the same as what we had, we don't need to do anything.
 	if (new_value == value)
@@ -349,14 +352,32 @@ void CMeterCtrl::SetValue(double new_value)
 
 	value = new_value;
 
-	// Make sure that the new value is within the current range and update
-	// the actual angle that the needle should be.
-	if (new_value < min_range)
-		actual_angle = 0;
-	else if (new_value > max_range)
-		actual_angle = NEEDLE_SWEEP;
-	else
+
+	if (auto_range) // VLD: autoscale the meter
+	{
+		// Derive a new range based on the new_value above
+		temp_value = (int)powf(10.0, floorf(log10f((float)value * 10)));
+
+		// Determine if we need to reset the range up or down
+		if (temp_value > max_range)
+			SetRange(min_range, temp_value, TRUE);
+		else if (temp_value <= max_range/10)
+			SetRange(min_range, max_range/10, TRUE); // will ratchet down by a decade each time
+
+		// Calculate the needle angle
 		actual_angle = (int)(value / (max_range - min_range) * NEEDLE_SWEEP);
+	}
+	else
+	{
+		// Make sure that the new value is within the current range and update
+		// the actual angle that the needle should be.
+		if (new_value < min_range)
+			actual_angle = 0;
+		else if (new_value > max_range)
+			actual_angle = NEEDLE_SWEEP;
+		else
+			actual_angle = (int)(value / (max_range - min_range) * NEEDLE_SWEEP);
+	}
 
 	// See if the needle would move significantly.  If not, we're done.
 	if (fabs((double)actual_angle - shown_angle) < NEEDLE_SENSITIVITY)

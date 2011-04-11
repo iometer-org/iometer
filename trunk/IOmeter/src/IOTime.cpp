@@ -369,13 +369,11 @@ LONGLONG oshpc_freq()
 
 timer_type TimerType = TIMER_OSHPC;
 
-#if defined(IOMTR_CPU_PPC)
+#if 0 
 
 // NOTE:
 // This is the orginal code converted to the new timer format, but it 
-// should not really be used. Despite the architecture specfic macro, there
-// is really no code differece between i386, x86-64 and PPC -- see more comments 
-// below.
+// is superceded by the code below
 
 // This does not seem like a very efficient method of getting clock cycles
 // since it involves unnecessary math. I think this can be removed in favor of
@@ -417,14 +415,7 @@ uint64_t rdtsc()
 
     return uli.QuadPart; 
 }
-
 #else
-
-// NOTE for PPC builds:
-// The else here is supposed to apply to the Intel architecture only based on 
-// the macro alone, but it is safe to use it for PPC too. The intrinsic macros
-// that the OSX environment provides are used below to implement the arch
-// specific timestamp counter code.
 
 #include <mach/mach_time.h>
 #include <sys/sysctl.h>
@@ -458,12 +449,8 @@ double oshpc_freq()
 	return ((double) info.denom * 1e9 / info.numer);
 }
 
-// 
-// There are no other functional differences in the code between PPC and x86, 
-// so use the IOMTR_CPU_I386 definition is there just to satisfy IOCommon.h 
-// requirements and can be safely used to build all architectures....
-//
-#if defined(__ppc__) || defined(__ppc64__)
+
+#if defined(IOMTR_CPU_PPC)
 uint64_t rdtsc()
 {
 	ULARGE_INTEGER uli;
@@ -476,7 +463,8 @@ uint64_t rdtsc()
 
    return uli.QuadPart; 
 }
-#else // all other x86 architectures
+
+#elif defined(IOMTR_CPU_X86_64) || defined(IOMTR_CPU_I386)
 uint64_t rdtsc()
 {
 	ULARGE_INTEGER uli;
@@ -485,9 +473,10 @@ uint64_t rdtsc()
 	
 	return uli.QuadPart;
 }
-#endif // if ppc or ppc64
-
+#else
+ #error ===> ERROR: You have to do some coding here to get the OSX port done!
 #endif
+
 // ----------------------------------------------------------------------------
 #else
 #error ===> ERROR: You have to do some coding here to get the port done!

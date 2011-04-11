@@ -308,12 +308,12 @@ BOOL CAccessDialog::OnInitDialog()
 void CAccessDialog::SizeToText(DWORD size, CString * size_text)
 {
 	// Breaking the size down into MBs, KBs, and bytes.
-	size_text->Format("%4dMB %4dKB %4dB", size / MEGABYTE_BIN, (size % MEGABYTE_BIN) / KILOBYTE_BIN, size % KILOBYTE_BIN);
+	size_text->Format("%4d MiB %4d KiB %4d B", size / MEGABYTE_BIN, (size % MEGABYTE_BIN) / KILOBYTE_BIN, size % KILOBYTE_BIN);
 }
 
 //
 // Get the value of a specified Megabytes/Kilobytes/Bytes control for the currently selected 
-// access spec, as shown by the edit boxes (MB, KB, bytes).
+// access spec, as shown by the edit boxes (MiB, KiB, bytes).
 //
 DWORD CAccessDialog::GetMKBEditbox(MKBControls * which)
 {
@@ -332,7 +332,7 @@ DWORD CAccessDialog::GetMKBEditbox(MKBControls * which)
 	if (GetDlgItemInt(which->EMegabytesID) > MAX_SIZE_RANGE) {
 		which->SMegabytesCtrl->SetPos(MAX_SIZE_RANGE);
 		ErrorMessage("The maximum value supported by Iometer for this control "
-			     "is 1023 MB + 1023 KB + 1023 bytes.");
+			     "is 1023 MiB + 1023 KiB + 1023 B.");
 	}
 
 	return GetDlgItemInt(which->EBytesID)
@@ -340,7 +340,7 @@ DWORD CAccessDialog::GetMKBEditbox(MKBControls * which)
 }
 
 //
-// Get the value of a specified Megabytes/Kilobytes/Bytes control for the currently selected 
+// Get the value of a specified MiB/KiB/B control for the currently selected 
 // access spec, as shown by the spinner controls.
 //
 DWORD CAccessDialog::GetMKBSpinners(MKBControls * which)
@@ -350,7 +350,7 @@ DWORD CAccessDialog::GetMKBSpinners(MKBControls * which)
 }
 
 //
-// Enable or disable a specified Megabytes/Kilobytes/Bytes control.
+// Enable or disable a specified MiB/KiB/B control.
 //
 void CAccessDialog::EnableMKBControls(MKBControls * which, BOOL enabled)
 {

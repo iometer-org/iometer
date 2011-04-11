@@ -84,12 +84,13 @@ class CMeterCtrl:public CWnd {
 	///////////////////////////////////////////////////////////////////////////
 	// Meter setup information.
       public:
-	void SetRange(int range1, int range2);
+	void SetRange(int range1, int range2, BOOL range_auto);
 	void SetValue(double new_value);
 	//
       protected:
 	int min_range;
 	int max_range;
+	BOOL auto_range;
 	double value;
 	//
 	///////////////////////////////////////////////////////////////////////////

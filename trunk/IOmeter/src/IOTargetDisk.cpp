@@ -117,6 +117,8 @@
 #include "IOCommon.h"
 #include "IOTargetDisk.h"
 #include "IOAccess.h"
+#include <initguid.h>
+#include <diskguid.h>
 
 #define _DISK_MSGS 0
 
@@ -956,13 +958,17 @@ BOOL TargetDisk::Set_Sizes(BOOL open_disk)
 
 		SetLastError(0);
 
+		BOOL bDiskIsGpt = FALSE;
+		BOOL bHaveDataPartition = FALSE;
+
 #ifdef USE_NEW_DISCOVERY_MECHANISM
 		spec.disk_info.has_partitions = FALSE;
 #endif
 
 		// Try the EX version first
 		if (DeviceIoControl(disk_file, IOCTL_DISK_GET_DRIVE_LAYOUT_EX, NULL, 0,
-				disk_layout_info_ex, sizeof(disk_layout_info_ex), &disk_info_size, NULL)){
+				disk_layout_info_ex, sizeof(disk_layout_info_ex), &disk_info_size, NULL))
+		{
 
 			// Checking that drive contains nothing but free space.
 			for (i = 0; i < disk_layout_info_ex[0].PartitionCount; i++) {
@@ -970,9 +976,23 @@ BOOL TargetDisk::Set_Sizes(BOOL open_disk)
 					disk_layout_info_ex[0].PartitionEntry[i].PartitionLength.LowPart) 
 				{
 #ifdef USE_NEW_DISCOVERY_MECHANISM
+					if (disk_layout_info_ex[0].PartitionStyle == PARTITION_STYLE_GPT)
+					{
+						bDiskIsGpt = TRUE;
+
+						if (disk_layout_info_ex[0].PartitionEntry[i].Gpt.PartitionType != PARTITION_MSFT_RESERVED_GUID 
+						  && disk_layout_info_ex[0].PartitionEntry[i].Gpt.PartitionType != PARTITION_SYSTEM_GUID 
+						  && disk_layout_info_ex[0].PartitionEntry[i].Gpt.PartitionType != PARTITION_LDM_METADATA_GUID)
+						{
+							bHaveDataPartition = TRUE;
+						}
+					}
+
+
 					// Make the decision about whether to display this disk elsewhere...
-					spec.disk_info.has_partitions = TRUE;
-					break;
+					if (spec.disk_info.has_partitions == FALSE)
+						spec.disk_info.has_partitions = TRUE;
+					//break;
 #else					
 					if ( open_disk )
 						Close( NULL );				
@@ -1009,6 +1029,15 @@ BOOL TargetDisk::Set_Sizes(BOOL open_disk)
 			return FALSE;
 		}
 
+#ifdef USE_NEW_DISCOVERY_MECHANISM
+		if (bDiskIsGpt && spec.disk_info.has_partitions && !bHaveDataPartition)
+		{
+			cout << "Physical disk \'" <<  spec.name << "\' is a GPT disk with one or more " <<endl 
+				 << "   hidden partitions and no data parititons. " << endl 
+				 << "   Use diskpart to clean the disk and leave it uninitialized in order" << endl
+				 << "   to use as a raw disk, otherwise create and format a data parition. " << endl;
+		}
+#endif
 		// Getting information on the size of the drive.
 		size = 0;
 		spec.disk_info.sector_size = 0;

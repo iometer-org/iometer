@@ -172,8 +172,8 @@ BOOL CBigMeter::Create(int performance_bar, CString test_title, CString stat_tit
 							54, AlignCenter, TRUE, FALSE,
 							FALSE,::GetSysColor(COLOR_ACTIVECAPTION));
 
-	SetDlgItemInt(EMaxRange, max_range);
-	((CMeterCtrl *) GetDlgItem(MMeter))->SetRange(0, max_range);
+	SetDlgItemInt(EMaxRange, 0); // initial value is 0 to indicate auto_range
+	((CMeterCtrl *) GetDlgItem(MMeter))->SetRange(0, max_range, TRUE);
 
 	UpdateDisplay();
 
@@ -400,11 +400,8 @@ void CBigMeter::OnKillfocusEMaxRange()
 {
 	int new_range;
 
-	// Update the maximum range, but disallow a blank or zero range.
-	if (!(new_range = GetDlgItemInt(EMaxRange))) {
-		SetDlgItemInt(EMaxRange, max_range);
-		return;
-	}
+	// Allow 0 or null range -- indicates auto_range
+	new_range = GetDlgItemInt(EMaxRange);
 
 	SetMaxRange(new_range);
 }
@@ -416,9 +413,9 @@ void CBigMeter::OnChangeEMaxRange()
 {
 	int new_range;
 
-	// Only set the range if the displayed value is not zero or blank.
-	if (new_range = GetDlgItemInt(EMaxRange))
-		SetMaxRange(new_range);
+	// Allow 0 or null range -- indicates auto_range
+	new_range = GetDlgItemInt(EMaxRange);
+	SetMaxRange(new_range);
 }
 
 //
@@ -426,12 +423,16 @@ void CBigMeter::OnChangeEMaxRange()
 //
 void CBigMeter::SetMaxRange(int new_range)
 {
+	// Check for auto range first and just pass in the current max_range
+	if (new_range == 0)
+		return ((CMeterCtrl *) GetDlgItem(MMeter))->SetRange(0, max_range, TRUE);
+
 	// If the range is the same as the old one, we don't need to update it.
-	if (new_range == max_range)
+	else if (new_range == max_range)
 		return;
 
 	max_range = new_range;
-	((CMeterCtrl *) GetDlgItem(MMeter))->SetRange(0, max_range);
+	((CMeterCtrl *) GetDlgItem(MMeter))->SetRange(0, max_range, FALSE);
 }
 
 //

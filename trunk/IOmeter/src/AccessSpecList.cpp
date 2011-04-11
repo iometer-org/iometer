@@ -139,7 +139,7 @@ void AccessSpecList::InsertDefaultSpecs()
 	// 512 Bytes
 
 	spec = New();
-	_snprintf(spec->name, MAX_NAME, "512B; 100%% Read; 0%% random");
+	_snprintf(spec->name, MAX_NAME, "512 B; 100%% Read; 0%% random");
 	spec->access[0].of_size = 100;
 	spec->access[0].size = 512;
 	spec->access[0].reads = 100;
@@ -150,7 +150,7 @@ void AccessSpecList::InsertDefaultSpecs()
 	spec->access[0].reply = 0;
 
 	spec = New();
-	_snprintf(spec->name, MAX_NAME, "512B; 75%% Read; 0%% random");
+	_snprintf(spec->name, MAX_NAME, "512 B; 75%% Read; 0%% random");
 	spec->access[0].of_size = 100;
 	spec->access[0].size = 512;
 	spec->access[0].reads = 75;
@@ -161,7 +161,7 @@ void AccessSpecList::InsertDefaultSpecs()
 	spec->access[0].reply = 0;
 
 	spec = New();
-	_snprintf(spec->name, MAX_NAME, "512B; 50%% Read; 0%% random");
+	_snprintf(spec->name, MAX_NAME, "512 B; 50%% Read; 0%% random");
 	spec->access[0].of_size = 100;
 	spec->access[0].size = 512;
 	spec->access[0].reads = 50;
@@ -172,7 +172,7 @@ void AccessSpecList::InsertDefaultSpecs()
 	spec->access[0].reply = 0;
 
 	spec = New();
-	_snprintf(spec->name, MAX_NAME, "512B; 25%% Read; 0%% random");
+	_snprintf(spec->name, MAX_NAME, "512 B; 25%% Read; 0%% random");
 	spec->access[0].of_size = 100;
 	spec->access[0].size = 512;
 	spec->access[0].reads = 25;
@@ -183,7 +183,7 @@ void AccessSpecList::InsertDefaultSpecs()
 	spec->access[0].reply = 0;
 
 	spec = New();
-	_snprintf(spec->name, MAX_NAME, "512B; 0%% Read; 0%% random");
+	_snprintf(spec->name, MAX_NAME, "512 B; 0%% Read; 0%% random");
 	spec->access[0].of_size = 100;
 	spec->access[0].size = 512;
 	spec->access[0].reads = 0;
@@ -196,7 +196,7 @@ void AccessSpecList::InsertDefaultSpecs()
 	// 4096 Bytes / 4 Kilo Bytes
 
 	spec = New();
-	_snprintf(spec->name, MAX_NAME, "4K; 100%% Read; 0%% random");
+	_snprintf(spec->name, MAX_NAME, "4 KiB; 100%% Read; 0%% random");
 	spec->access[0].of_size = 100;
 	spec->access[0].size = 4096;
 	spec->access[0].reads = 100;
@@ -207,7 +207,7 @@ void AccessSpecList::InsertDefaultSpecs()
 	spec->access[0].reply = 0;
 
 	spec = New();
-	_snprintf(spec->name, MAX_NAME, "4K; 75%% Read; 0%% random");
+	_snprintf(spec->name, MAX_NAME, "4 KiB; 75%% Read; 0%% random");
 	spec->access[0].of_size = 100;
 	spec->access[0].size = 4096;
 	spec->access[0].reads = 75;
@@ -218,7 +218,7 @@ void AccessSpecList::InsertDefaultSpecs()
 	spec->access[0].reply = 0;
 
 	spec = New();
-	_snprintf(spec->name, MAX_NAME, "4K; 50%% Read; 0%% random");
+	_snprintf(spec->name, MAX_NAME, "4 KiB; 50%% Read; 0%% random");
 	spec->access[0].of_size = 100;
 	spec->access[0].size = 4096;
 	spec->access[0].reads = 50;
@@ -229,7 +229,7 @@ void AccessSpecList::InsertDefaultSpecs()
 	spec->access[0].reply = 0;
 
 	spec = New();
-	_snprintf(spec->name, MAX_NAME, "4K; 25%% Read; 0%% random");
+	_snprintf(spec->name, MAX_NAME, "4 KiB; 25%% Read; 0%% random");
 	spec->access[0].of_size = 100;
 	spec->access[0].size = 4096;
 	spec->access[0].reads = 25;
@@ -240,7 +240,7 @@ void AccessSpecList::InsertDefaultSpecs()
 	spec->access[0].reply = 0;
 
 	spec = New();
-	_snprintf(spec->name, MAX_NAME, "4K; 0%% Read; 0%% random");
+	_snprintf(spec->name, MAX_NAME, "4 KiB; 0%% Read; 0%% random");
 	spec->access[0].of_size = 100;
 	spec->access[0].size = 4096;
 	spec->access[0].reads = 0;
@@ -253,7 +253,7 @@ void AccessSpecList::InsertDefaultSpecs()
 	// 16384 Bytes / 16 Kilo Bytes
 
 	spec = New();
-	_snprintf(spec->name, MAX_NAME, "16K; 100%% Read; 0%% random");
+	_snprintf(spec->name, MAX_NAME, "16 KiB; 100%% Read; 0%% random");
 	spec->access[0].of_size = 100;
 	spec->access[0].size = 16384;
 	spec->access[0].reads = 100;
@@ -264,7 +264,7 @@ void AccessSpecList::InsertDefaultSpecs()
 	spec->access[0].reply = 0;
 
 	spec = New();
-	_snprintf(spec->name, MAX_NAME, "16K; 75%% Read; 0%% random");
+	_snprintf(spec->name, MAX_NAME, "16 KiB; 75%% Read; 0%% random");
 	spec->access[0].of_size = 100;
 	spec->access[0].size = 16384;
 	spec->access[0].reads = 75;
@@ -275,7 +275,7 @@ void AccessSpecList::InsertDefaultSpecs()
 	spec->access[0].reply = 0;
 
 	spec = New();
-	_snprintf(spec->name, MAX_NAME, "16K; 50%% Read; 0%% random");
+	_snprintf(spec->name, MAX_NAME, "16 KiB; 50%% Read; 0%% random");
 	spec->access[0].of_size = 100;
 	spec->access[0].size = 16384;
 	spec->access[0].reads = 50;
@@ -286,7 +286,7 @@ void AccessSpecList::InsertDefaultSpecs()
 	spec->access[0].reply = 0;
 
 	spec = New();
-	_snprintf(spec->name, MAX_NAME, "16K; 25%% Read; 0%% random");
+	_snprintf(spec->name, MAX_NAME, "16 KiB; 25%% Read; 0%% random");
 	spec->access[0].of_size = 100;
 	spec->access[0].size = 16384;
 	spec->access[0].reads = 25;
@@ -297,7 +297,7 @@ void AccessSpecList::InsertDefaultSpecs()
 	spec->access[0].reply = 0;
 
 	spec = New();
-	_snprintf(spec->name, MAX_NAME, "16K; 0%% Read; 0%% random");
+	_snprintf(spec->name, MAX_NAME, "16 KiB; 0%% Read; 0%% random");
 	spec->access[0].of_size = 100;
 	spec->access[0].size = 16384;
 	spec->access[0].reads = 0;
@@ -310,7 +310,7 @@ void AccessSpecList::InsertDefaultSpecs()
 	// 32768 Bytes / 32 Kilo Bytes
 
 	spec = New();
-	_snprintf(spec->name, MAX_NAME, "32K; 100%% Read; 0%% random");
+	_snprintf(spec->name, MAX_NAME, "32 KiB; 100%% Read; 0%% random");
 	spec->access[0].of_size = 100;
 	spec->access[0].size = 32768;
 	spec->access[0].reads = 100;
@@ -321,7 +321,7 @@ void AccessSpecList::InsertDefaultSpecs()
 	spec->access[0].reply = 0;
 
 	spec = New();
-	_snprintf(spec->name, MAX_NAME, "32K; 75%% Read; 0%% random");
+	_snprintf(spec->name, MAX_NAME, "32 KiB; 75%% Read; 0%% random");
 	spec->access[0].of_size = 100;
 	spec->access[0].size = 32768;
 	spec->access[0].reads = 75;
@@ -332,7 +332,7 @@ void AccessSpecList::InsertDefaultSpecs()
 	spec->access[0].reply = 0;
 
 	spec = New();
-	_snprintf(spec->name, MAX_NAME, "32K; 50%% Read; 0%% random");
+	_snprintf(spec->name, MAX_NAME, "32 KiB; 50%% Read; 0%% random");
 	spec->access[0].of_size = 100;
 	spec->access[0].size = 32768;
 	spec->access[0].reads = 50;
@@ -343,7 +343,7 @@ void AccessSpecList::InsertDefaultSpecs()
 	spec->access[0].reply = 0;
 
 	spec = New();
-	_snprintf(spec->name, MAX_NAME, "32K; 25%% Read; 0%% random");
+	_snprintf(spec->name, MAX_NAME, "32 KiB; 25%% Read; 0%% random");
 	spec->access[0].of_size = 100;
 	spec->access[0].size = 32768;
 	spec->access[0].reads = 25;
@@ -354,7 +354,7 @@ void AccessSpecList::InsertDefaultSpecs()
 	spec->access[0].reply = 0;
 
 	spec = New();
-	_snprintf(spec->name, MAX_NAME, "32K; 0%% Read; 0%% random");
+	_snprintf(spec->name, MAX_NAME, "32 KiB; 0%% Read; 0%% random");
 	spec->access[0].of_size = 100;
 	spec->access[0].size = 32768;
 	spec->access[0].reads = 0;
@@ -1166,13 +1166,13 @@ void AccessSpecList::SmartName(Test_Spec * spec)
 	// Switch statement for size part of name
 	switch (spec->access[0].size) {
 	case 512:
-		name = "512byte";
+		name = "512 B";
 		break;
 	case MEGABYTE_BIN:
-		name = "1MB";
+		name = "1 MiB";
 		break;
 	default:
-		name.Format("%dKB", (spec->access[0].size / KILOBYTE_BIN));
+		name.Format("%d KiB", (spec->access[0].size / KILOBYTE_BIN));
 	}
 
 	// Switch statement for random/sequential part of name

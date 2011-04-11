@@ -309,7 +309,7 @@ static int iomtr_set_cpu_affinity(ULONG_PTR affinity_mask)
 	if (!res) 
 	{
 		res = GetLastError();
-		cout << "Could not obtain process affinity. GetProcessAffinityMask() failed with error=" 
+		cout << "Error: Could not obtain process affinity. GetProcessAffinityMask() failed with " 
 			 << GetLastError() << endl;
 		
 		return 0;
@@ -323,14 +323,12 @@ static int iomtr_set_cpu_affinity(ULONG_PTR affinity_mask)
 		if (!res) 
 		{
 			res = GetLastError();
-			cout << "Set cpu affinity failed with error=" << GetLastError() << endl;
+			cout << "Error: Set CPU affinity failed with " << GetLastError() << endl;
 			return 0;
 		}
 		else 
 		{
-#ifdef _DEBUG
-			cout << "Set CPU affinity sucessfully." << endl;
-#endif
+			cout << "Set CPU affinity sucessfully to 0x" << hex << affinity_mask << endl;
 		}
 	}
 	else
@@ -989,6 +987,12 @@ static void ParseParam(int argc, char *argv[], struct dynamo_param *param)
 					sscanf(argv[I],"0x%" IOMTR_FORMAT_SPEC_64BIT "x", &tempMask);
 				else
 					sscanf(argv[I],"%" IOMTR_FORMAT_SPEC_64BIT "d", &tempMask);
+
+#if defined (IOMTR_SETTING_CPU_AFFINITY)
+
+				param->cpu_affinity = tempMask;
+#endif
+
 			}
 			break;
 #endif

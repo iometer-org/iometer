@@ -555,6 +555,8 @@ typedef unsigned __int8   uint8_t;
 
 #define SMLBUFSIZE 512 
 
+#define MAX_GUI_IOPS 1000000 // million for now?
+
 // ----------------------------------------------------------------------------
 #if defined(IOMTR_OSFAMILY_NETWARE) || defined(IOMTR_OSFAMILY_UNIX)
  //param does not contain a valid internet address

@@ -322,6 +322,9 @@ DWORDLONG rdtsc()
 {
 	return __rdtsc();
 }
+
+#else
+#warning ===> WARNING: You have to do some coding here to get the port done!
 #endif
 
 //
@@ -474,7 +477,9 @@ uint64_t rdtsc()
 	return uli.QuadPart;
 }
 #else
- #error ===> ERROR: You have to do some coding here to get the OSX port done!
+#warning ===> WARNING: You have to do some coding here to get the port done!
+#endif
+
 #endif
 
 // ----------------------------------------------------------------------------

@@ -97,7 +97,7 @@
 #include <net/if.h>
 #endif
 
-#if defined(IOMTR_OS_LINUX) || defined(IOMTR_OSFAMILY_NETWARE) || defined(IOMTR_OS_SOLARIS)
+#if defined(IOMTR_OSFAMILY_NETWARE) || defined(IOMTR_OS_SOLARIS)
 #include <stropts.h>
 #endif
 

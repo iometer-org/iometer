@@ -1014,9 +1014,6 @@ void Grunt::Asynchronous_Delay(int transfer_delay)
 //
 void CDECL Grunt_Thread_Wrapper(void *grunt)
 {
-	long long rand_max = RAND_MAX;
-	int max_sector_size = ((Grunt *) grunt)->Get_Maximum_Sector_Size();
-
 	if (param.cpu_affinity) // only if we have been provided an overriding affinity
 		((Grunt *) grunt)->Set_Affinity(param.cpu_affinity);
 

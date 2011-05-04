@@ -383,7 +383,6 @@ int CDECL main(int argc, char *argv[])
 	Banner();
 
 #if !defined(DO_NOT_PARSE_BEFORE_MANAGER)
-
 	// In order to allow command line parameters to influence default values of
 	// the Manager class members, we need to parse parameters before instantiating
 	// the Manager, but to do this, we need to:
@@ -418,7 +417,6 @@ int CDECL main(int argc, char *argv[])
 
 	// Parse params and then instantiate the manager next...
 	ParseParam(argc, argv, &param);
-
 #endif
 
 	manager = new Manager;
@@ -430,7 +428,6 @@ int CDECL main(int argc, char *argv[])
 	memcpy(manager->prt->network_name, network_name, sizeof(network_name));
 	memcpy(manager->exclude_filesys, exclude_filesys, sizeof(exclude_filesys));
 	memcpy(manager->blkdevlist, blkdevlist, sizeof(blkdevlist));
-
 #else // defined(DO_NOT_PARSE_BEFORE_MANAGER) // the original code
 	iometer[0] = 0;
 	manager->manager_name[0] = 0;
@@ -452,8 +449,8 @@ int CDECL main(int argc, char *argv[])
 	ParseParam(argc, argv, &param);
 
 	g_pVersionStringWithDebug = NULL;	//should use manager object after this...
-
 #endif
+
 	iomtr_set_cpu_affinity(param.cpu_affinity);
 
 	// If there were command line parameters, indicate that they were recognized.
@@ -473,7 +470,7 @@ int CDECL main(int argc, char *argv[])
 	} else {
 		strcpy(manager->exclude_filesys, DEFAULT_EXCLUDE_FILESYS);
 	}
-	cout << endl;
+	// cout << endl;
 
 #if defined(IOMTR_OSFAMILY_UNIX)
 #if defined(IOMTR_OS_LINUX) || defined(IOMTR_OS_OSX)
@@ -632,41 +629,22 @@ CleanUp:
 
 void Banner()
 {
-	//cout << "Version " << g_pVersionStringWithDebug << endl;
-	cout << "Dynamo version " << IOVER_FILEVERSION << VERSION_DEBUG ; 
+	cout << "Dynamo version " << IOVER_FILEVERSION << VERSION_DEBUG << ", "; 
 
-#if (defined(IOMTR_OSFAMILY_WINDOWS) ||  defined(IOMTR_OS_LINUX))
-  #if defined(IOMTR_CPU_I386)		//#if defined(_M_IX86)
-	cout << ", Intel x86 32bit";
-  #elif defined(IOMTR_CPU_IA64)		//#elif defined(_M_IA64)
-	cout << ", Intel Itanium 64bit";
-  #elif defined(IOMTR_CPU_X86_64)	//#elif defined(_M_X64)
-	cout << ", Intel/AMD x64 64bit";
- #endif
+#if defined(IOMTR_CPU_I386)
+	cout << "i386";
+#elif defined(IOMTR_CPU_IA64)
+	cout << "Itanium";
+#elif defined(IOMTR_CPU_PPC)
+	cout << "PowerPC";	
+#elif defined(IOMTR_CPU_SPARC)
+	cout << "SPARC";	
+#elif defined(IOMTR_CPU_X86_64)
+	cout << "x86-64";
+#elif defined(IOMTR_CPU_XSCALE) 
+	cout << "XScale";
+#endif
 
-#elif defined(IOMTR_OS_LINUX)
- #if defined(IOMTR_CPU_XSCALE) 
-	cout << ", Intel XScale";
- #endif
-#elif defined(IOMTR_OS_OSX)
- #if defined(__ppc__)
-	cout << ", PowerPC 32bit";
- #elif defined(__ppc64__)
-	cout << ", PowerPC 64bit";
- #elif defined(__i386__)
-	cout << ", Intel x86 32bit";
- #elif defined(__x86_64__)
-	cout << ", Intel x86_64 64bit";
- #else
-	cout << ", unknown architecture and bitness";
- #endif
-  
- #if defined(__BIG__ENDIAN__)
-	cout << ", big-endian";
- #endif
-#endif 
-
-	// cout << endl;
 	cout << ", built " << __DATE__ << " " << __TIME__ << endl;
 	cout << endl;
 }
@@ -682,14 +660,11 @@ void Banner()
 void Syntax(const char *errmsg /*=NULL*/ )
 {
 	if (errmsg) {
-		cout << endl << "*** Error processing the command line." << endl;
+		cout << "*** Error processing the command line." << endl;
 		cout << "*** " << errmsg << endl;
 	}
 
 	cout << endl;
-
-	//Banner();
-
 	cout << "SYNTAX" << endl;
 	cout << endl;
 
@@ -708,21 +683,21 @@ void Syntax(const char *errmsg /*=NULL*/ )
 	cout << "dynamo [-i iometer_computer_name -m manager_computer_name] [-n manager_name]" << endl;
 	cout << "       [-x excluded_fs_type] [-d extra_device] [-f extra_device_file] [-l]" << endl;
 	cout << "       [-c cpu_affinity] [-p login_port_number]" << endl;
-#elif defined (IOMTR_OS_SOLARIS)
-	cout << "dynamo [-i iometer_computer_name -m manager_computer_name] [-n manager_name]" << endl;
-	cout << "       [-x excluded_fs_type] [-d extra_device] [-f extra_device_file] [-l]" << endl;
-	cout << "       [-p login_port_number]" << endl;
+#elif defined(IOMTR_OS_NETWARE)
+	cout << "dynamo [/i iometer_computer_name /m manager_computer_name] [/n manager_name]" << endl;
+	cout << "       [/x excluded_volumes] [/c cpu_affinity] [/p login_port_number]" << endl;
 #elif defined(IOMTR_OS_OSX)
 	cout << "dynamo [-i iometer_computer_name -m manager_computer_name] [-n manager_name]" << endl;
 	cout << "       [-x excluded_fs_type] [-d extra_device] [-f extra_device_file] [-l]" << endl;
 	cout << "       [-p login_port_number]  [use_rdtsc]" << endl;
+#elif defined (IOMTR_OS_SOLARIS)
+	cout << "dynamo [-i iometer_computer_name -m manager_computer_name] [-n manager_name]" << endl;
+	cout << "       [-x excluded_fs_type] [-d extra_device] [-f extra_device_file] [-l]" << endl;
+	cout << "       [-p login_port_number]" << endl;
 #elif defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)
 	cout << "dynamo [/i iometer_computer_name /m manager_computer_name] [/n manager_name]" << endl;
 	cout << "       [/c cpu_affinity] [/p login_port_number]" << endl;
-	cout << "       [use_rdtsc] [force_raw] " << endl;
-#elif defined(IOMTR_OS_NETWARE)
-	cout << "dynamo [/i iometer_computer_name /m manager_computer_name] [/n manager_name]" << endl;
-	cout << "       [/x excluded_volumes] [/c cpu_affinity] [/p login_port_number]" << endl;
+	cout << "       [use_rdtsc] [force_raw]" << endl;
 #else
 #warning ===> WARNING: You have to do some coding here to get the port done!
 #endif
@@ -1018,6 +993,7 @@ static void ParseParam(int argc, char *argv[], struct dynamo_param *param)
 	}
 
 	// Enforce switch combinations
+	
 	if (bParamIometer && !bParamDynamo) {
 		Syntax("Specifying the Iometer address, the Manager network name parameter becomes mandatory.");
 	}

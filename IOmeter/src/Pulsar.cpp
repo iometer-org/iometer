@@ -139,12 +139,12 @@ extern timer_type TimerType;
 #if defined(IOMTR_OSFAMILY_UNIX)
 #include <sys/resource.h>
 #include <ctype.h>
-#if defined(IOMTR_OS_SOLARIS)
-#include <synch.h>
-#elif defined(IOMTR_OS_LINUX)
+#if defined(IOMTR_OS_LINUX)
 int kstatfd;
 #elif defined(IOMTR_OS_OSX)
-  // nop
+// nop
+#elif defined(IOMTR_OS_SOLARIS)
+#include <synch.h>
 #else
 #warning ===> WARNING: You have to do some coding here to get the port done!
 #endif
@@ -160,7 +160,7 @@ int do_syslog = FALSE;
 
 
 struct dynamo_param param;	// global scope so other modules have access to it
-				// needed specifically for timer_type and disk_contorl
+				// needed specifically for timer_type and disk_control
 
 /////////////////////////////////////////////////////////////////////////////
 // Forward declarations

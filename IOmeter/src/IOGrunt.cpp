@@ -697,8 +697,7 @@ void Grunt::Set_Affinity(DWORD_PTR affinity)
 //#elif defined(IOMTR_OS_LINUX)
 //			sched_setaffinity(gettid(), CPU_SETSIZE, &s)
 #else
-#error ===> ERROR: You have to add affinity code here
-
+#warning ===> WARNING: You have to do some coding here to get the port done!
 #endif
 			cout << "Worker " << worker_index << "setting thread affinity mask to 0x" 
 				 << hex << effective_affinity << endl;

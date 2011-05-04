@@ -117,8 +117,11 @@
 #include "IOCommon.h"
 #include "IOTargetDisk.h"
 #include "IOAccess.h"
+
+#if defined(IOMTR_OSFAMILY_WINDOWS)
 #include <initguid.h>
 #include <diskguid.h>
+#endif
 
 #define _DISK_MSGS 0
 

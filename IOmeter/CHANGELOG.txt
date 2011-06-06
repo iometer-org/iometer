@@ -8,10 +8,13 @@ Version 1.1.0 (GA?)
 ===================
 
 - New functionality:
-   - n.a.
+   - (Windows) Support for identifying GPT disks with hidden
+     paritions was added.
 - Improvements:
    - n.a.
 - Bug fixes:
+   - (Linux) Removed stropts.h include for Linux, as this file is no
+     longer available with newer Linux distributions.
    - (OS X) Specialized the OS X makefile (Makefile-OSX.all) into
      Makefile-OSX.ppc and Makefile-OSX.i386, because otherwise builds 
      on x86 are breaking due to the CPU architecture specific timer 
@@ -26,6 +29,8 @@ Version 1.1.0 (GA?)
    - Converted Iometer User's Manual from Star Office based file (.sxw)
      to the Open Document Format (.odt)
 - Others:
+   - (All) Minor changes to the initial puslar output. In particular the
+     processor family information were cleaned up.
    - Appended .txt extension to the capital letter files (CHANGELOG etc.)
    - Rework of CHANGELOG file to clarify changes since version 2006.07.27.
 

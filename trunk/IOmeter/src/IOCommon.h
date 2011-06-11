@@ -258,7 +258,7 @@ using namespace std;
  #if defined(IOMTR_OS_OSX)
   #include <sys/aio.h>
   #define aiocb64 		aiocb
-  #define aio_suspend64	aio_suspend
+  #define aio_suspend64		aio_suspend
   #define aio_error64		aio_error
   #define aio_cancel64		aio_cancel
   #define aio_read64		aio_read
@@ -293,14 +293,14 @@ using namespace std;
 #define IOMETER_RECEIVE_TIMEOUT		10000 // 10 seconds in miliseconds
 
 // All references to types
-typedef          __int64  int64_t;
-typedef unsigned __int64 uint64_t;
-typedef          __int32  int32_t;
-typedef unsigned __int32 uint32_t;
-typedef          __int16  int16_t;
-typedef unsigned __int16 uint16_t;
-typedef          __int8    int8_t;
-typedef unsigned __int8   uint8_t;
+typedef          __int64    int64_t;
+typedef unsigned __int64   uint64_t;
+typedef          __int32    int32_t;
+typedef unsigned __int32   uint32_t;
+typedef          __int16    int16_t;
+typedef unsigned __int16   uint16_t;
+typedef          __int8      int8_t;
+typedef unsigned __int8     uint8_t;
 #endif
 
 // ----------------------------------------------------------------------------
@@ -331,22 +331,22 @@ typedef unsigned __int8   uint8_t;
 
  typedef union _LARGE_INTEGER 
  {
-	struct 
+    struct 
     {
         uint32_t LowPart;
         int32_t  HighPart;
     };
-   int64_t QuadPart;
+    int64_t QuadPart;
  } LARGE_INTEGER, *PLARGE_INTEGER;
 
-  typedef union _ULARGE_INTEGER 
-  {
-	  struct 
-	  {
-		  uint32_t LowPart;
-          uint32_t HighPart;
-      };
-      uint64_t QuadPart;
+ typedef union _ULARGE_INTEGER 
+ {
+    struct 
+    {
+        uint32_t LowPart;
+        uint32_t HighPart;
+    };
+    uint64_t QuadPart;
  } ULARGE_INTEGER, *PULARGE_INTEGER;
 
  #if defined(IOMTR_OSFAMILY_NETWARE)
@@ -371,18 +371,18 @@ typedef unsigned __int8   uint8_t;
  
  #if defined(IOMTR_SETTING_GCC_M64)
   // DWORD is supposed to be an unsigned 32 bit number.
-  typedef unsigned int	       DWORD;
-  typedef DWORD				   LONG;
-  typedef unsigned __int64     ULONG_PTR, *PULONG_PTR;
-  typedef ULONG_PTR            DWORD_PTR;
-  typedef __int64			   LONG_PTR;
+  typedef unsigned int	       		DWORD;
+  typedef DWORD				LONG;
+  typedef unsigned __int64     		ULONG_PTR, *PULONG_PTR;
+  typedef ULONG_PTR            		DWORD_PTR;
+  typedef __int64			LONG_PTR;
   #define IOMTR_FORMAT_SPEC_64BIT	"L" 
 #else
   typedef unsigned long			DWORD;
-  typedef DWORD					LONG;
+  typedef DWORD				LONG;
   typedef unsigned long			ULONG_PTR, *PULONG_PTR;
-  typedef ULONG_PTR				DWORD_PTR;
-  typedef int					LONG_PTR;
+  typedef ULONG_PTR			DWORD_PTR;
+  typedef int				LONG_PTR;
   #define IOMTR_FORMAT_SPEC_64BIT	"l"
  #endif
  
@@ -425,14 +425,14 @@ typedef unsigned __int8   uint8_t;
    // dps: Was __int32 in before, but conflicts while conversion
    //      from unsigned __int32 to unsigned long for instance
    //      (using Microsoft Visual C++).
-   typedef long LONG_PTR, *PLONG_PTR;
-   typedef unsigned long  ULONG_PTR, *PULONG_PTR;
-   typedef ULONG_PTR      DWORD_PTR;
+   typedef long               LONG_PTR, *PLONG_PTR;
+   typedef unsigned long      ULONG_PTR, *PULONG_PTR;
+   typedef ULONG_PTR          DWORD_PTR;
   #endif
   #if defined(IOMTR_OS_WIN64)
-   typedef __int64 LONG_PTR, *PLONG_PTR;
-   typedef unsigned __int64 ULONG_PTR, *PULONG_PTR;
-   typedef ULONG_PTR        DWORD_PTR;
+   typedef __int64            LONG_PTR, *PLONG_PTR;
+   typedef unsigned __int64   ULONG_PTR, *PULONG_PTR;
+   typedef ULONG_PTR          DWORD_PTR;
   #endif
 #endif // LONG_PTR
  //  The places in the Iometer code that now use CONNECTION used to use
@@ -478,11 +478,11 @@ typedef unsigned __int8   uint8_t;
 #define LONG_DELAY    3000   // msec. to wait before reattempting an action
 #define IDLE_DELAY    1000   // max msec to wait between calls to CGalileoApp::OnIdle()
 
-#define DATA_PATTERN_REPEATING_BYTES	0
-#define DATA_PATTERN_PSEUDO_RANDOM		1
-#define DATA_PATTERN_FULL_RANDOM		2
+#define DATA_PATTERN_REPEATING_BYTES   0
+#define DATA_PATTERN_PSEUDO_RANDOM     1
+#define DATA_PATTERN_FULL_RANDOM       2
 
-#define RANDOM_BUFFER_SIZE 16*1024*1024
+#define RANDOM_BUFFER_SIZE   16*1024*1024
 
 #define KILOBYTE_BIN   1024
 #define MEGABYTE_BIN   1048576
@@ -553,9 +553,9 @@ typedef unsigned __int8   uint8_t;
 #define SEND   1
 #define RECV   2
 
-#define SMLBUFSIZE 512 
+#define SMLBUFSIZE   512 
 
-#define MAX_GUI_IOPS 1000000 // million for now?
+#define MAX_GUI_IOPS   1000000 // million for now?
 
 // ----------------------------------------------------------------------------
 #if defined(IOMTR_OSFAMILY_NETWARE) || defined(IOMTR_OSFAMILY_UNIX)
@@ -792,8 +792,8 @@ struct Results
 #endif
  	struct {
  		int sigev_notify;
- 		}	aio_sigevent;
-	};
+ 	} aio_sigevent;
+ };
  struct timeb {
 #if defined(IOMTR_SETTING_GCC_M64)
 	int time;
@@ -803,7 +803,7 @@ struct Results
 	unsigned short millitm;
 	short timezone;
 	short dstflag;
-	};
+ };
  #endif
  typedef struct _OVERLAPPED {   
 	DWORD  Internal;
@@ -962,16 +962,16 @@ inline int IsBigEndian(void)
 }
 
 #if defined(_DEBUG)
- void	Dump_Raw_Result(struct Raw_Result *res);
- void	Dump_Manager_Results(struct Manager_Results *res);
- void	Dump_CPU_Results(struct CPU_Results *res);
- void	Dump_Net_Results(struct Net_Results *res);
+ void Dump_Raw_Result(struct Raw_Result *res);
+ void Dump_Manager_Results(struct Manager_Results *res);
+ void Dump_CPU_Results(struct CPU_Results *res);
+ void Dump_Net_Results(struct Net_Results *res);
 #endif
 // ----------------------------------------------------------------------------
 
 #if defined(IOMTR_OSFAMILY_WINDOWS)
- #define _time			time
- #define _millitm		millitm
+ #define _time      time
+ #define _millitm   millitm
 #endif
 
 #if defined(IOMTR_OSFAMILY_NETWARE) || defined(IOMTR_OSFAMILY_UNIX)
@@ -1113,9 +1113,9 @@ inline int IsBigEndian(void)
 #endif
 
 #if defined(IOMTR_OSFAMILY_WINDOWS) 
- #define sleep_milisec(_time) Sleep(_time);
+ #define sleep_milisec(_time)   Sleep(_time);
 #elif defined(IOMTR_OSFAMILY_UNIX)
- #define sleep_milisec(_time) usleep(_time * 1000);
+ #define sleep_milisec(_time)   usleep(_time * 1000);
 #else
  #error You have some work to do here to implemenent sleep_milisec()
 #endif
@@ -1133,12 +1133,22 @@ inline int IsBigEndian(void)
 // ----------------------------------------------------------------------------
 
 // Defines various timer types supported, see iotime.c
-typedef enum {TIMER_UNDEFINED=0, TIMER_OSHPC=1, TIMER_RDTSC=2,  TIMER_HPET=3, TIMER_TYPE_MAX=3} timer_type;
+typedef enum {
+	TIMER_UNDEFINED = 0, 
+	TIMER_OSHPC     = 1, 
+	TIMER_RDTSC     = 2,  
+	TIMER_HPET      = 3, 
+	TIMER_TYPE_MAX  = 3
+} timer_type;
 
 // #ifdef USE_NEW_DETECTION_MECHANISM
 // Controls the disk view options in the new disk detection code. Not ifdefed beuase it is tied
 // to the dynamo_param relocation which is not ifdefed either.
-typedef enum {RAWDISK_VIEW_COMPAT=0, RAWDISK_VIEW_NOPART=1, RAWDISK_VIEW_FULL=2} diskview_type;
+typedef enum {
+	RAWDISK_VIEW_COMPAT = 0, 
+	RAWDISK_VIEW_NOPART = 1, 
+	RAWDISK_VIEW_FULL   = 2
+} diskview_type;
 
 // Moved to a global location so that other classes can get access 
 // to it w/out complicated C++ relationships
@@ -1148,10 +1158,10 @@ struct dynamo_param {
 	char *manager_computer_name;
 	char *manager_exclude_fs;
 	char (*blkdevlist)[MAX_TARGETS][MAX_NAME];
-	ULONG_PTR cpu_affinity; // Needs to be 64bits on 64bit systems!
-							// Someone needs to fix the linux definitions
+	ULONG_PTR cpu_affinity;   // Needs to be 64bits on 64bit systems!
+	                          // Someone needs to fix the linux definitions
 	int login_port_number;
-	int timer_type; // control timer used from cmdline
-	int disk_control; // control what disk get displayed in iometer from cmdline
+	int timer_type;           // control timer used from cmdline
+	int disk_control;         // control what disk get displayed in iometer from cmdline
 };
 #endif	// ___IOCOMMON_H_DEFINED___

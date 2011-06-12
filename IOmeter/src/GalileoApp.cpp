@@ -416,7 +416,7 @@ void CGalileoApp::LaunchDynamo(const CString & mgr_name /* ="" */ )
 	// Make sure the formatting string was initialized.
 	ASSERT(!theApp.new_manager_command_line_format.IsEmpty());
 
-	portparam.Format(" /p %d ", cmdline.GetLoginportnumber());
+	portparam.Format(" -p %d ", cmdline.GetLoginportnumber());
 
 	// Create a string with the appropriate command line parameters.
 	cmd.Format(new_manager_command_line_format, mgr_name, portparam, mgr_name, portparam);

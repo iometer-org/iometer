@@ -345,7 +345,6 @@ using namespace std;
   //typedef long		       LONG; // careful, on windows long is 32bits -- see above
   #if defined(IOMTR_OS_OSX)
    #define off64_t	off_t  
-   #define stricmp strcasecmp
   #endif 
  #else
   #warning ===> WARNING: You have to do some coding here to get the port done!
@@ -1085,10 +1084,10 @@ inline int IsBigEndian(void)
 #endif 
 // ----------------------------------------------------------------------------
 #if defined(IOMTR_OSFAMILY_WINDOWS)
- #define _millitm   millitm
- #define snprintf   _snprintf
- #define stricmp    _stricmp
- #define _time      time
+ #define _millitm     millitm
+ #define snprintf     _snprintf
+ #define strcasecmp   _stricmp   // Follow POSIX naming of functions
+ #define _time        time
 #endif
 // ----------------------------------------------------------------------------
 #if defined(IOMTR_OS_LINUX)

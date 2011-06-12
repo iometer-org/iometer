@@ -676,7 +676,7 @@ Test_Spec *AccessSpecList::RefByName(const char *check_name)
 
 	for (int s = 0; s < spec_count; s++) {
 		spec = Get(s);
-		if (_stricmp(spec->name, check_name) == 0)
+		if (strcasecmp(spec->name, check_name) == 0)
 			return spec;
 	}
 	return NULL;

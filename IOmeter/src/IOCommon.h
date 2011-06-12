@@ -286,27 +286,9 @@ using namespace std;
   #include "ostream64.h"
  #endif
 #endif
-
-#if defined(IOMTR_OSFAMILY_WINDOWS)
-#define snprintf _snprintf
-#define stricmp  _stricmp
-#define IOMETER_RECEIVE_TIMEOUT		10000 // 10 seconds in miliseconds
-
-// All references to types
-typedef          __int64    int64_t;
-typedef unsigned __int64   uint64_t;
-typedef          __int32    int32_t;
-typedef unsigned __int32   uint32_t;
-typedef          __int16    int16_t;
-typedef unsigned __int16   uint16_t;
-typedef          __int8      int8_t;
-typedef unsigned __int8     uint8_t;
-#endif
-
 // ----------------------------------------------------------------------------
 #include "IOVersion.h"   // version info definitions
 // ----------------------------------------------------------------------------
-
 
 
 
@@ -420,6 +402,17 @@ typedef unsigned __int8     uint8_t;
  #endif 
 // ----------------------------------------------------------------------------
 #if defined(IOMTR_OSFAMILY_WINDOWS)
+
+// All references to types
+typedef          __int64    int64_t;
+typedef unsigned __int64   uint64_t;
+typedef          __int32    int32_t;
+typedef unsigned __int32   uint32_t;
+typedef          __int16    int16_t;
+typedef unsigned __int16   uint16_t;
+typedef          __int8      int8_t;
+typedef unsigned __int8     uint8_t;
+
 #ifndef LONG_PTR
   #if defined(IOMTR_OS_WIN32)
    // dps: Was __int32 in before, but conflicts while conversion
@@ -466,6 +459,7 @@ typedef unsigned __int8     uint8_t;
 #endif
 
 // ----------------------------------------------------------------------------
+
 
 
 // Definition of the defines itself
@@ -590,6 +584,10 @@ typedef unsigned __int8     uint8_t;
 
 #endif
 // ----------------------------------------------------------------------------
+#if defined(IOMTR_OSFAMILY_WINDOWS)
+ #define IOMETER_RECEIVE_TIMEOUT   10000 // 10 seconds in miliseconds
+#endif
+// ----------------------------------------------------------------------------
 
 
 
@@ -622,6 +620,25 @@ enum {
 	RecordNoManagers,
 	RecordNone
 };
+
+// Defines various timer types supported, see iotime.c
+typedef enum {
+	TIMER_UNDEFINED = 0, 
+	TIMER_OSHPC     = 1, 
+	TIMER_RDTSC     = 2,  
+	TIMER_HPET      = 3, 
+	TIMER_TYPE_MAX  = 3
+} timer_type;
+
+// #ifdef USE_NEW_DETECTION_MECHANISM
+// Controls the disk view options in the new disk detection code. Not ifdefed beuase it is tied
+// to the dynamo_param relocation which is not ifdefed either.
+typedef enum {
+	RAWDISK_VIEW_COMPAT = 0, 
+	RAWDISK_VIEW_NOPART = 1, 
+	RAWDISK_VIEW_FULL   = 2
+} diskview_type;
+
 // ----------------------------------------------------------------------------
 
 // FORCE_STRUCT_ALIGN forces compiler controlled structure alignment. This seems
@@ -772,6 +789,21 @@ struct Results
 } STRUCT_ALIGN_IOMETER;
 
 #include "unpack.h"
+
+// Moved to a global location so that other classes can get access 
+// to it w/out complicated C++ relationships
+struct dynamo_param {
+	char *iometer;
+	char *manager_name;
+	char *manager_computer_name;
+	char *manager_exclude_fs;
+	char (*blkdevlist)[MAX_TARGETS][MAX_NAME];
+	ULONG_PTR cpu_affinity;   // Needs to be 64bits on 64bit systems!
+	                          // Someone needs to fix the linux definitions
+	int login_port_number;
+	int timer_type;           // control timer used from cmdline
+	int disk_control;         // control what disk get displayed in iometer from cmdline
+};
 
 // ----------------------------------------------------------------------------
 #if defined(IOMTR_OSFAMILY_UNIX) || defined(IOMTR_OSFAMILY_NETWARE)
@@ -968,12 +1000,6 @@ inline int IsBigEndian(void)
  void Dump_Net_Results(struct Net_Results *res);
 #endif
 // ----------------------------------------------------------------------------
-
-#if defined(IOMTR_OSFAMILY_WINDOWS)
- #define _time      time
- #define _millitm   millitm
-#endif
-
 #if defined(IOMTR_OSFAMILY_NETWARE) || defined(IOMTR_OSFAMILY_UNIX)
  BOOL    SetQueueSize(HANDLE, int);
  HANDLE  CreateIoCompletionPort(HANDLE, HANDLE, DWORD, DWORD);
@@ -1058,6 +1084,13 @@ inline int IsBigEndian(void)
 	 UNLOCK;
 #endif 
 // ----------------------------------------------------------------------------
+#if defined(IOMTR_OSFAMILY_WINDOWS)
+ #define _millitm   millitm
+ #define snprintf   _snprintf
+ #define stricmp    _stricmp
+ #define _time      time
+#endif
+// ----------------------------------------------------------------------------
 #if defined(IOMTR_OS_LINUX)
  extern DWORDLONG jiffies(void);
  extern DWORDLONG timer_value(void);
@@ -1111,7 +1144,7 @@ inline int IsBigEndian(void)
 
  extern DWORDLONG timer_value(void); 
 #endif
-
+// ----------------------------------------------------------------------------
 #if defined(IOMTR_OSFAMILY_WINDOWS) 
  #define sleep_milisec(_time)   Sleep(_time);
 #elif defined(IOMTR_OSFAMILY_UNIX)
@@ -1119,7 +1152,6 @@ inline int IsBigEndian(void)
 #else
  #error You have some work to do here to implemenent sleep_milisec()
 #endif
-
 // ----------------------------------------------------------------------------
 //#if defined(IOMTR_OS_OSX) || defined(IOMTR_OS_SOLARIS)
 #if defined(IOMTR_OS_SOLARIS)
@@ -1132,36 +1164,8 @@ inline int IsBigEndian(void)
 #endif
 // ----------------------------------------------------------------------------
 
-// Defines various timer types supported, see iotime.c
-typedef enum {
-	TIMER_UNDEFINED = 0, 
-	TIMER_OSHPC     = 1, 
-	TIMER_RDTSC     = 2,  
-	TIMER_HPET      = 3, 
-	TIMER_TYPE_MAX  = 3
-} timer_type;
-
-// #ifdef USE_NEW_DETECTION_MECHANISM
-// Controls the disk view options in the new disk detection code. Not ifdefed beuase it is tied
-// to the dynamo_param relocation which is not ifdefed either.
-typedef enum {
-	RAWDISK_VIEW_COMPAT = 0, 
-	RAWDISK_VIEW_NOPART = 1, 
-	RAWDISK_VIEW_FULL   = 2
-} diskview_type;
-
-// Moved to a global location so that other classes can get access 
-// to it w/out complicated C++ relationships
-struct dynamo_param {
-	char *iometer;
-	char *manager_name;
-	char *manager_computer_name;
-	char *manager_exclude_fs;
-	char (*blkdevlist)[MAX_TARGETS][MAX_NAME];
-	ULONG_PTR cpu_affinity;   // Needs to be 64bits on 64bit systems!
-	                          // Someone needs to fix the linux definitions
-	int login_port_number;
-	int timer_type;           // control timer used from cmdline
-	int disk_control;         // control what disk get displayed in iometer from cmdline
-};
 #endif	// ___IOCOMMON_H_DEFINED___
+
+
+
+

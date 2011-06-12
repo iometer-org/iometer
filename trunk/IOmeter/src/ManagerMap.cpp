@@ -269,7 +269,7 @@ void ManagerMap::SpawnLocalManagers()
 				theApp.LaunchDynamo();
 			} else {
 				// Spawn a Dynamo with the appropriate name parameter.
-				theApp.LaunchDynamo(" /n " + map[counter].name);
+				theApp.LaunchDynamo(" -n " + map[counter].name);
 			}
 		}
 	}

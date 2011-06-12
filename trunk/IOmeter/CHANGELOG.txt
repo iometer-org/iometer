@@ -10,8 +10,13 @@ Version 1.1.0 (GA?)
 - New functionality:
    - (Windows) Support for identifying GPT disks with hidden
      paritions was added.
-- Improvements:
-   - n.a.
+- Changes/Improvements:
+   - (All) Expressing Dynamo command line options with Windows style 
+     options (/f) is no longer supported. Going forward, only Unix style 
+     options (-f or --foo) are available.
+   - (All) Non-standard Dynamo command line options used for tuning
+     or activating alternative code paths (-force_raw and -use_rdtsc)
+     are now consolidated in the new --flag option.
 - Bug fixes:
    - (Linux) Removed stropts.h include for Linux, as this file is no
      longer available with newer Linux distributions.
@@ -29,6 +34,8 @@ Version 1.1.0 (GA?)
    - Converted Iometer User's Manual from Star Office based file (.sxw)
      to the Open Document Format (.odt)
 - Others:
+   - (All) Reimplementation of handing of Dynamo command line option 
+     handling and the related help output (aka Syntax() function). 
    - (All) Minor changes to the initial puslar output. In particular the
      processor family information were cleaned up.
    - Appended .txt extension to the capital letter files (CHANGELOG etc.)

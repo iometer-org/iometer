@@ -643,6 +643,8 @@ void Banner()
 	cout << "x86-64";
 #elif defined(IOMTR_CPU_XSCALE) 
 	cout << "XScale";
+#else
+#warning ===> WARNING: You have to do some coding here to get the port done!
 #endif
 
 	cout << ", built " << __DATE__ << " " << __TIME__ << endl;
@@ -667,109 +669,123 @@ void Syntax(const char *errmsg /*=NULL*/ )
 	cout << endl;
 	cout << "SYNTAX" << endl;
 	cout << endl;
-
-#if defined(IOMTR_OS_LINUX) || defined(IOMTR_OS_OSX)
-	cout << "dynamo -?" << endl;
-#elif defined(IOMTR_OS_NETWARE) || defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)
-	cout << "dynamo /?" << endl;
-#elif defined(IOMTR_OS_SOLARIS)
-	// Solaris 2.7 must have the switch (? is used for its own purpose).
-	cout << "dynamo \\?" << endl;
-#else
-#warning ===> WARNING: You have to do some coding here to get the port done!
+	cout << "       dynamo [-i iometer_host -m dynamo_host [-n dynamo_name]]" << endl;
+	cout << endl;
+	cout << "Only the most common options are listed here; see below for the remainder." << endl;
+	cout << endl;
+	cout << "OPTIONS" << endl;
+	cout << endl;
+	cout << "   General Options" << endl;	
+	cout << endl;
+	cout << "       -h, --help" << endl;
+	cout << "              Print the usage information and exit." << endl;	
+	cout << endl;	
+	cout << "   Login Options" << endl;	
+	cout << endl;
+	cout << "       -i iometer_host" << endl;
+	cout << "              The host name of the computer that is running the Iometer GUI." << endl;
+	cout << "              This option is only needed in cases where Dynamo and Iometer"   << endl;
+	cout << "              are runnning on different machines. If this option is not set," << endl;
+	cout << "              then Dynamo will try to connect to Iometer on the local host."  << endl;
+	cout << endl;
+	cout << "       -p iometer_port" << endl;
+	cout << "              The port number on which the Iometer GUI is listening."         << endl;
+	cout << "              If this option is not set, then Dynamo will use the default"    << endl;
+	cout << "              TCP port (" << WELL_KNOWN_TCP_PORT << ")."                      << endl;
+	cout << endl;
+	cout << "       -m dynamo_host" << endl;
+	cout << "              The host name of the computer where Dynamo is running on."      << endl;
+	cout << "              This option is only needed in cases where Dynamo and Iometer"   << endl;
+	cout << "              are running on different machines. In such scenarios, the"      << endl;
+	cout << "              Iometer GUI is using this information to communicate back to"   << endl;
+	cout << "              this particular Dynamo instance."                               << endl;
+	cout << "              Please make sure, that the computer where Iometer is running"   << endl;
+	cout << "              on, can actually ping this host name successfully. Otherwise"   << endl;
+	cout << "              Dynamo and Iometer will hand a long time during login."         << endl;
+	cout << endl;
+	cout << "       -n dynamo_name" << endl;
+	cout << "              In the Iometer GUI, the different Dynamo instances are listed"  << endl;
+	cout << "              as manager. This option specifies the manager name that will"   << endl;
+	cout << "              be used for this particular Dynamo instance. Please notice,"    << endl;
+	cout << "              that this name is also used for storing particular setups in"   << endl;
+	cout << "              an Iometer Configuration File (ICF) file."                      << endl;
+	cout << "              If this option is not set, then Dynamo will use the host name"  << endl;
+	cout << "              as default."                                                    << endl;
+	cout << endl;
+	cout << "   System Options" << endl;
+	cout << endl;		
+#if defined(IOMTR_OS_LINUX) || defined(IOMTR_OSFAMILY_WINDOWS)
+	cout << "       -c cpu_mask" << endl;
+	cout << "              Enables CPU affinity. It binds Dynamo to the processing units"  << endl;
+	cout << "              (HW threads) specified by the cpu_mask. This is used for"       << endl;
+	cout << "              getting more consistent timing values. For example, if you "    << endl;
+	cout << "              want to bind Dynamo to the third CPU, you have should set the"  << endl;
+	cout << "              cpu_mask to 4 (decimal representation of bitmap 00000100)."     << endl;
+	cout << "              If this option is not set, Dynamo will automatically bind to"   << endl;
+	cout << "              the first CPU in the system." << endl;
+	cout << endl;
 #endif
-
-#if defined(IOMTR_OS_LINUX)
-	cout << "dynamo [-i iometer_computer_name -m manager_computer_name] [-n manager_name]" << endl;
-	cout << "       [-x excluded_fs_type] [-d extra_device] [-f extra_device_file] [-l]" << endl;
-	cout << "       [-c cpu_affinity] [-p login_port_number]" << endl;
-#elif defined(IOMTR_OS_NETWARE)
-	cout << "dynamo [/i iometer_computer_name /m manager_computer_name] [/n manager_name]" << endl;
-	cout << "       [/x excluded_volumes] [/c cpu_affinity] [/p login_port_number]" << endl;
-#elif defined(IOMTR_OS_OSX)
-	cout << "dynamo [-i iometer_computer_name -m manager_computer_name] [-n manager_name]" << endl;
-	cout << "       [-x excluded_fs_type] [-d extra_device] [-f extra_device_file] [-l]" << endl;
-	cout << "       [-p login_port_number]  [use_rdtsc]" << endl;
-#elif defined (IOMTR_OS_SOLARIS)
-	cout << "dynamo [-i iometer_computer_name -m manager_computer_name] [-n manager_name]" << endl;
-	cout << "       [-x excluded_fs_type] [-d extra_device] [-f extra_device_file] [-l]" << endl;
-	cout << "       [-p login_port_number]" << endl;
-#elif defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)
-	cout << "dynamo [/i iometer_computer_name /m manager_computer_name] [/n manager_name]" << endl;
-	cout << "       [/c cpu_affinity] [/p login_port_number]" << endl;
-	cout << "       [use_rdtsc] [force_raw]" << endl;
-#else
-#warning ===> WARNING: You have to do some coding here to get the port done!
-#endif
-
-	cout << endl;
-	cout << "   ? - show Dynamo version number and command line syntax" << endl;
-	cout << endl;
-	cout << "   iometer_computer_name - the name of the computer running Iometer" << endl;
-	cout << "      This is only needed if Dynamo and Iometer are running on different" << endl;
-	cout << "      computers.  Without this parameter, Dynamo will search for Iometer" << endl;
-	cout << "      on the local host." << endl;
-	cout << endl;
-	cout << "   manager_name - the name of this Dynamo" << endl;
-	cout << "      This name is the one Iometer will use as the manager name, important" << endl;
-	cout << "      when restoring config files.  This defaults to the host's name." << endl;
-	cout << endl;
-	cout << "   manager_computer_name - the name of the computer running this Dynamo" << endl;
-	cout << "      This name or IP address is the one Iometer will use to communicate" << endl;
-	cout << "      with this manager. The default is the IP adress of the host's first" << endl;
-	cout << "      NIC." << endl;
-	cout << "      Make sure iometer box can ping this name successfully, otherwise dynamo" << endl;
-	cout << "      and iometer will hang a long time during login." << endl;
-	cout << endl;
-	cout << "   login_port_number - the port number Iometer is listening on. If this" << endl;
-	cout << "      parameter is not given, the default port(" << WELL_KNOWN_TCP_PORT << ") will be used." << endl;
-	cout << endl;
-
 #if defined(IOMTR_OS_LINUX) || defined(IOMTR_OS_OSX) || defined(IOMTR_OS_SOLARIS)
-	cout << "   excluded_fs_type - type of filesystems to exclude from device search" << endl;
-	cout << "      This string should contain the filesystem types that are not reported" << endl;
-	cout << "      to Iometer. The default is \"" << DEFAULT_EXCLUDE_FILESYS << "\"." << endl;
+	cout << "       -l" << endl;
+	cout << "              Enables the recording of events to syslog. Default location"    << endl;
+	cout << "              for the corresponding log file is /var/log/messages."           << endl;
 	cout << endl;
-	cout << "   extra_device - block device name to be included in the test if this device" << endl;
-	cout << "      CAN NOT be detected automatically by dynamo. You can use it multiple times," << endl;
-	cout << "      for example, -b dev1 -b dev2 -b dev3..." << endl;
-	cout << endl;
-	cout << "   extra_device_file - a file store extra device names with each name in one line" << endl;
-	cout << "      use this in case you have lots of extra device need to be claimed." << endl;
-	cout << "      You MUST use absolute path for device name here." << endl;
-	cout << endl;
-	cout << "   -l - to record events in syslog, default is /var/log/messages." << endl;
+#endif
+	cout << "   Device Options" << endl;	
+	cout << endl;	
+#if defined(IOMTR_OS_LINUX) || defined(IOMTR_OS_OSX) || defined(IOMTR_OS_SOLARIS)
+	cout << "       -d extra_device" << endl;
+	cout << "              Specifies the name of a block device that should be included"   << endl;
+	cout << "              in the test but CAN NOT be detected automatically by Dynamo."   << endl;
+	cout << "              This option can be used multiple time, to list multiple"        << endl;
+	cout << "              devices:"                                                       << endl;	
+	cout << "              -d dev1 -d dev2 -d dev3 ..."                                    << endl;
+	cout << endl;	
+	cout << "       -f extra_device_file" << endl;
+	cout << "              Names a text file which contains the names of block device"     << endl;
+	cout << "              that should be includede in the test. It is similar to the"     << endl;
+	cout << "              -d option but more practical in cases where you have to add"    << endl;
+	cout << "              lots of extra extra devices."                                   << endl;
+	cout << "              Please ensure that the devices are listed with their absolute"  << endl;
+	cout << "              path, and that there is only one device per line."              << endl;
+	cout << endl;	
+#endif
+#if defined(IOMTR_OS_LINUX) || defined(IOMTR_OS_OSX) || defined(IOMTR_OS_SOLARIS)
+	cout << "       -x excluded_fs_type" << endl;
+	cout << "              Type of filesystem to be excluded from the device search."      << endl;
+	cout << "              This option can be used multiple time, to list multiple"        << endl;
+	cout << "              devices. If the option is not set, Dynamo will default to"      << endl;
+	cout << "              omit filesystems of the following types:"                       << endl;
+	cout << "              " << DEFAULT_EXCLUDE_FILESYS                                    << endl;
 	cout << endl;
 #elif defined(IOMTR_OSFAMILY_NETWARE)
-	cout << "   excluded_volumes - volumes to exclude from volume or device search" << endl;
-	cout << "      The default is \"" << "none" << "\"." << endl;
-	cout << endl;
-#elif defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)
-	// nop  
-#else
-#warning ===> WARNING: You have to do some coding here to get the port done!
-#endif
-
-#if defined(IOMTR_OS_LINUX) || defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)
-	cout << "   cpu_affinity - cpu affinity is used to bind dynamo to certain processor(s)." << endl;
-	cout << "      This is used for getting a more consistent timing value. For example, if" << endl;
-	cout << "      you want to bind to the third cpu, you should have value 4(00000100) here." << endl;
-	cout << "      If this parameter is not specified, dynamo will bind to the first CPU" << endl;
-	cout << "      in system by default." << endl;
+	cout << "       -x excluded_volume" << endl;
+	cout << "              Volumes to be excluded from the volume or device search."       << endl;
+	cout << "              This option can be used multiple time, to list multiple"        << endl;
+	cout << "              volumes. If the option is not set, Dynamo will default to"      << endl;
+	cout << "              omit the following:"                                            << endl;
+	cout << "              " << "none"                                                     << endl;	
 	cout << endl;
 #endif
-
+	cout << "   Other Options" << endl;	
+	cout << endl;
+	cout << "       --flag flag_name" << endl;
+	cout << "              Allows non-standard options to be set. Typically these are"     << endl;
+	cout << "              switches to enable certain tuning options or alternative code"  << endl;
+	cout << "              paths. Please notice, that these flags are considered to be"    << endl;
+	cout << "              shorter lived nature, so future versions of Dynamo might come"  << endl;
+	cout << "              with different flags."                                          << endl;
+	cout << "              In this version, the following options are supported:"          << endl;
+	cout << "              FORCE_RAW"                                                      << endl;
+	cout << "                  Forces Dynamo to report all raw disks, even if those"       << endl;
+	cout << "                  disks have partitions on them."                             << endl;
 #if defined(IOMTR_OSFAMILY_WINDOWS) || defined(IOMTR_OS_OSX)
-	cout << "   use_rdtsc - enables explicit rdtsc use in favor of other OS API" << endl;
-	cout << "      for measuring I/O performance." << endl;
-	cout << endl;
+	cout << "              USE_RDTSC"                                                      << endl;
+	cout << "                  Forces Dynamo to not use the high precision timer API"      << endl;
+	cout << "                  provided by the OS. Instead the RDTSC instruction (or"      << endl;
+	cout << "                  equivalent) of the CPU is used."                            << endl;
 #endif
-
-#if defined(IOMTR_OSFAMILY_WINDOWS)
-	cout << "   force_raw - forces dynamo to report all raw disks regardless of partitions" << endl;
-	cout << "      contained within them. " << endl;
 	cout << endl;
-#endif
 
 	exit(0);
 }
@@ -782,14 +798,23 @@ void Syntax(const char *errmsg /*=NULL*/ )
 /* ##                                                                     ## */
 /* ######################################################################### */
 
+// TODO: Should be reimplemented using a standard function like getopt_long(). 
+//       Unfortunately Windows doesn't provide this, so we might go with
+//         (i) an Windows getopt_long() port
+//        (ii) an adopted BSD getopt_long() implementation
+//             (proven implementation and compatible license)
+//       (iii) Boost.Program_options 
+//             (not worth the dependency just for this)
+
 static void ParseParam(int argc, char *argv[], struct dynamo_param *param)
 {
 	// Local variables
 
-	char cSwitchKey;
+	char *pcOption;
 
 	BOOL bParamIometer = FALSE;
-	BOOL bParamDynamo = FALSE;
+	BOOL bParamDynamo  = FALSE;
+
 	int count = 0;
 	ifstream devfile;
 
@@ -797,117 +822,89 @@ static void ParseParam(int argc, char *argv[], struct dynamo_param *param)
 
 	for (int I = 1; I < argc; I++) {
 
-		// See if the user is requesting syntax help.
+		// NOTE: The following piece is from the Syntax() function:
+		//       =====BEGIN============================================
+		//       // Solaris 2.7 must have the switch (? is used for its own purpose).
+		//       cout << "dynamo \\?" << endl;		
+		//       =====END==============================================
+		//       Given Solaris 7 is pretty old (released in 1998), we
+		//       no longer support this option. If it is nevertheless
+		//       still needed, then add support back into the 
+		//       ParseParam()and Syntax() function.
 
-		if ((argv[I][0] == '?') || (argv[I][1] == '?')) {
+		// Ensure minimal parameter length
+
+		if (strlen(argv[I]) < 2) {
+			Syntax("Options must have a length of at least 2 characters.");
+			return;
+		}
+
+		// Ensure that each parameter has a leading option indicator
+		
+		if (argv[I][0] == '-') {
+			pcOption = &argv[I][1];
+			if (argv[I][1] == '-') {
+				pcOption = &argv[I][2];
+			}
+		}
+		else {
+			Syntax("Options must start with a leading option indicator (\"-\" or \"--\").");
+			return;			
+		}
+		
+		// Process parameters that have no argument
+		// (alphabetic order; short options followed by long options)
+
+		if (strcasecmp(pcOption, "?") == 0) {
 			Syntax();
 			return;
 		}
-		// Ensure that the each parameter has a leading switch
-		if ((argv[I][0] != '-') && (argv[I][0] != '/')) {
-			Syntax("Exactly one letter must follow a switch character.\n"
-			       "Switch characters are \"-\" and \"/\".");
+		
+		if (strcasecmp(pcOption, "H") == 0 || strcasecmp(pcOption, "HELP") == 0) {
+			Syntax();
 			return;
 		}
-
-		if (strlen(argv[I]) != 2) {
-			if (!strcasecmp(&argv[I][1], "force_raw"))
-			{
-				param->disk_control = RAWDISK_VIEW_FULL;
-				continue;
-			} 
-			else
-#if defined(IOMTR_OSFAMILY_WINDOWS) || defined(IOMTR_OS_OSX)
-			if (!strcasecmp(&argv[I][1], "use_rdtsc"))
-			{
-				param->timer_type = TIMER_RDTSC;
-
-				//
-				// Kludge, we don't really need the above param->timer_type since we can 
-				// directly access the TimerType global defines in IoTime.h. This should
-				// be cleaned up better.
-				//
-				if (param->timer_type != TIMER_UNDEFINED && param->timer_type < TIMER_TYPE_MAX)
-				{
-					TimerType = (timer_type) param->timer_type;
-					cout << "Dynamo will attempt to use the TSC/ITC CPU timer." << endl;
-				}
-
-				continue;
-			}
-			else
-#endif
-			{
-				Syntax("Exactly one letter must follow a switch character.\n"
-					   "Switch characters are \"-\" and \"/\".");
-				return;
-			}
-		}
-		// Ensure that each parameter has a value following the switch
-
-		if ((I + 1) >= argc) {
-			Syntax("An additional parameter was expected after the last switch.");
-			return;
-		}
-		// Process the parameters based on the switch
-
-		cSwitchKey = toupper(argv[I][1]);
-		I++;
-
-		switch (cSwitchKey) {
-		case 'I':
-			if (bParamIometer == TRUE) {
-				Syntax("Iometer address was specified more than once.");
-				return;
-			}
-			if (strlen(argv[I]) >= MAX_NETWORK_NAME) {
-				Syntax("Iometer address parameter was too long.");
-				return;
-			}
-			strcpy(param->iometer, argv[I]);
-			bParamIometer = TRUE;
-			break;
-		case 'M':
-			// No check for more then once specification (as we have a default)
-			if (strlen(argv[I]) >= MAX_NETWORK_NAME) {
-				Syntax("Manager network name parameter was too long.");
-				return;
-			}
-			strcpy(param->manager_computer_name, argv[I]);
-			bParamDynamo = TRUE;
-			break;
-		case 'N':
-			if (param->manager_name[0] != '\0') {
-				Syntax("Manager name was specified more than once.");
-				return;
-			}
-			if (strlen(argv[I]) >= MAX_WORKER_NAME) {
-				Syntax("Manager name parameter was too long.");
-				return;
-			}
-			strcpy(param->manager_name, argv[I]);
-			break;
-		case 'P':
-			if (argv[I])
-				param->login_port_number = atoi(argv[I]);
-			if (param->login_port_number < 1 || param->login_port_number > 65535) {
-				Syntax("Port number was out of range.");
-				param->login_port_number = 0;
-				return;
-			}
-			break;
-#if defined(IOMTR_OS_LINUX) || defined(IOMTR_OS_NETWARE) || defined(IOMTR_OS_OSX) || defined(IOMTR_OS_SOLARIS)
-		case 'X':
-			if ((strlen(argv[I]) + strlen(param->manager_exclude_fs)) >= MAX_EXCLUDE_FILESYS) {
-				Syntax("Excluded filesystem list too long.");
-				return;
-			}
-			strcat(param->manager_exclude_fs, argv[I]);
-			strcat(param->manager_exclude_fs, " ");
-			break;
-#endif
+		
 #if defined(IOMTR_OS_LINUX) || defined(IOMTR_OS_OSX) || defined(IOMTR_OS_SOLARIS)
-		case 'D':
+		if (strcasecmp(pcOption, "L") == 0) {
+			do_syslog = TRUE;
+			openlog(NEW_WORKER_EXECUTABLE, 0, LOG_USER);
+			continue;
+		}
+#endif
+
+		// Process parameters that have (an) argument(s)
+		// (alphabetic order; short options followed by long options)
+		
+		I++;
+		if (I >= argc) {
+			Syntax("Options requires one or more argument(s).");
+			return;
+		}
+			
+#if defined(IOMTR_OS_LINUX) || defined(IOMTR_OSFAMILY_WINDOWS)
+		if (strcasecmp(pcOption, "C") == 0) {
+			if (argv[I])
+			{
+				// Lets use sscanf below to support hex input
+				ULONG_PTR tempMask = 0;
+				
+				// Handle both hex and decimal values. Abstract format spec syntax (in iocommon.h)
+				if (argv[I][0] == '0' && argv[I][1] == 'x')
+					sscanf(argv[I],"0x%" IOMTR_FORMAT_SPEC_64BIT "x", &tempMask);
+				else
+					sscanf(argv[I],"%" IOMTR_FORMAT_SPEC_64BIT "d", &tempMask);
+
+#if defined (IOMTR_SETTING_CPU_AFFINITY)
+				param->cpu_affinity = tempMask;
+#endif
+			}
+			continue;
+		}
+#endif
+
+#if defined(IOMTR_OS_LINUX) || defined(IOMTR_OS_OSX) || defined(IOMTR_OS_SOLARIS)			
+		if (strcasecmp(pcOption, "D") == 0) {
 			if (check_dev(argv[I])) {
 				Syntax("Not a valid device.");
 				return;
@@ -917,10 +914,11 @@ static void ParseParam(int argc, char *argv[], struct dynamo_param *param)
 			} else {
 				cout << "Too many targets you want to test, skip " << argv[I] << endl;
 			}
-			break;
-		case 'F':
+			continue;
+		}
+		
+		if (strcasecmp(pcOption, "F") == 0) {
 			char devname[MAX_NAME];
-
 			devfile.open(argv[I]);
 			if (!devfile.is_open()) {
 				Syntax("Can not open device file list.");
@@ -937,51 +935,107 @@ static void ParseParam(int argc, char *argv[], struct dynamo_param *param)
 					cout << "Too many targets you want to test, skip " << devname << endl;
 				}
 			}
-			break;
-		case 'L':
-			do_syslog = TRUE;
-			openlog(NEW_WORKER_EXECUTABLE, 0, LOG_USER);
-			break;
+			continue;
+		}
 #endif
-#if defined(IOMTR_OS_LINUX) || defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)
-		case 'C':
+	
+		if (strcasecmp(pcOption, "I") == 0) {
+			if (bParamIometer == TRUE) {
+				Syntax("Iometer address was specified more than once.");
+				return;
+			}
+			if (strlen(argv[I]) >= MAX_NETWORK_NAME) {
+				Syntax("Iometer address parameter was too long.");
+				return;
+			}
+			strcpy(param->iometer, argv[I]);
+			bParamIometer = TRUE;		
+			continue;
+		}
+		
+		if (strcasecmp(pcOption, "M") == 0) {
+			// No check for more then once specification (as we have a default)
+			if (strlen(argv[I]) >= MAX_NETWORK_NAME) {
+				Syntax("Manager network name parameter was too long.");
+				return;
+			}
+			strcpy(param->manager_computer_name, argv[I]);
+			bParamDynamo = TRUE;
+			continue;
+		}
+		
+		if (strcasecmp(pcOption, "N") == 0) {
+			if (param->manager_name[0] != '\0') {
+				Syntax("Manager name was specified more than once.");
+				return;
+			}
+			if (strlen(argv[I]) >= MAX_WORKER_NAME) {
+				Syntax("Manager name parameter was too long.");
+				return;
+			}
+			strcpy(param->manager_name, argv[I]);
+			continue;
+		}
+		
+		if (strcasecmp(pcOption, "P") == 0) {
 			if (argv[I])
-			{
-				// Lets use sscanf below to support hex input
-				ULONG_PTR tempMask = 0;
-				
-				// Handle both hex and decimal values. Abstract format spec syntax (in iocommon.h)
-				if (argv[I][0] == '0' && argv[I][1] == 'x')
-					sscanf(argv[I],"0x%" IOMTR_FORMAT_SPEC_64BIT "x", &tempMask);
-				else
-					sscanf(argv[I],"%" IOMTR_FORMAT_SPEC_64BIT "d", &tempMask);
-
-#if defined (IOMTR_SETTING_CPU_AFFINITY)
-
-				param->cpu_affinity = tempMask;
-#endif
-
+				param->login_port_number = atoi(argv[I]);
+			if (param->login_port_number < 1 || param->login_port_number > 65535) {
+				Syntax("Port number was out of range.");
+				param->login_port_number = 0;
+				return;
 			}
-			break;
-#endif
+			continue;
+		}
 
-		default:
-			{
-				char tmpary[2] = { cSwitchKey, 0 };
-#if defined(IOMTR_OSFAMILY_NETWARE) || defined(IOMTR_OSFAMILY_UNIX)
-				char temp_array[128];
-
-				strcpy(temp_array, "Unrecognized switch: ");
-				strcat(temp_array, tmpary);
-				strcat(temp_array, ".");
-				Syntax(temp_array);
-#elif defined(IOMTR_OSFAMILY_WINDOWS)
-				Syntax("Unrecognized switch: " + (CString) tmpary + ".");
-#else
-#warning ===> WARNING: You have to do some coding here to get the port done!
-#endif
+#if defined(IOMTR_OS_LINUX) || defined(IOMTR_OSFAMILY_NETWARE) || defined(IOMTR_OS_OSX) || defined(IOMTR_OS_SOLARIS)
+		if (strcasecmp(pcOption, "X") == 0) {
+			if ((strlen(argv[I]) + strlen(param->manager_exclude_fs)) >= MAX_EXCLUDE_FILESYS) {
+				Syntax("Excluded filesystem list too long.");
+				return;
 			}
-			break;
+			strcat(param->manager_exclude_fs, argv[I]);
+			strcat(param->manager_exclude_fs, " ");
+			continue;
+		}
+#endif
+
+		if (strcasecmp(pcOption, "FLAG") == 0) {
+			if (strcasecmp(argv[I], "FORCE_RAW") == 0) {
+				param->disk_control = RAWDISK_VIEW_FULL;
+				continue;
+			}
+#if defined(IOMTR_OSFAMILY_WINDOWS) || defined(IOMTR_OS_OSX)
+			if (strcasecmp(argv[I], "USE_RDTSC") == 0) {
+				param->timer_type = TIMER_RDTSC;
+				//
+				// Kludge, we don't really need the above param->timer_type since we can 
+				// directly access the TimerType global defines in IoTime.h. This should
+				// be cleaned up better.
+				//
+				if (param->timer_type != TIMER_UNDEFINED && param->timer_type < TIMER_TYPE_MAX)
+				{
+					TimerType = (timer_type) param->timer_type;
+					cout << "Dynamo will attempt to use the TSC/ITC CPU timer." << endl;
+				}
+				continue;				
+			}
+#endif
+			// Unknown flag
+			{
+				char temp[256];
+				snprintf(temp, 256, "Flag unknown or not supported on this platform: %s", argv[I]);
+				Syntax(temp);
+				return;
+			}
+		}
+
+		// Unknown parameter
+		{
+			char temp[256];
+			snprintf(temp, 256, "Option unknown or not supported on this platform: %s", argv[I-1]);
+			Syntax(temp);
+			return;
 		}
 	}
 

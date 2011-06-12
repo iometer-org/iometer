@@ -811,21 +811,14 @@ static void ParseParam(int argc, char *argv[], struct dynamo_param *param)
 		}
 
 		if (strlen(argv[I]) != 2) {
-
-#if defined(IOMTR_OSFAMILY_WINDOWS)
-			// TODO for non-Windows
-			//
-			// This should be turned on for all OSes, but I am not sure about the underscode in _stricmp
-			//
-			if (!stricmp(&argv[I][1], "force_raw"))
+			if (!strcasecmp(&argv[I][1], "force_raw"))
 			{
 				param->disk_control = RAWDISK_VIEW_FULL;
 				continue;
 			} 
 			else
-#endif
 #if defined(IOMTR_OSFAMILY_WINDOWS) || defined(IOMTR_OS_OSX)
-			if (!stricmp(&argv[I][1], "use_rdtsc"))
+			if (!strcasecmp(&argv[I][1], "use_rdtsc"))
 			{
 				param->timer_type = TIMER_RDTSC;
 

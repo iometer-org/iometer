@@ -65,12 +65,13 @@
 
 
 #ifdef USE_NEW_DISCOVERY_MECHANISM
+
+
+#if 0	
 //
 // DDK/WLK headers for ANY windows build, necessary for the fancy
 // storage structure referenced.
 //
-
-#if 0	
 // All this is now covered in the winioctl.h -- assuming you have a recent one
 // Uncomment as necessary.
 #include <devioctl.h>
@@ -1229,7 +1230,7 @@ int Report_RawDisks( Target_Spec *disk_spec, int start_count, int view_type )
 			&& (d.spec.disk_info.has_partitions == TRUE))
 		{
 			cout << "Physical disk \'" << d.spec.name << "\' contains partition information." << endl;
-			cout << "Use /force_raw option to display." << endl;
+			cout << "Use --flag FORCE_RAW option to display." << endl;
 			continue;
 		}
 

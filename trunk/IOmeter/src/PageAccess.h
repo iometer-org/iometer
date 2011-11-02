@@ -174,6 +174,8 @@ class CPageAccess:public CPropertyPage {
 	afx_msg void OnKillfocusLAssignedAccess(NMHDR * pNMHDR, LRESULT * pResult);
 	afx_msg void OnClickLGlobalAccess(NMHDR * pNMHDR, LRESULT * pResult);
 	afx_msg void OnClickLAssignedAccess(NMHDR * pNMHDR, LRESULT * pResult);
+	afx_msg void OnKeyDownGlobalAccess(NMHDR * pNMHDR, LRESULT * pResult);
+	afx_msg void OnKeyDownAssignedAccess(NMHDR * pNMHDR, LRESULT * pResult);
 
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

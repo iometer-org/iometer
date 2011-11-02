@@ -548,7 +548,7 @@ typedef unsigned __int8     uint8_t;
 
 #define SMLBUFSIZE   512 
 
-#define MAX_GUI_IOPS   1000000 // million for now?
+#define MAX_GUI_IOPS   ((uint32) -1) // max 32bit value
 
 // ----------------------------------------------------------------------------
 #if defined(IOMTR_OSFAMILY_NETWARE) || defined(IOMTR_OSFAMILY_UNIX)

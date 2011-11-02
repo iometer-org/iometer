@@ -135,421 +135,487 @@ void AccessSpecList::InsertIdleSpec()
 void AccessSpecList::InsertDefaultSpecs()
 {
 	Test_Spec *spec;
+	int index = 0;
+	int iterations = 0;
 
-	// 512 Bytes
+	// Runs through 2 iterations, one for individual access specs, and one for the all-in-one
+	while (iterations < 2)
+	{
+		spec = New(); 
+		index = 0;
 
-	spec = New();
-	_snprintf(spec->name, MAX_NAME, "512 B; 100%% Read; 0%% random");
-	spec->access[0].of_size = 100;
-	spec->access[0].size = 512;
-	spec->access[0].reads = 100;
-	spec->access[0].random = 0;
-	spec->access[0].delay = 0;
-	spec->access[0].burst = 1;
-	spec->access[0].align = 0;
-	spec->access[0].reply = 0;
+		if (iterations == 0) _snprintf(spec->name, MAX_NAME, "512 B; 100%% Read; 0%% random");
+		else 	_snprintf(spec->name, MAX_NAME, "All in one");
 
-	spec = New();
-	_snprintf(spec->name, MAX_NAME, "512 B; 75%% Read; 0%% random");
-	spec->access[0].of_size = 100;
-	spec->access[0].size = 512;
-	spec->access[0].reads = 75;
-	spec->access[0].random = 0;
-	spec->access[0].delay = 0;
-	spec->access[0].burst = 1;
-	spec->access[0].align = 0;
-	spec->access[0].reply = 0;
+		spec->access[index].of_size = 100;
+		spec->access[index].size = 512;
+		spec->access[index].reads = 100;
+		spec->access[index].random = 0;
+		spec->access[index].delay = 0;
+		spec->access[index].burst = 1;
+		spec->access[index].align = 0;
+		spec->access[index].reply = 0;
 
-	spec = New();
-	_snprintf(spec->name, MAX_NAME, "512 B; 50%% Read; 0%% random");
-	spec->access[0].of_size = 100;
-	spec->access[0].size = 512;
-	spec->access[0].reads = 50;
-	spec->access[0].random = 0;
-	spec->access[0].delay = 0;
-	spec->access[0].burst = 1;
-	spec->access[0].align = 0;
-	spec->access[0].reply = 0;
+#ifndef IOMTR_SETTING_NO_OLD_ACCESS_SPEC
 
-	spec = New();
-	_snprintf(spec->name, MAX_NAME, "512 B; 25%% Read; 0%% random");
-	spec->access[0].of_size = 100;
-	spec->access[0].size = 512;
-	spec->access[0].reads = 25;
-	spec->access[0].random = 0;
-	spec->access[0].delay = 0;
-	spec->access[0].burst = 1;
-	spec->access[0].align = 0;
-	spec->access[0].reply = 0;
+		if (iterations == 0) 
+		{ 
+			spec = New(); 
+			_snprintf(spec->name, MAX_NAME, "512 B; 75%% Read; 0%% random");
+		}
+		else index++;
 
-	spec = New();
-	_snprintf(spec->name, MAX_NAME, "512 B; 0%% Read; 0%% random");
-	spec->access[0].of_size = 100;
-	spec->access[0].size = 512;
-	spec->access[0].reads = 0;
-	spec->access[0].random = 0;
-	spec->access[0].delay = 0;
-	spec->access[0].burst = 1;
-	spec->access[0].align = 0;
-	spec->access[0].reply = 0;
+		spec->access[index].of_size = 100;
+		spec->access[index].size = 512;
+		spec->access[index].reads = 75;
+		spec->access[index].random = 0;
+		spec->access[index].delay = 0;
+		spec->access[index].burst = 1;
+		spec->access[index].align = 0;
+		spec->access[index].reply = 0;
+#endif
+		if (iterations == 0) 
+		{
+			spec = New(); 
+			_snprintf(spec->name, MAX_NAME, "512 B; 50%% Read; 0%% random");
+		}
+		else index++;
+
+		spec->access[index].of_size = 100;
+		spec->access[index].size = 512;
+		spec->access[index].reads = 50;
+		spec->access[index].random = 0;
+		spec->access[index].delay = 0;
+		spec->access[index].burst = 1;
+		spec->access[index].align = 0;
+		spec->access[index].reply = 0;
+
+#ifndef IOMTR_SETTING_NO_OLD_ACCESS_SPEC
+		if (iterations == 0) 
+		{
+			spec = New(); 
+			_snprintf(spec->name, MAX_NAME, "512 B; 25%% Read; 0%% random");
+		}
+		else index++;
+
+		spec->access[index].of_size = 100;
+		spec->access[index].size = 512;
+		spec->access[index].reads = 25;
+		spec->access[index].random = 0;
+		spec->access[index].delay = 0;
+		spec->access[index].burst = 1;
+		spec->access[index].align = 0;
+		spec->access[index].reply = 0;
+#endif
+
+		if (iterations == 0) 
+		{
+			spec = New(); 
+			_snprintf(spec->name, MAX_NAME, "512 B; 0%% Read; 0%% random");
+		}
+		else index++;
+
+		spec->access[index].of_size = 100;
+		spec->access[index].size = 512;
+		spec->access[index].reads = 0;
+		spec->access[index].random = 0;
+		spec->access[index].delay = 0;
+		spec->access[index].burst = 1;
+		spec->access[index].align = 0;
+		spec->access[index].reply = 0;
 
 	// 4096 Bytes / 4 Kilo Bytes
 
-	spec = New();
-	_snprintf(spec->name, MAX_NAME, "4 KiB; 100%% Read; 0%% random");
-	spec->access[0].of_size = 100;
-	spec->access[0].size = 4096;
-	spec->access[0].reads = 100;
-	spec->access[0].random = 0;
-	spec->access[0].delay = 0;
-	spec->access[0].burst = 1;
-	spec->access[0].align = 0;
-	spec->access[0].reply = 0;
+		if (iterations == 0) 
+		{ 
+			spec = New(); 
+			_snprintf(spec->name, MAX_NAME, "4 KiB; 100%% Read; 0%% random");
+		}
+		else index++;
 
-	spec = New();
-	_snprintf(spec->name, MAX_NAME, "4 KiB; 75%% Read; 0%% random");
-	spec->access[0].of_size = 100;
-	spec->access[0].size = 4096;
-	spec->access[0].reads = 75;
-	spec->access[0].random = 0;
-	spec->access[0].delay = 0;
-	spec->access[0].burst = 1;
-	spec->access[0].align = 0;
-	spec->access[0].reply = 0;
+		spec->access[index].of_size = 100;
+		spec->access[index].size = 4096;
+		spec->access[index].reads = 100;
+		spec->access[index].random = 0;
+		spec->access[index].delay = 0;
+		spec->access[index].burst = 1;
+		spec->access[index].align = 0;
+		spec->access[index].reply = 0;
 
-	spec = New();
-	_snprintf(spec->name, MAX_NAME, "4 KiB; 50%% Read; 0%% random");
-	spec->access[0].of_size = 100;
-	spec->access[0].size = 4096;
-	spec->access[0].reads = 50;
-	spec->access[0].random = 0;
-	spec->access[0].delay = 0;
-	spec->access[0].burst = 1;
-	spec->access[0].align = 0;
-	spec->access[0].reply = 0;
+#ifndef IOMTR_SETTING_NO_OLD_ACCESS_SPEC
 
-	spec = New();
-	_snprintf(spec->name, MAX_NAME, "4 KiB; 25%% Read; 0%% random");
-	spec->access[0].of_size = 100;
-	spec->access[0].size = 4096;
-	spec->access[0].reads = 25;
-	spec->access[0].random = 0;
-	spec->access[0].delay = 0;
-	spec->access[0].burst = 1;
-	spec->access[0].align = 0;
-	spec->access[0].reply = 0;
+		if (iterations == 0) 
+		{ 
+			spec = New(); 
+			_snprintf(spec->name, MAX_NAME, "4 KiB; 75%% Read; 0%% random");
+		}
+		else index++;
 
-	spec = New();
-	_snprintf(spec->name, MAX_NAME, "4 KiB; 0%% Read; 0%% random");
-	spec->access[0].of_size = 100;
-	spec->access[0].size = 4096;
-	spec->access[0].reads = 0;
-	spec->access[0].random = 0;
-	spec->access[0].delay = 0;
-	spec->access[0].burst = 1;
-	spec->access[0].align = 0;
-	spec->access[0].reply = 0;
+		spec->access[index].of_size = 100;
+		spec->access[index].size = 4096;
+		spec->access[index].reads = 75;
+		spec->access[index].random = 0;
+		spec->access[index].delay = 0;
+		spec->access[index].burst = 1;
+		spec->access[index].align = 0;
+		spec->access[index].reply = 0;
+#endif
 
-	// 16384 Bytes / 16 Kilo Bytes
+		if (iterations == 0) 
+		{ 
+			spec = New(); 
+			_snprintf(spec->name, MAX_NAME, "4 KiB; 50%% Read; 0%% random");
+		}
 
-	spec = New();
-	_snprintf(spec->name, MAX_NAME, "16 KiB; 100%% Read; 0%% random");
-	spec->access[0].of_size = 100;
-	spec->access[0].size = 16384;
-	spec->access[0].reads = 100;
-	spec->access[0].random = 0;
-	spec->access[0].delay = 0;
-	spec->access[0].burst = 1;
-	spec->access[0].align = 0;
-	spec->access[0].reply = 0;
+		spec->access[index].of_size = 100;
+		spec->access[index].size = 4096;
+		spec->access[index].reads = 50;
+		spec->access[index].random = 0;
+		spec->access[index].delay = 0;
+		spec->access[index].burst = 1;
+		spec->access[index].align = 0;
+		spec->access[index].reply = 0;
 
-	spec = New();
-	_snprintf(spec->name, MAX_NAME, "16 KiB; 75%% Read; 0%% random");
-	spec->access[0].of_size = 100;
-	spec->access[0].size = 16384;
-	spec->access[0].reads = 75;
-	spec->access[0].random = 0;
-	spec->access[0].delay = 0;
-	spec->access[0].burst = 1;
-	spec->access[0].align = 0;
-	spec->access[0].reply = 0;
+#ifndef IOMTR_SETTING_NO_OLD_ACCESS_SPEC
 
-	spec = New();
-	_snprintf(spec->name, MAX_NAME, "16 KiB; 50%% Read; 0%% random");
-	spec->access[0].of_size = 100;
-	spec->access[0].size = 16384;
-	spec->access[0].reads = 50;
-	spec->access[0].random = 0;
-	spec->access[0].delay = 0;
-	spec->access[0].burst = 1;
-	spec->access[0].align = 0;
-	spec->access[0].reply = 0;
+		if (iterations == 0) 
+		{ 
+			spec = New(); 
+			_snprintf(spec->name, MAX_NAME, "4 KiB; 25%% Read; 0%% random");
+		}
 
-	spec = New();
-	_snprintf(spec->name, MAX_NAME, "16 KiB; 25%% Read; 0%% random");
-	spec->access[0].of_size = 100;
-	spec->access[0].size = 16384;
-	spec->access[0].reads = 25;
-	spec->access[0].random = 0;
-	spec->access[0].delay = 0;
-	spec->access[0].burst = 1;
-	spec->access[0].align = 0;
-	spec->access[0].reply = 0;
+		spec->access[index].of_size = 100;
+		spec->access[index].size = 4096;
+		spec->access[index].reads = 25;
+		spec->access[index].random = 0;
+		spec->access[index].delay = 0;
+		spec->access[index].burst = 1;
+		spec->access[index].align = 0;
+		spec->access[index].reply = 0;
+#endif
 
-	spec = New();
-	_snprintf(spec->name, MAX_NAME, "16 KiB; 0%% Read; 0%% random");
-	spec->access[0].of_size = 100;
-	spec->access[0].size = 16384;
-	spec->access[0].reads = 0;
-	spec->access[0].random = 0;
-	spec->access[0].delay = 0;
-	spec->access[0].burst = 1;
-	spec->access[0].align = 0;
-	spec->access[0].reply = 0;
+		if (iterations == 0) 
+		{ 
+			spec = New(); 
+			_snprintf(spec->name, MAX_NAME, "4 KiB; 0%% Read; 0%% random");
+		}
+
+		spec->access[index].of_size = 100;
+		spec->access[index].size = 4096;
+		spec->access[index].reads = 0;
+		spec->access[index].random = 0;
+		spec->access[index].delay = 0;
+		spec->access[index].burst = 1;
+		spec->access[index].align = 0;
+		spec->access[index].reply = 0;
+
+#ifdef IOMTR_SETTING_USE_NEW_ACCESS_SPEC
+	// 4096 Bytes / 4 Kilo Bytes
+
+		if (iterations == 0) 
+		{ 
+			spec = New(); 
+			_snprintf(spec->name, MAX_NAME, "4 KiB aligned; 100%% Read; 100%% random");
+		}
+
+		spec->access[index].of_size = 100;
+		spec->access[index].size = 4096;
+		spec->access[index].reads = 100;
+		spec->access[index].random = 100;
+		spec->access[index].delay = 0;
+		spec->access[index].burst = 1;
+		spec->access[index].align = 4096;
+		spec->access[index].reply = 0;
+
+		if (iterations == 0) 
+		{ 
+			spec = New(); 
+			_snprintf(spec->name, MAX_NAME, "4 KiB aligned; 50%% Read; 100%% random");
+		}
+
+		spec->access[index].of_size = 100;
+		spec->access[index].size = 4096;
+		spec->access[index].reads = 50;
+		spec->access[index].random = 100;
+		spec->access[index].delay = 0;
+		spec->access[index].burst = 1;
+		spec->access[index].align = 4096;
+		spec->access[index].reply = 0;
+
+		if (iterations == 0) 
+		{ 
+			spec = New(); 
+			_snprintf(spec->name, MAX_NAME, "4 KiB aligned; 0%% Read; 100%% random");
+		}
+
+		spec->access[index].of_size = 100;
+		spec->access[index].size = 4096;
+		spec->access[index].reads = 0;
+		spec->access[index].random = 100;
+		spec->access[index].delay = 0;
+		spec->access[index].burst = 1;
+		spec->access[index].align = 4096;
+		spec->access[index].reply = 0;
+#endif
+	
+		// 16384 Bytes / 16 Kilo Bytes
+
+		if (iterations == 0) 
+		{ 
+			spec = New(); 
+			_snprintf(spec->name, MAX_NAME, "16 KiB; 100%% Read; 0%% random");
+		}
+
+		spec->access[index].of_size = 100;
+		spec->access[index].size = 16384;
+		spec->access[index].reads = 100;
+		spec->access[index].random = 0;
+		spec->access[index].delay = 0;
+		spec->access[index].burst = 1;
+		spec->access[index].align = 0;
+		spec->access[index].reply = 0;
+
+#ifndef IOMTR_SETTING_NO_OLD_ACCESS_SPEC
+		
+		if (iterations == 0) 
+		{ 
+			spec = New(); 
+			_snprintf(spec->name, MAX_NAME, "16 KiB; 75%% Read; 0%% random");
+		}
+
+		spec->access[index].of_size = 100;
+		spec->access[index].size = 16384;
+		spec->access[index].reads = 75;
+		spec->access[index].random = 0;
+		spec->access[index].delay = 0;
+		spec->access[index].burst = 1;
+		spec->access[index].align = 0;
+		spec->access[index].reply = 0;
+#endif
+
+		if (iterations == 0) 
+		{ 
+			spec = New(); 
+			_snprintf(spec->name, MAX_NAME, "16 KiB; 50%% Read; 0%% random");
+		}
+
+		spec->access[index].of_size = 100;
+		spec->access[index].size = 16384;
+		spec->access[index].reads = 50;
+		spec->access[index].random = 0;
+		spec->access[index].delay = 0;
+		spec->access[index].burst = 1;
+		spec->access[index].align = 0;
+		spec->access[index].reply = 0;
+
+#ifndef IOMTR_SETTING_NO_OLD_ACCESS_SPEC
+
+		if (iterations == 0) 
+		{ 
+			spec = New(); 
+			_snprintf(spec->name, MAX_NAME, "16 KiB; 25%% Read; 0%% random");
+		}
+
+		spec->access[index].of_size = 100;
+		spec->access[index].size = 16384;
+		spec->access[index].reads = 25;
+		spec->access[index].random = 0;
+		spec->access[index].delay = 0;
+		spec->access[index].burst = 1;
+		spec->access[index].align = 0;
+		spec->access[index].reply = 0;
+#endif
+
+		if (iterations == 0) 
+		{ 
+			spec = New(); 
+			_snprintf(spec->name, MAX_NAME, "16 KiB; 0%% Read; 0%% random");
+		}
+
+		spec->access[index].of_size = 100;
+		spec->access[index].size = 16384;
+		spec->access[index].reads = 0;
+		spec->access[index].random = 0;
+		spec->access[index].delay = 0;
+		spec->access[index].burst = 1;
+		spec->access[index].align = 0;
+		spec->access[index].reply = 0;
 
 	// 32768 Bytes / 32 Kilo Bytes
+#ifndef IOMTR_SETTING_NO_OLD_ACCESS_SPEC
 
-	spec = New();
-	_snprintf(spec->name, MAX_NAME, "32 KiB; 100%% Read; 0%% random");
-	spec->access[0].of_size = 100;
-	spec->access[0].size = 32768;
-	spec->access[0].reads = 100;
-	spec->access[0].random = 0;
-	spec->access[0].delay = 0;
-	spec->access[0].burst = 1;
-	spec->access[0].align = 0;
-	spec->access[0].reply = 0;
+		if (iterations == 0) 
+		{ 
+			spec = New(); 
+			_snprintf(spec->name, MAX_NAME, "32 KiB; 100%% Read; 0%% random");
+		}
 
-	spec = New();
-	_snprintf(spec->name, MAX_NAME, "32 KiB; 75%% Read; 0%% random");
-	spec->access[0].of_size = 100;
-	spec->access[0].size = 32768;
-	spec->access[0].reads = 75;
-	spec->access[0].random = 0;
-	spec->access[0].delay = 0;
-	spec->access[0].burst = 1;
-	spec->access[0].align = 0;
-	spec->access[0].reply = 0;
+		spec->access[index].of_size = 100;
+		spec->access[index].size = 32768;
+		spec->access[index].reads = 100;
+		spec->access[index].random = 0;
+		spec->access[index].delay = 0;
+		spec->access[index].burst = 1;
+		spec->access[index].align = 0;
+		spec->access[index].reply = 0;
 
-	spec = New();
-	_snprintf(spec->name, MAX_NAME, "32 KiB; 50%% Read; 0%% random");
-	spec->access[0].of_size = 100;
-	spec->access[0].size = 32768;
-	spec->access[0].reads = 50;
-	spec->access[0].random = 0;
-	spec->access[0].delay = 0;
-	spec->access[0].burst = 1;
-	spec->access[0].align = 0;
-	spec->access[0].reply = 0;
+		if (iterations == 0) 
+		{ 
+			spec = New(); 
+			_snprintf(spec->name, MAX_NAME, "32 KiB; 75%% Read; 0%% random");
+		}
 
-	spec = New();
-	_snprintf(spec->name, MAX_NAME, "32 KiB; 25%% Read; 0%% random");
-	spec->access[0].of_size = 100;
-	spec->access[0].size = 32768;
-	spec->access[0].reads = 25;
-	spec->access[0].random = 0;
-	spec->access[0].delay = 0;
-	spec->access[0].burst = 1;
-	spec->access[0].align = 0;
-	spec->access[0].reply = 0;
+		spec->access[index].of_size = 100;
+		spec->access[index].size = 32768;
+		spec->access[index].reads = 75;
+		spec->access[index].random = 0;
+		spec->access[index].delay = 0;
+		spec->access[index].burst = 1;
+		spec->access[index].align = 0;
+		spec->access[index].reply = 0;
 
-	spec = New();
-	_snprintf(spec->name, MAX_NAME, "32 KiB; 0%% Read; 0%% random");
-	spec->access[0].of_size = 100;
-	spec->access[0].size = 32768;
-	spec->access[0].reads = 0;
-	spec->access[0].random = 0;
-	spec->access[0].delay = 0;
-	spec->access[0].burst = 1;
-	spec->access[0].align = 0;
-	spec->access[0].reply = 0;
+		if (iterations == 0) 
+		{ 
+			spec = New(); 
+			_snprintf(spec->name, MAX_NAME, "32 KiB; 50%% Read; 0%% random");
+		}
 
-	// Brings all specifications into one
+		spec->access[index].of_size = 100;
+		spec->access[index].size = 32768;
+		spec->access[index].reads = 50;
+		spec->access[index].random = 0;
+		spec->access[index].delay = 0;
+		spec->access[index].burst = 1;
+		spec->access[index].align = 0;
+		spec->access[index].reply = 0;
 
-	spec = New();
-	_snprintf(spec->name, MAX_NAME, "All in one");
+		if (iterations == 0) 
+		{ 
+			spec = New(); 
+			_snprintf(spec->name, MAX_NAME, "32 KiB; 25%% Read; 0%% random");
+		}
 
-	spec->access[0].of_size = 5;
-	spec->access[0].size = 512;
-	spec->access[0].reads = 100;
-	spec->access[0].random = 0;
-	spec->access[0].delay = 0;
-	spec->access[0].burst = 1;
-	spec->access[0].align = 0;
-	spec->access[0].reply = 0;
+		spec->access[index].of_size = 100;
+		spec->access[index].size = 32768;
+		spec->access[index].reads = 25;
+		spec->access[index].random = 0;
+		spec->access[index].delay = 0;
+		spec->access[index].burst = 1;
+		spec->access[index].align = 0;
+		spec->access[index].reply = 0;
 
-	spec->access[1].of_size = 5;
-	spec->access[1].size = 512;
-	spec->access[1].reads = 75;
-	spec->access[1].random = 0;
-	spec->access[1].delay = 0;
-	spec->access[1].burst = 1;
-	spec->access[1].align = 0;
-	spec->access[1].reply = 0;
+		if (iterations == 0) 
+		{ 
+			spec = New(); 
+			_snprintf(spec->name, MAX_NAME, "32 KiB; 0%% Read; 0%% random");
+		}
 
-	spec->access[2].of_size = 5;
-	spec->access[2].size = 512;
-	spec->access[2].reads = 50;
-	spec->access[2].random = 0;
-	spec->access[2].delay = 0;
-	spec->access[2].burst = 1;
-	spec->access[2].align = 0;
-	spec->access[2].reply = 0;
+		spec->access[index].of_size = 100;
+		spec->access[index].size = 32768;
+		spec->access[index].reads = 0;
+		spec->access[index].random = 0;
+		spec->access[index].delay = 0;
+		spec->access[index].burst = 1;
+		spec->access[index].align = 0;
+		spec->access[index].reply = 0;
+#endif
 
-	spec->access[3].of_size = 5;
-	spec->access[3].size = 512;
-	spec->access[3].reads = 25;
-	spec->access[3].random = 0;
-	spec->access[3].delay = 0;
-	spec->access[3].burst = 1;
-	spec->access[3].align = 0;
-	spec->access[3].reply = 0;
+#ifdef IOMTR_SETTING_USE_NEW_ACCESS_SPEC
 
-	spec->access[4].of_size = 5;
-	spec->access[4].size = 512;
-	spec->access[4].reads = 0;
-	spec->access[4].random = 0;
-	spec->access[4].delay = 0;
-	spec->access[4].burst = 1;
-	spec->access[4].align = 0;
-	spec->access[4].reply = 0;
+		if (iterations == 0) 
+		{ 
+			spec = New(); 
+			_snprintf(spec->name, MAX_NAME, "64 KiB; 100%% Read; 0%% random");
+		}
 
-	spec->access[5].of_size = 5;
-	spec->access[5].size = 4096;
-	spec->access[5].reads = 100;
-	spec->access[5].random = 0;
-	spec->access[5].delay = 0;
-	spec->access[5].burst = 1;
-	spec->access[5].align = 0;
-	spec->access[5].reply = 0;
+		spec->access[index].of_size = 100;
+		spec->access[index].size = 65536;
+		spec->access[index].reads = 100;
+		spec->access[index].random = 0;
+		spec->access[index].delay = 0;
+		spec->access[index].burst = 1;
+		spec->access[index].align = 0;
+		spec->access[index].reply = 0;
 
-	spec->access[6].of_size = 5;
-	spec->access[6].size = 4096;
-	spec->access[6].reads = 75;
-	spec->access[6].random = 0;
-	spec->access[6].delay = 0;
-	spec->access[6].burst = 1;
-	spec->access[6].align = 0;
-	spec->access[6].reply = 0;
+		if (iterations == 0) 
+		{ 
+			spec = New(); 
+			_snprintf(spec->name, MAX_NAME, "64 KiB; 50%% Read; 0%% random");
+		}
 
-	spec->access[7].of_size = 5;
-	spec->access[7].size = 4096;
-	spec->access[7].reads = 50;
-	spec->access[7].random = 0;
-	spec->access[7].delay = 0;
-	spec->access[7].burst = 1;
-	spec->access[7].align = 0;
-	spec->access[7].reply = 0;
+		spec->access[index].of_size = 100;
+		spec->access[index].size = 65536;
+		spec->access[index].reads = 50;
+		spec->access[index].random = 0;
+		spec->access[index].delay = 0;
+		spec->access[index].burst = 1;
+		spec->access[index].align = 0;
+		spec->access[index].reply = 0;
 
-	spec->access[8].of_size = 5;
-	spec->access[8].size = 4096;
-	spec->access[8].reads = 25;
-	spec->access[8].random = 0;
-	spec->access[8].delay = 0;
-	spec->access[8].burst = 1;
-	spec->access[8].align = 0;
-	spec->access[8].reply = 0;
+		if (iterations == 0) 
+		{ 
+			spec = New(); 
+			_snprintf(spec->name, MAX_NAME, "64 KiB; 0%% Read; 0%% random");
+		}
 
-	spec->access[9].of_size = 5;
-	spec->access[9].size = 4096;
-	spec->access[9].reads = 0;
-	spec->access[9].random = 0;
-	spec->access[9].delay = 0;
-	spec->access[9].burst = 1;
-	spec->access[9].align = 0;
-	spec->access[9].reply = 0;
+		spec->access[index].of_size = 100;
+		spec->access[index].size = 65536;
+		spec->access[index].reads = 0;
+		spec->access[index].random = 0;
+		spec->access[index].delay = 0;
+		spec->access[index].burst = 1;
+		spec->access[index].align = 0;
+		spec->access[index].reply = 0;
 
-	spec->access[10].of_size = 5;
-	spec->access[10].size = 16384;
-	spec->access[10].reads = 100;
-	spec->access[10].random = 0;
-	spec->access[10].delay = 0;
-	spec->access[10].burst = 1;
-	spec->access[10].align = 0;
-	spec->access[10].reply = 0;
+		if (iterations == 0) 
+		{ 
+			spec = New(); 
+			_snprintf(spec->name, MAX_NAME, "256 KiB; 100%% Read; 0%% random");
+		}
 
-	spec->access[11].of_size = 5;
-	spec->access[11].size = 16384;
-	spec->access[11].reads = 75;
-	spec->access[11].random = 0;
-	spec->access[11].delay = 0;
-	spec->access[11].burst = 1;
-	spec->access[11].align = 0;
-	spec->access[11].reply = 0;
+		spec->access[index].of_size = 100;
+		spec->access[index].size = 262144;
+		spec->access[index].reads = 100;
+		spec->access[index].random = 0;
+		spec->access[index].delay = 0;
+		spec->access[index].burst = 1;
+		spec->access[index].align = 0;
+		spec->access[index].reply = 0;
 
-	spec->access[12].of_size = 5;
-	spec->access[12].size = 16384;
-	spec->access[12].reads = 50;
-	spec->access[12].random = 0;
-	spec->access[12].delay = 0;
-	spec->access[12].burst = 1;
-	spec->access[12].align = 0;
-	spec->access[12].reply = 0;
+		if (iterations == 0) 
+		{ 
+			spec = New(); 
+			_snprintf(spec->name, MAX_NAME, "256 KiB; 50%% Read; 0%% random");
+		}
 
-	spec->access[13].of_size = 5;
-	spec->access[13].size = 16384;
-	spec->access[13].reads = 25;
-	spec->access[13].random = 0;
-	spec->access[13].delay = 0;
-	spec->access[13].burst = 1;
-	spec->access[13].align = 0;
-	spec->access[13].reply = 0;
+		spec->access[index].of_size = 100;
+		spec->access[index].size = 262144;
+		spec->access[index].reads = 50;
+		spec->access[index].random = 0;
+		spec->access[index].delay = 0;
+		spec->access[index].burst = 1;
+		spec->access[index].align = 0;
+		spec->access[index].reply = 0;
 
-	spec->access[14].of_size = 5;
-	spec->access[14].size = 16384;
-	spec->access[14].reads = 0;
-	spec->access[14].random = 0;
-	spec->access[14].delay = 0;
-	spec->access[14].burst = 1;
-	spec->access[14].align = 0;
-	spec->access[14].reply = 0;
+		if (iterations == 0) 
+		{ 
+			spec = New(); 
+			_snprintf(spec->name, MAX_NAME, "256 KiB; 0%% Read; 0%% random");
+		}
 
-	spec->access[15].of_size = 5;
-	spec->access[15].size = 32768;
-	spec->access[15].reads = 100;
-	spec->access[15].random = 0;
-	spec->access[15].delay = 0;
-	spec->access[15].burst = 1;
-	spec->access[15].align = 0;
-	spec->access[15].reply = 0;
+		spec->access[index].of_size = 100;
+		spec->access[index].size = 262144;
+		spec->access[index].reads = 0;
+		spec->access[index].random = 0;
+		spec->access[index].delay = 0;
+		spec->access[index].burst = 1;
+		spec->access[index].align = 0;
+		spec->access[index].reply = 0;
 
-	spec->access[16].of_size = 5;
-	spec->access[16].size = 32768;
-	spec->access[16].reads = 75;
-	spec->access[16].random = 0;
-	spec->access[16].delay = 0;
-	spec->access[16].burst = 1;
-	spec->access[16].align = 0;
-	spec->access[16].reply = 0;
-
-	spec->access[17].of_size = 5;
-	spec->access[17].size = 32768;
-	spec->access[17].reads = 50;
-	spec->access[17].random = 0;
-	spec->access[17].delay = 0;
-	spec->access[17].burst = 1;
-	spec->access[17].align = 0;
-	spec->access[17].reply = 0;
-
-	spec->access[18].of_size = 5;
-	spec->access[18].size = 32768;
-	spec->access[18].reads = 25;
-	spec->access[18].random = 0;
-	spec->access[18].delay = 0;
-	spec->access[18].burst = 1;
-	spec->access[18].align = 0;
-	spec->access[18].reply = 0;
-
-	spec->access[19].of_size = 5;
-	spec->access[19].size = 32768;
-	spec->access[19].reads = 0;
-	spec->access[19].random = 0;
-	spec->access[19].delay = 0;
-	spec->access[19].burst = 1;
-	spec->access[19].align = 0;
-	spec->access[19].reply = 0;
-
-	spec->access[20].of_size = IOERROR;
+#endif  // #ifdef IOMTR_SETTING_USE_NEW_ACCESS_SPEC
+	
+		iterations++;
+	} // while
 }
 
 //

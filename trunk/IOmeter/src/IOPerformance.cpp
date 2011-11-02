@@ -102,6 +102,8 @@
 #include <sys/processor.h>
 #endif
 
+#define PERF_ERROR_THRESHOLD 10 // number of errors before certain non-critical error messages get displayed
+
 //
 // Initializing system performance data.
 //
@@ -1227,6 +1229,8 @@ double Performance::Calculate_Stat(_int64 start_value, _int64 end_value, DWORD c
 {
 	double count_difference;	// Difference between two snapshots of a counter.
 	double perf_stat;	// Calculated performance statistic, such as % utilization.
+	static int threshold1 = 0;
+	static int threshold2 = 0;
 
 	// Verify valid performance time.
 	if (perf_time <= 0) {
@@ -1353,13 +1357,15 @@ double Performance::Calculate_Stat(_int64 start_value, _int64 end_value, DWORD c
 		// Verify valid values.  
 		// Do not print an error message unless it's more than trivially invalid.
 		if (perf_stat < (double)0.0) {
-			if (perf_stat < (double)-0.001) {
-				cout << "*** Performance counter percentage is less than zero: " << perf_stat << endl;
+			if (perf_stat < (double)-0.001 && ++threshold1 == PERF_ERROR_THRESHOLD) {
+				cout << "*** Performance counter percentage is less than zero: " << perf_stat << " (repeats " << threshold1 << " times)" << endl;
+				threshold1 = 0;
 			}
 			return (double)0.0;
 		} else if (perf_stat > (double)1.0) {
-			if (perf_stat > (double)1.001) {
-				cout << "*** Performance counter percentage is greater than 1: " << perf_stat << endl;
+			if (perf_stat > (double)1.001 && ++threshold2 == PERF_ERROR_THRESHOLD) {
+				cout << "*** Performance counter percentage is greater than 1: " << perf_stat << " (repeats " << threshold1 << " times)" << endl;
+				threshold2 = 0;
 			}
 			return (double)100.0;
 		}

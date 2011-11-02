@@ -573,9 +573,8 @@ int CDECL main(int argc, char *argv[])
 
 		if (!bReturned)
 		{
-			cout << "Dynamo not running as an administrators." << endl;
+			cout << "Dynamo not running as an administrator." << endl;
 			cout << "       All available disks might not be reported " << endl;
-			//cout << "       Cannot get TCP statistics from the kernel " << endl;
 			cout << endl;
 		} 
 		FreeSid(AdminGroup); 
@@ -1003,6 +1002,7 @@ static void ParseParam(int argc, char *argv[], struct dynamo_param *param)
 		if (strcasecmp(pcOption, "FLAG") == 0) {
 			if (strcasecmp(argv[I], "FORCE_RAW") == 0) {
 				param->disk_control = RAWDISK_VIEW_FULL;
+				cout << "Dynamo will display raw disks with valid partitions." << endl;
 				continue;
 			}
 #if defined(IOMTR_OSFAMILY_WINDOWS) || defined(IOMTR_OS_OSX)
@@ -1016,7 +1016,7 @@ static void ParseParam(int argc, char *argv[], struct dynamo_param *param)
 				if (param->timer_type != TIMER_UNDEFINED && param->timer_type < TIMER_TYPE_MAX)
 				{
 					TimerType = (timer_type) param->timer_type;
-					cout << "Dynamo will attempt to use the TSC/ITC CPU timer." << endl;
+					cout << "Dynamo will attempt to use the processor's high precision timer." << endl;
 				}
 				continue;				
 			}
@@ -1044,6 +1044,8 @@ static void ParseParam(int argc, char *argv[], struct dynamo_param *param)
 	if (bParamIometer && !bParamDynamo) {
 		Syntax("Specifying the Iometer address, the Manager network name parameter becomes mandatory.");
 	}
+	
+	cout << endl; // add one more newline.
 
 	return;
 }

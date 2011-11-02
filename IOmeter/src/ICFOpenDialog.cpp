@@ -101,8 +101,12 @@ IMPLEMENT_DYNAMIC(CICFOpenDialog, CFileDialog)
 	m_ofn.lpstrTitle = buf;
 
 	m_ofn.Flags |= OFN_ENABLETEMPLATE | OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
-
+	
 	m_ofn.lpTemplateName = MAKEINTRESOURCE(IDD_FILEOPEN_OPTS);
+
+	// This is key to getting the templates working properly and secondary opens to work at all?!
+	m_bVistaStyle = FALSE;
+	
 	//{{AFX_DATA_INIT(CICFOpenDialog)
 	isCkTestSetup = TRUE;
 	isCkResultsDisplay = TRUE;
@@ -268,6 +272,7 @@ void CICFOpenDialog::OnPaint()
 {
 	CPaintDC dc(this);	// device context for painting
 
+
 	CRect MgrWkr;
 	CRect AsgnAspec;
 	CRect AsgnTargets;
@@ -301,4 +306,5 @@ void CICFOpenDialog::OnPaint()
 	dc.LineTo(x2, y2);	// Horiz line from the first line to the AsgnAspec checkbox
 	dc.MoveTo(x1, y3);
 	dc.LineTo(x2, y3);	// Horiz line from the first line to the AsgnTargets checkbox
+
 }

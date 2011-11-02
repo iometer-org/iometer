@@ -103,6 +103,10 @@ IMPLEMENT_DYNAMIC(CICFSaveDialog, CFileDialog)
 	m_ofn.Flags |= OFN_ENABLETEMPLATE | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
 
 	m_ofn.lpTemplateName = MAKEINTRESOURCE(IDD_FILESAVE_OPTS);
+
+	// This is key to getting the templates working properly and secondary opens to work at all?!
+	m_bVistaStyle = FALSE;
+
 	//{{AFX_DATA_INIT(CICFSaveDialog)
 	isCkTestSetup = TRUE;
 	isCkResultsDisplay = TRUE;

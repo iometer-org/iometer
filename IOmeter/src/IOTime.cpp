@@ -510,8 +510,8 @@ uint64_t rdtsc()
 // 4. Define a {timer_name}() and {timer_name}_freq() functions for a desired timer 
 //    e.g. rtc() rtc_freq(), rdtsc_freq is the only exception -- see below
 // 5. oshpc() and oshpc_freq() are the minimum ones that need be defined, however they should
-//    not rely on rdtsc. i.e. use another type of timer. If rdtsc is not really using the real
-//    rdtsc, do not even define rdtsc and set the default timer_type accordingly
+//    not rely on rdtsc. i.e. use another type of timer. If your rdtsc() is not really using the real
+//    rdtsc, do not even define rdtsc() and set the default timer_type accordingly
 // 6. rdtsc() becomes an optional timer, and rdtsc_freq (below) would calculate its frequency 
 //
 // Note, the function naming convention move to timer_value was done because some
@@ -525,13 +525,13 @@ uint64_t rdtsc()
 //
 // The main problem is that TSC/ITC frequency may not match the internal 
 // processor clock, so we derive it here based on another known counter--
-// oshpc() in this case. The default counter required for all this to work.
-// While doing that, we can also detect speed stepping but not 100% reliably.
+// oshpc() -- the default counter required for all this to work.
+// While doing that, we can also detect speed stepping but maybe not 100% reliably.
 //
 // Note: -assumes we are running on one processor; caller should affinitize. 
 //       -oshpc() is used to measure the TSC/ITC since we know its period. 
-//		 -falls back to oshpc_freq() in case we find speed stepping.
-//		 -abstracted for non-windows OS (at least those that support rdtsc)
+//		 -falls back to oshpc() counter in case we find speed stepping.
+//		 -abstracted for non-windows OS 
 
 int64_t rdtsc_freq()
 {

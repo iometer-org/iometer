@@ -253,8 +253,8 @@ class CPageDisplay:public CPropertyPage {
 	}
 
 	void OnBResultType(int which_button);
-	unsigned int GetMaxRange(Results * results, int result_type);
-	unsigned int ReportMaxRange(double max_range_needed);
+	double GetMaxRange(Results * results, int result_type);
+	double ReportMaxRange(double max_range_needed);
 
 	// Returns the appropriate result value in a double and a CString
 	BOOL GetDisplayData(Results * results, int result_type, double *result_value, CString * result_text);

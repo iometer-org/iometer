@@ -501,13 +501,13 @@ void CMeterCtrl::OnPaint()
 	dc.SelectObject(&scale_font);
 	dc.SetBkColor(0x00000000);
 	dc.SetTextColor(0x00FFFFFF);
-	dc.DrawText(scale_text, -1, &scale_box, DT_CENTER);
+	dc.DrawText(scale_text, scale_text.GetLength(), &scale_box, DT_CENTER);
 
 	// Add the labels and tick marks.
 	dc.SelectObject(&label_font);
 	dc.SelectObject(&marker_pen);
 	for (i = 0; i < label_count; i++) {
-		dc.DrawText(label[i], -1, &label_box[i], DT_CENTER | DT_NOCLIP);
+		dc.DrawText(label[i], label[i].GetLength(), &label_box[i], DT_CENTER | DT_NOCLIP);
 		dc.MoveTo(tick_mark[i][0]);
 		dc.LineTo(tick_mark[i][1]);
 	}

@@ -140,7 +140,9 @@ BEGIN_MESSAGE_MAP(CPageAccess, CPropertyPage)
     ON_NOTIFY(NM_KILLFOCUS, LGlobalAccess, OnKillfocusLGlobalAccess)
     ON_NOTIFY(NM_KILLFOCUS, LAssignedAccess, OnKillfocusLAssignedAccess)
     ON_NOTIFY(NM_CLICK, LGlobalAccess, OnClickLGlobalAccess)
-ON_NOTIFY(NM_CLICK, LAssignedAccess, OnClickLAssignedAccess)
+	ON_NOTIFY(NM_CLICK, LAssignedAccess, OnClickLAssignedAccess)
+	ON_NOTIFY(LVN_KEYDOWN, LGlobalAccess, OnKeyDownGlobalAccess)
+	ON_NOTIFY(LVN_KEYDOWN, LAssignedAccess, OnKeyDownAssignedAccess)
     //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
@@ -703,6 +705,9 @@ void CPageAccess::OnBegindragLGlobalAccess(NMHDR * pNMHDR, LRESULT * pResult)
 	// set drag icon to icon of current selection
 	p_DragImage->BeginDrag(0, point);
 
+	if (m_LGlobalAccess.GetSelectedCount() > 1) 	
+	theApp.m_wndStatusBar.GetStatusBarCtrl().SetText("", 0, 0);
+
 	*pResult = 0;
 }
 
@@ -735,6 +740,9 @@ void CPageAccess::OnBegindragLAssignedAccess(NMHDR * pNMHDR, LRESULT * pResult)
 	// set drag icon to icon of current selection
 	p_DragImage->BeginDrag(0, point);
 
+	if (m_LAssignedAccess.GetSelectedCount() > 1) 	
+		theApp.m_wndStatusBar.GetStatusBarCtrl().SetText("", 0, 0);
+	
 	*pResult = 0;
 }
 
@@ -1034,6 +1042,9 @@ void CPageAccess::OnKillfocusLGlobalAccess(NMHDR * pNMHDR, LRESULT * pResult)
 
 	if (!frame_rect.PtInRect(point))
 		SetGlobalButtons(FALSE);
+
+	// Clear the status bar when the focus is moved away from the access list
+	if (theApp.m_wndStatusBar.m_hWnd) theApp.m_wndStatusBar.GetStatusBarCtrl().SetText("", 0, 0);
 }
 
 void CPageAccess::OnKillfocusLAssignedAccess(NMHDR * pNMHDR, LRESULT * pResult)
@@ -1055,6 +1066,9 @@ void CPageAccess::OnKillfocusLAssignedAccess(NMHDR * pNMHDR, LRESULT * pResult)
 
 	if (!frame_rect.PtInRect(point))
 		SetAssignedButtons(FALSE);
+
+	// Clear the status bar when the focus is moved away from the access list
+	theApp.m_wndStatusBar.GetStatusBarCtrl().SetText("", 0, 0);
 }
 
 void CPageAccess::OnSetfocusLGlobalAccess(NMHDR * pNMHDR, LRESULT * pResult)
@@ -1104,10 +1118,107 @@ void CPageAccess::OnClickLGlobalAccess(NMHDR * pNMHDR, LRESULT * pResult)
 {
 	SetGlobalButtons(TRUE);
 	*pResult = 0;
+
+	// Display the access spec name in the left most field of the status bar
+#if 0 // null the status bar if more than one item selected
+	if (m_LGlobalAccess.GetSelectedCount() > 1) 
+	{
+		theApp.m_wndStatusBar.GetStatusBarCtrl().SetText("", 0, 0);
+		return;
+	}
+#endif
+
+	int item_index = m_LGlobalAccess.GetSelectionMark();
+	CString str = m_LGlobalAccess.GetItemText(item_index, 0);
+	theApp.m_wndStatusBar.GetStatusBarCtrl().SetText(str, 0, 0);
 }
 
 void CPageAccess::OnClickLAssignedAccess(NMHDR * pNMHDR, LRESULT * pResult)
 {
 	SetAssignedButtons(TRUE);
 	*pResult = 0;
+
+	// Display the access spec name in the left most field of the status bar
+#if 0 // null the status bar if more than one item selected
+	if (m_LAssignedAccess.GetSelectedCount() > 1) 
+	{
+		theApp.m_wndStatusBar.GetStatusBarCtrl().SetText("", 0, 0);
+		return;
+	}
+#endif
+
+	int item_index = m_LAssignedAccess.GetSelectionMark(); 
+	CString str = m_LAssignedAccess.GetItemText(item_index, 0);
+	theApp.m_wndStatusBar.GetStatusBarCtrl().SetText(str, 0, 0);
+}
+
+// Ved: Added key up/down handlers (OnKeyDownGlobalAccess, OnKeyDownAssignedAccess) to deal with 
+// status bar updates when the GUI does not display the full access spec string.
+
+void CPageAccess::OnKeyDownGlobalAccess(NMHDR * pNMHDR, LRESULT * pResult)
+{
+	LV_KEYDOWN* pLVKeyDown = (LV_KEYDOWN*)pNMHDR;
+	*pResult = 0;
+
+#if 0 // null the status bar if more than one item selected
+	if (m_LGlobalAccess.GetSelectedCount() > 1) 
+	{
+			theApp.m_wndStatusBar.GetStatusBarCtrl().SetText("", 0, 0);
+			return;
+	}
+#endif
+
+	int item_index = m_LGlobalAccess.GetSelectionMark(); //GetNextItem(FIND_FIRST, LVNI_SELECTED);
+
+	if(pLVKeyDown->wVKey == VK_UP ) 
+	{
+		if (item_index)
+		{
+			m_LGlobalAccess.SetSelectionMark(--item_index);
+		}
+	}
+	else if (pLVKeyDown->wVKey == VK_DOWN ) 
+	{
+		if (item_index < m_LGlobalAccess.GetItemCount() - 1)
+		{
+			m_LGlobalAccess.SetSelectionMark(++item_index);
+		}
+	}
+
+	CString str = m_LGlobalAccess.GetItemText(item_index, 0);
+	theApp.m_wndStatusBar.GetStatusBarCtrl().SetText(str, 0, 0);
+}
+
+void CPageAccess::OnKeyDownAssignedAccess(NMHDR * pNMHDR, LRESULT * pResult)
+{
+	LV_KEYDOWN* pLVKeyDown = (LV_KEYDOWN*)pNMHDR;
+	*pResult = 0;
+
+#if 0 // null the status bar if more than one item selected
+	if (m_LAssignedAccess.GetSelectedCount() > 1) 
+	{
+			theApp.m_wndStatusBar.GetStatusBarCtrl().SetText("", 0, 0);
+			return;
+	}
+#endif
+
+	int item_index = m_LAssignedAccess.GetSelectionMark(); //GetNextItem(FIND_FIRST, LVNI_SELECTED);
+
+	if(pLVKeyDown->wVKey == VK_UP ) 
+	{
+		if (item_index)
+		{
+			m_LAssignedAccess.SetSelectionMark(--item_index);
+		}
+	}
+	else if (pLVKeyDown->wVKey == VK_DOWN ) 
+	{
+		if (item_index < m_LAssignedAccess.GetItemCount() - 1)
+		{
+			m_LAssignedAccess.SetSelectionMark(++item_index);
+		}
+	}
+
+	CString str = m_LAssignedAccess.GetItemText(item_index, 0);
+	theApp.m_wndStatusBar.GetStatusBarCtrl().SetText(str, 0, 0);
 }

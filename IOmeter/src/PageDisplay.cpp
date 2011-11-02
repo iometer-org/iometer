@@ -301,7 +301,7 @@ void CPageDisplay::SetResultSource(int manager_index, int worker_index, int sele
 
 void CPageDisplay::Update()
 {
-	int max_rate[NUM_STATUS_BARS];
+	double max_rate[NUM_STATUS_BARS];
 	int i, j;
 	CString max_range_text;
 	double stat_double;
@@ -326,15 +326,16 @@ void CPageDisplay::Update()
 
 	// Setting ranges on status bar and displaying range value.
 	for (i = 0; i < NUM_STATUS_BARS; i++) {
-		((CProgressCtrl *) GetDlgItem(PRate1 + i))->SetRange(0, max_rate[i]);
+		// scale the status internally to 0-100, whily displaying the actual value -- is this unnecessary?
+		((CProgressCtrl *) GetDlgItem(PRate1 + i))->SetRange(0, 100); // was SetRange(0, max_rate[i]);
 
 		// See if results are displaying a percentage.
 		if ((barcharts[i].result_to_display >= CPU_UTILIZATION_RESULT) &&
 		    (barcharts[i].result_to_display <= IRQ_UTILIZATION_RESULT)) {
-			max_range_text.Format("%d %%", max_rate[i]);	// display % sign
+			max_range_text.Format("%g %%", max_rate[i]);	// display % sign
 			((CStatic *) GetDlgItem(TRate1MAX + i))->SetWindowText(max_range_text);
 		} else {
-			max_range_text.Format("%d", max_rate[i]);	// displaying a rate
+			max_range_text.Format("%g", max_rate[i]);	// displaying a rate
 			((CStatic *) GetDlgItem(TRate1MAX + i))->SetWindowText(max_range_text);
 		}
 
@@ -346,9 +347,11 @@ void CPageDisplay::Update()
 			       barcharts[i].result_to_display, &stat_double, &stat_string);
 
 		// Update the appropriate progress bar
-		((CProgressCtrl *) GetDlgItem(PRate1 + i))->SetPos((int)stat_double);
+		// Adjust the bar to fall within 0-100
+		((CProgressCtrl *) GetDlgItem(PRate1 + i))->SetPos((int)(stat_double*100/max_rate[i])); // was SetPos((int)stat_double);
 
-		// Display the new value to the user
+
+		// Display the new value to the user -- this is the actual value (not scaled to 0-100)
 		((CStatic *) GetDlgItem(TRate1 + i))->SetWindowText(stat_string);
 	}
 
@@ -366,7 +369,7 @@ void CPageDisplay::Update()
 // Finds and returns the maximum range that a status bar should be set to based on
 // what data is to be displayed.
 //
-unsigned int CPageDisplay::GetMaxRange(Results * results, int result_type)
+double CPageDisplay::GetMaxRange(Results * results, int result_type)
 {
 	switch (result_type) {
 	case MBPS_BIN_RESULT:
@@ -493,22 +496,28 @@ unsigned int CPageDisplay::GetMaxRange(Results * results, int result_type)
 // Returns the value that the maximum range for a status bar should be set to based 
 // on what's needed.
 //
-unsigned int CPageDisplay::ReportMaxRange(double max_range_needed)
+double CPageDisplay::ReportMaxRange(double max_range_needed)
 {
-	double max_rate = (double)10;	// Start the max range at 1.0,
+	double max_rate = 1.0;	// Start the max range at 1.0,
 
-	while (max_rate < max_range_needed)	// and continue to grow it in increments
-	{			// of 10x until the need is met.
-		if (max_rate * (double)10 < max_rate)	// Trap overflow.
-			break;
-		max_rate *= (double)10;
+	if (max_range_needed < 1.0)
+	{
+		while (max_rate > (max_range_needed * 10))	// and continue to shrink it in increments
+		{											// of 0.1x until the need is met.
+			max_rate /= 10;
+		}
+	}
+	else
+	{
+		while (max_rate < max_range_needed)	// and continue to grow it in increments
+		{									// of 10x until the need is met.
+			if (max_rate * 10.0 < max_rate)	// Trap overflow.
+				break;
+			max_rate *= 10.0;
+		}
 	}
 
-	// The maximum range for the progress bar is defined in the common header
-	if (max_rate > MAX_GUI_IOPS)
-		max_rate = MAX_GUI_IOPS;
-
-	return (unsigned int)max_rate;
+	return max_rate;
 }
 
 //

@@ -108,6 +108,10 @@ BOOL SetQueueSize(HANDLE cqid, int size)
 	}
 #if defined(IOMTR_OS_LINUX) || defined(IOMTR_OS_OSX) || defined(IOMTR_OS_SOLARIS)
 	this_cqid->aiocb_list = (struct aiocb64 **)malloc(sizeof(struct aiocb64 *) * size);
+#ifdef IOMTR_SETTING_LINUX_LIBAIO
+        this_cqid->iocb_list = (struct iocb **)malloc(sizeof(struct iocb *) * size);
+	this_cqid->events = (struct io_event *)malloc(sizeof(struct io_event));
+#endif
 #elif defined(IOMTR_OS_NETWARE)
 	this_cqid->aiocb_list = (struct aiocb64 **)NXMemAlloc(sizeof(struct aiocb64 *) * size, 1);
 #else
@@ -117,6 +121,14 @@ BOOL SetQueueSize(HANDLE cqid, int size)
 		cout << "memory allocation failed" << endl;
 #if defined(IOMTR_OS_LINUX) || defined(IOMTR_OS_OSX) || defined(IOMTR_OS_SOLARIS)
 		free(this_cqid->element_list);
+#ifdef IOMTR_SETTING_LINUX_LIBAIO
+		if (this_cqid->iocb_list != NULL) {
+			free(this_cqid->iocb_list);
+		}
+		if (this_cqid->events != NULL) {
+			free(this_cqid->events);
+		}
+#endif
 #elif defined(IOMTR_OS_NETWARE)
 		NXMemFree(this_cqid->element_list);
 #else
@@ -124,9 +136,30 @@ BOOL SetQueueSize(HANDLE cqid, int size)
 #endif
 		return (FALSE);
 	}
+#ifdef IOMTR_SETTING_LINUX_LIBAIO
+	if ((this_cqid->iocb_list == NULL) || (this_cqid->events == NULL)) {
+		cout << "memory allocation failed -iocb_list or events" << endl;
+		if (this_cqid->iocb_list != NULL) {
+			free(this_cqid->iocb_list);
+		}
+		if (this_cqid->events != NULL) {
+			free(this_cqid->events);
+		}
+		return (FALSE);
+	}
+#endif
 
 	memset(this_cqid->element_list, 0, sizeof(struct CQ_Element) * size);
 	memset(this_cqid->aiocb_list, 0, sizeof(struct aiocb64 *) * size);
+#ifdef IOMTR_SETTING_LINUX_LIBAIO
+        memset(this_cqid->iocb_list, 0, sizeof(struct iocb *) * size);
+	memset(&this_cqid->io_ctx_id, 0, sizeof(io_context_t));
+	memset(this_cqid->events, 0, sizeof(struct io_event));
+        if (io_queue_init(size, &this_cqid->io_ctx_id) < 0 ) {
+		cout << "Error: cannot initialize aio completion queue: " << strerror(errno) << endl ;
+		return (FALSE);
+	}   
+#endif
 	this_cqid->size = size;
 	this_cqid->last_freed = -1;
 	this_cqid->position = 0;
@@ -168,6 +201,10 @@ HANDLE CreateIoCompletionPort(HANDLE file_handle, HANDLE cq, DWORD completion_ke
 		}
 		cqid->element_list = NULL;
 		cqid->aiocb_list = NULL;
+#ifdef IOMTR_SETTING_LINUX_LIBAIO
+		cqid->iocb_list = NULL;
+		cqid->events = NULL;
+#endif
 		cqid->size = 0;
 		cqid->last_freed = -1;
 		cqid->position = 0;
@@ -213,6 +250,10 @@ HANDLE CreateEvent(void *, BOOL, BOOL, LPCTSTR)
 	}
 	eventqid->element_list = NULL;
 	eventqid->aiocb_list = NULL;
+#ifdef IOMTR_SETTING_LINUX_LIBAIO
+	eventqid->iocb_list = NULL;
+        eventqid->events = NULL;
+#endif
 	eventqid->size = 0;
 	eventqid->last_freed = -1;
 	eventqid->position = 0;
@@ -243,6 +284,10 @@ BOOL GetQueuedCompletionStatus(HANDLE cq, LPDWORD bytes_transferred, LPDWORD com
 	struct IOCQ *cqid;
 	int i, j;
 	int aio_error_return;
+#ifdef IOMTR_SETTING_LINUX_LIBAIO
+	struct iocb *iocbp1;
+	struct iocb *iocbp2;
+#endif
 
 	cqid = (struct IOCQ *)cq;
 
@@ -285,7 +330,6 @@ BOOL GetQueuedCompletionStatus(HANDLE cq, LPDWORD bytes_transferred, LPDWORD com
 		}
 
 		if (cqid->element_list[i].done == TRUE) {
-
 			// IO operation completed with either success or failure.
 
 			*completion_key = cqid->element_list[i].completion_key;
@@ -304,7 +348,9 @@ BOOL GetQueuedCompletionStatus(HANDLE cq, LPDWORD bytes_transferred, LPDWORD com
 			// We are returning the status of this aio. Set it to NULL to free the slot.
 
 			cqid->aiocb_list[i] = 0;
-
+#ifdef IOMTR_SETTING_LINUX_LIBAIO
+			cqid->iocb_list[i] = 0;
+#endif
 			if ((DWORD) * bytes_transferred < (DWORD) 0) {
 				*bytes_transferred = 0;
 				// TODO: Here - and in the other locations where SetLastError()
@@ -327,6 +373,11 @@ BOOL GetQueuedCompletionStatus(HANDLE cq, LPDWORD bytes_transferred, LPDWORD com
 		i++;
 	}			// end of IO Return loop.
 
+        if (tmout == 0) {
+		SetLastError(WAIT_TIMEOUT);
+		return (FALSE);
+	}
+
 	//
 	// Beyond this point return FALSE. No I/O has completed yet.
 	// aio_suspend() till atleast one completes. But do not return
@@ -339,6 +390,40 @@ BOOL GetQueuedCompletionStatus(HANDLE cq, LPDWORD bytes_transferred, LPDWORD com
 		timeout.tv_nsec = (tmout % 1000) * 1000000;
 		timeoutp = &timeout;
 	}
+
+#ifdef IOMTR_SETTING_LINUX_LIBAIO
+        do {
+	    aio_error_return = io_getevents(cqid->io_ctx_id, 1, 1, cqid->events, NULL);
+        } while (aio_error_return == 0 && errno == 0);
+
+	i = cqid->position;
+	for (j = 0; j < cqid->size; j++) {
+		if (i == cqid->size) {
+			i = 0;
+		}
+                iocbp1 = &cqid->element_list[i].iocbp;
+                iocbp2 = cqid->events->obj;
+                if (iocbp1 == iocbp2) {
+        		if (aio_error_return <= 0) {
+            			cout << "Error: io_getevents(): " << strerror(errno) << endl;
+            			cqid->element_list[i].error = errno;
+            			SetLastError(errno);
+            			return(FALSE);
+        		} else {
+        			cqid->element_list[i].done = TRUE;
+				cqid->element_list[i].bytes_transferred = iocbp2->u.c.nbytes;
+        		}
+			SetLastError(WAIT_TIMEOUT);
+			return (FALSE);
+		}
+		i++;
+        }
+	if (j == cqid->size) {
+		cout << "io_getevents ERROR: " << aio_error_return << endl;
+	}
+	SetLastError(WAIT_TIMEOUT);
+	return (FALSE);
+#else
 
 	if (aio_suspend64(cqid->aiocb_list, cqid->size, timeoutp) < 0) {
 		*lpOverlapped = NULL;
@@ -378,8 +463,10 @@ BOOL GetQueuedCompletionStatus(HANDLE cq, LPDWORD bytes_transferred, LPDWORD com
 			}
 		}
 	}
+
 	SetLastError(WAIT_TIMEOUT);
 	return (FALSE);
+#endif
 }
 
 //
@@ -400,6 +487,10 @@ BOOL GetOverlappedResult(HANDLE file_handle, LPOVERLAPPED lpOverlapped, LPDWORD 
 	int i, j;
 	int aio_error_return;
 	IOCQ *eventqid;
+#ifdef IOMTR_SETTING_LINUX_LIBAIO
+	struct iocb *iocbp1;
+	struct iocb *iocbp2;
+#endif
 
 	//
 	// This function either blocks for ever or scans the AIO list just once for completions.
@@ -421,6 +512,49 @@ BOOL GetOverlappedResult(HANDLE file_handle, LPOVERLAPPED lpOverlapped, LPDWORD 
 	//
 	// get a handle to the current event queue.
 	eventqid = (IOCQ *) ((ULONG_PTR) lpOverlapped->hEvent ^ 0x1);
+
+#ifdef IOMTR_SETTING_LINUX_LIBAIO
+        do {
+	    aio_error_return = io_getevents(eventqid->io_ctx_id, 1, 1, eventqid->events, NULL);
+        } while (aio_error_return == 0 && errno == 0);
+
+	i = eventqid->position;
+	for (j = 0; j < eventqid->size; j++) {
+		if (i == eventqid->size) {
+			i = 0;
+		}
+                iocbp1 = &eventqid->element_list[i].iocbp;
+                iocbp2 = eventqid->events->obj;
+                if (iocbp1 == iocbp2) {
+        		if (aio_error_return <= 0) {
+            			cout << "Error: io_getevents(): " << strerror(errno) << endl;
+            			eventqid->element_list[i].error = errno;
+            			SetLastError(errno);
+            			return(FALSE);
+        		}
+			
+			this_fd = eventqid->element_list[i].iocbp.aio_fildes;
+
+			if (filep->fd == this_fd) {
+
+				*bytes_transferred = (DWORD) iocbp2->u.c.nbytes;			
+				eventqid->iocb_list[i] = 0;
+				eventqid->last_freed = i;
+				eventqid->position = i + 1;
+
+				lpOverlapped = (LPOVERLAPPED) eventqid->element_list[i].data;
+
+				return (TRUE);
+			}
+		}
+		i++;
+        }
+	if (j == eventqid->size) {
+		cout << "io_getevents ERROR: " << aio_error_return << endl;
+	}
+	SetLastError(WAIT_TIMEOUT);
+	return (FALSE);
+#else
 
 	// Call aio_suspend() now.
 	if (aio_suspend64(eventqid->aiocb_list, eventqid->size, timeoutp) < 0) {
@@ -491,6 +625,7 @@ BOOL GetOverlappedResult(HANDLE file_handle, LPOVERLAPPED lpOverlapped, LPDWORD 
 	// At this point NO I/O has completed. Return WAIT_TIMEOUT and FALSE.
 	SetLastError(WAIT_TIMEOUT);
 	return (FALSE);
+#endif
 }
 
 //
@@ -505,12 +640,17 @@ BOOL ReadFile(HANDLE file_handle, void *buffer, DWORD bytes_to_read, LPDWORD byt
 {
 	struct File *filep;
 	struct IOCQ *this_cq;
+#ifdef IOMTR_SETTING_LINUX_LIBAIO
+        struct iocb *iocbp;
+        int aio_result = 0;
+        long long offsetUpper, offsetLower, offset;
+#else
 	struct aiocb64 *aiocbp;
-	int i, free_index = -1;
-
 #ifdef IMMEDIATE_AIO_COMPLETION
 	int aio_error_return;
 #endif
+#endif
+	int i, free_index = -1;
 
 	filep = (struct File *)file_handle;
 	//
@@ -534,7 +674,11 @@ BOOL ReadFile(HANDLE file_handle, void *buffer, DWORD bytes_to_read, LPDWORD byt
 	} else {
 		// search for a free index. 
 		for (i = 0; i < this_cq->size; i++) {
+#ifdef IOMTR_SETTING_LINUX_LIBAIO
+			if (this_cq->iocb_list[i] == NULL) {
+#else
 			if (this_cq->aiocb_list[i] == NULL) {
+#endif
 				free_index = i;
 				break;
 			}
@@ -545,6 +689,34 @@ BOOL ReadFile(HANDLE file_handle, void *buffer, DWORD bytes_to_read, LPDWORD byt
 	if (free_index == -1)
 		return (FALSE);
 
+#ifdef IOMTR_SETTING_LINUX_LIBAIO
+        // iocbp for free index
+        iocbp = &this_cq->element_list[free_index].iocbp;
+
+        offsetUpper = (off64_t) lpOverlapped->OffsetHigh << 32;
+        offsetLower = lpOverlapped->Offset;
+        offset = offsetUpper + offsetLower;
+
+        // prepare iocb
+        io_prep_pread(iocbp, filep->fd, buffer, bytes_to_read, offset);
+
+        // queue iocbp in this_cq->iocb_listq
+        this_cq->iocb_list[free_index] = iocbp;
+
+        this_cq->element_list[free_index].data = lpOverlapped;
+        this_cq->element_list[free_index].bytes_transferred = 0;
+        this_cq->element_list[free_index].completion_key = filep->completion_key;
+
+        *bytes_read = 0;
+
+        // submit a list of iocb pointers
+        aio_result = io_submit(this_cq->io_ctx_id, 1, &this_cq->iocb_list[free_index]);
+        if (aio_result < 0) {
+            cout << "Error: io_submit() in ReadFile(): " << strerror(errno) << endl;
+            SetLastError(errno);
+            return (FALSE);
+        }
+#else
 	aiocbp = &this_cq->element_list[free_index].aiocbp;
 
 	aiocbp->aio_buf = buffer;
@@ -602,7 +774,7 @@ BOOL ReadFile(HANDLE file_handle, void *buffer, DWORD bytes_to_read, LPDWORD byt
 	else
 		// aio_read is in progress. We have to set the aiocb_list[] to point correctly.
 		this_cq->aiocb_list[free_index] = aiocbp;
-
+#endif
 	SetLastError(ERROR_IO_PENDING);
 	return (FALSE);
 }
@@ -620,12 +792,17 @@ BOOL WriteFile(HANDLE file_handle, void *buffer, DWORD bytes_to_write, LPDWORD b
 {
 	struct File *filep;
 	struct IOCQ *this_cq;
+#ifdef IOMTR_SETTING_LINUX_LIBAIO
+	struct iocb *iocbp;
+        int aio_result;
+        long long offsetUpper, offsetLower, offset;
+#else
 	struct aiocb64 *aiocbp;
-	int i, free_index = -1;
-
 #ifdef IMMEDIATE_AIO_COMPLETION
 	int aio_error_return;
 #endif
+#endif
+	int i, free_index = -1;
 
 	filep = (struct File *)file_handle;
 	//
@@ -649,7 +826,11 @@ BOOL WriteFile(HANDLE file_handle, void *buffer, DWORD bytes_to_write, LPDWORD b
 	} else
 		// search for a free index. 
 		for (i = 0; i < this_cq->size; i++) {
+#ifdef IOMTR_SETTING_LINUX_LIBAIO
+			if (this_cq->iocb_list[i] == NULL) {
+#else
 			if (this_cq->aiocb_list[i] == NULL) {
+#endif
 				free_index = i;
 				break;
 			}
@@ -659,6 +840,34 @@ BOOL WriteFile(HANDLE file_handle, void *buffer, DWORD bytes_to_write, LPDWORD b
 	if (free_index == -1)
 		return (FALSE);
 
+#ifdef IOMTR_SETTING_LINUX_LIBAIO
+        // iocbp for free index
+        iocbp = &this_cq->element_list[free_index].iocbp;
+
+        offsetUpper = (off64_t) lpOverlapped->OffsetHigh << 32;
+        offsetLower = lpOverlapped->Offset;
+        offset = offsetUpper + offsetLower;
+
+        // prepare iocb
+        io_prep_pwrite(iocbp, filep->fd, buffer, bytes_to_write, offset);
+
+        // queue iocbp in this_cq->iocb_list
+        this_cq->iocb_list[free_index] = iocbp;
+
+	this_cq->element_list[free_index].data = lpOverlapped;
+	this_cq->element_list[free_index].bytes_transferred = 0;
+	this_cq->element_list[free_index].completion_key = filep->completion_key;
+
+	*bytes_written = 0;
+
+        // submit a list of iocb pointers
+        aio_result = io_submit(this_cq->io_ctx_id, 1, &this_cq->iocb_list[free_index]);
+        if (aio_result < 0) {
+            cout << "Error: io_submit() in WriteFile(): " << strerror(errno) << endl;
+            SetLastError(errno);
+            return (FALSE);
+        }
+#else
 	aiocbp = &this_cq->element_list[free_index].aiocbp;
 
 	aiocbp->aio_buf = buffer;
@@ -709,6 +918,7 @@ BOOL WriteFile(HANDLE file_handle, void *buffer, DWORD bytes_to_write, LPDWORD b
 	else
 		// aio_write is in progress. We have to set the aiocb_list[] to point correctly.
 		this_cq->aiocb_list[free_index] = aiocbp;
+#endif
 
 	SetLastError(ERROR_IO_PENDING);
 	return (FALSE);
@@ -741,6 +951,9 @@ BOOL CloseHandle(HANDLE object, int object_type)
 	case FILE_ELEMENT:
 		filep = (struct File *)object;
 		cqid = filep->iocq;
+#ifdef IOMTR_SETTING_LINUX_LIBAIO
+		close(filep->fd);
+#else
 		// cancel any pending aio requests.
 		retval = aio_cancel64(filep->fd, NULL);
 		while (retval == AIO_NOTCANCELED) {
@@ -771,13 +984,19 @@ BOOL CloseHandle(HANDLE object, int object_type)
 #else
 #warning ===> WARNING: You have to do some coding here to get the port done!
 #endif
+
+#endif
 		break;
 	case CQ_ELEMENT:
 		cqid = (struct IOCQ *)object;
 
 		// cancel any pending aio requests.
 		for (i = 0; i < cqid->size; i++) {
+#ifdef IOMTR_SETTING_LINUX_LIBAIO
+			if (!cqid->iocb_list[i])
+#else
 			if (!cqid->aiocb_list[i])
+#endif
 				continue;
 
 #if defined(IOMTR_OS_LINUX) || defined(IOMTR_OS_OSX) || defined(IOMTR_OS_NETWARE)
@@ -787,20 +1006,35 @@ BOOL CloseHandle(HANDLE object, int object_type)
 			 * AIOs for the queue, thus avoiding the problem of cancelling a
 			 * message not in the queue.
 			 */
+#ifdef IOMTR_SETTING_LINUX_LIBAIO
+			retval = io_cancel(cqid->io_ctx_id, cqid->iocb_list[i], cqid->events);
+#else
 			retval = aio_cancel64(cqid->element_list[i].aiocbp.aio_fildes, NULL);
+#endif
+
 #elif defined(IOMTR_OS_SOLARIS)
 			retval = aio_cancel64(cqid->element_list[i].aiocbp.aio_fildes, cqid->aiocb_list[i]);
 #else
 #warning ===> WARNING: You have to do some coding here to get the port done!
 #endif
+#ifdef IOMTR_SETTING_LINUX_LIBAIO
+                        if (retval) {
+				cout << "Error: io_cancel(): "<< retval << endl;
+                        }
+#else
 			if (retval == AIO_NOTCANCELED) {
 				retval = aio_error64(cqid->aiocb_list[i]);
 				retval = aio_return64(cqid->aiocb_list[i]);
 			}
+#endif
 		}
 
 #if defined(IOMTR_OS_LINUX) || defined(IOMTR_OS_OSX) || defined(IOMTR_OS_SOLARIS)
+#ifdef IOMTR_SETTING_LINUX_LIBAIO
+		free(cqid->iocb_list);
+#else
 		free(cqid->aiocb_list);
+#endif
 #elif defined(IOMTR_OS_NETWARE)
 		NXMemFree(cqid->aiocb_list);
 #else

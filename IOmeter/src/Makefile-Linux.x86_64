@@ -71,6 +71,7 @@ CXX=/usr/bin/g++
 # Note 3) -DIOMTR_SETTING_GCC_M64 allows for the gcc -m64 flag that makes longs
 #         64 bits and pointers 64 bits. This forces changes in data structures
 #         and type definitions for compatibility with a Win32 Iometer.
+# Note 4) -DIOMTR_SETTING_LINUX_LIBAIO enables using libaio for better handling of AIO
 CFLAGS=	-O \
 	-Wall \
 	-D_GNU_SOURCE \
@@ -80,6 +81,7 @@ CFLAGS=	-O \
 	-D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 \
 	-D_REENTRANT -DNOMINMAX \
 	-DUSE_NEW_DISCOVERY_MECHANISM -DFORCE_STRUCT_ALIGN \
+ 	-DIOMTR_SETTING_LINUX_LIBAIO \
 	-DIOMTR_SETTING_CPU_AFFINITY
 #	-ggdb
 
@@ -92,7 +94,7 @@ CFLAGS=	-O \
 # case, change this line as follows:
 #
 # LDFLAGS= ../glibc-2.1/rt/librt.a -lpthread
-LDFLAGS= -lrt -lpthread -g
+LDFLAGS= -lrt -lpthread -laio -g
 
 OBJECTS= IOGlobals.o \
          Pulsar.o \

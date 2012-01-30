@@ -312,6 +312,7 @@ void Performance::Get_CPU_Counters(int snapshot)
 	char tmpBuf[SMLBUFSIZE], *b;
 	__int64 jiffiesCpuNiceUtilization, jiffiesCpuidle, jiffiesCpuiowait;
 	__int64 jiffiesCpuirq, jiffiesCpusoftirq, jiffiesCpusteal;
+	__int64 jiffiesUnknown;
 	FILE *cpuStat;
 	struct cpu_data_type raw_cpu;
 
@@ -366,13 +367,13 @@ void Performance::Get_CPU_Counters(int snapshot)
 		if (!b)
 			goto err_out;
 		jiffiesCpuiowait = jiffiesCpuirq = jiffiesCpusoftirq = jiffiesCpusteal = 0;
-		numScans = sscanf(tmpBuf, "cpu%d %lld %lld %lld %lld %lld %lld %lld %lld\n",
+		numScans = sscanf(tmpBuf, "cpu%d %lld %lld %lld %lld %lld %lld %lld %lld %lld\n",
 					&cpuid,
 					&raw_cpu_data[i][CPU_USER_UTILIZATION][snapshot],
 					&jiffiesCpuNiceUtilization,
 					&raw_cpu_data[i][CPU_PRIVILEGED_UTILIZATION][snapshot],
 					&jiffiesCpuidle, &jiffiesCpuiowait, &jiffiesCpuirq, 
-					&jiffiesCpusoftirq, &jiffiesCpusteal);
+					&jiffiesCpusoftirq, &jiffiesCpusteal, &jiffiesUnknown);
 		if (numScans < 4)
 			goto err_out;
 

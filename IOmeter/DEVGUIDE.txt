@@ -219,6 +219,7 @@ find important global defines (-D<key>[=<value>]):
    IOMTR_SETTING_KSTAT_PERCPU  For the Linux kernel module. The kstat kernel
                                structure in some smp Linux version use an
                                alternative structure called 'percpu'.
+   IOMTR_SETTING_LINUX_LIBAIO  Enables the use of libaio on Linux.
    IOMTR_SETTING_NO_CPU_KHZ    For the Linux kernel module. A few non i386
                                kernels don't export cpu_khz.
    IOMTR_SETTING_OVERRIDE_FS   DANGER!!! - Additional code for dynamo, which

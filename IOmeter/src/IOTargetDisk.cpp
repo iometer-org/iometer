@@ -1226,6 +1226,12 @@ BOOL TargetDisk::Prepare(DWORDLONG * prepare_offset, volatile TestState * test_s
 	void *buffer = NULL;
 	DWORD bytes;
 	DWORDLONG rand_seed;
+#ifdef IOMTR_SETTING_LINUX_LIBAIO
+ 	struct statfs fsInfo;
+ 	int statResult;
+ 	int fd = -1;
+ 	fd = ((struct File *)disk_file)->fd;
+#endif
 
 	// Save current spec.random so that it can be reset back to the same seed value after preparing disks
 	// This allows the PRNG to be the same when doing the actual IO, whether the disk is prepped or not and the user specifies fixed seed
@@ -1336,6 +1342,17 @@ BOOL TargetDisk::Prepare(DWORDLONG * prepare_offset, volatile TestState * test_s
 					write_ok = FALSE;
 					break;
 				}
+#ifdef IOMTR_SETTING_LINUX_LIBAIO
+				statResult = fstatfs(fd, &fsInfo);
+				if (statResult < 0) {
+					cerr << __FUNCTION__ << ": Couldn't statfs logical disk file!" << endl;
+				}
+				if (fsInfo.f_bfree <= 0 ) {
+					write_ok = FALSE;
+					break;
+				}
+#endif
+
 				// If we are still writing and the slot is not busy, start an I/O for
 				// this slot.
 				if ((*test_state == TestPreparing) && write_ok && !busy[i]) {
@@ -1422,6 +1439,7 @@ BOOL TargetDisk::Prepare(DWORDLONG * prepare_offset, volatile TestState * test_s
 #ifdef _DEBUG
 						cout << "Wrote (eventually) " << bytes_written << " of " << bytes
 						    << " bytes to disk " << spec.name << "." << endl;
+
 #endif
 						// Mark the slot as idle.
 						busy[i] = FALSE;

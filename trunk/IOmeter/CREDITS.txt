@@ -61,6 +61,12 @@ C: NOVELL
 W: http://www.novell.com
 D: Added Netware/IA32 support for IOMETER.
 
+N: Jinpyo Kim
+E: jkim@vmware.com
+C: VMWARE
+W: http://www.vmware.com/
+D: Added libaio support for IOMETER on Linux (i386 and x86-64).
+
 N: Ralf Lichtenstein
 E: moozart@gmx.de
 D: Various Bug fixes.

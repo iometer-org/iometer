@@ -141,6 +141,10 @@ BOOL CQAIO::SetQueueSize(int size)
 	}
 #if defined(IOMTR_OS_LINUX) || defined(IOMTR_OS_OSX) || defined(IOMTR_OS_SOLARIS)
 	this_cqid->aiocb_list = (struct aiocb64 **)malloc(sizeof(struct aiocb64 *) * size);
+#ifdef IOMTR_SETTING_LINUX_LIBAIO
+        this_cqid->iocb_list = (struct iocb **)malloc(sizeof(struct iocb *) * size);
+        this_cqid->events = (struct io_event *)malloc(sizeof(struct io_event));
+#endif
 #elif defined(IOMTR_OS_NETWARE)
 	this_cqid->aiocb_list = (struct aiocb64 **)NXMemAlloc(sizeof(struct aiocb64 *) * size, 1);
 #else
@@ -150,6 +154,14 @@ BOOL CQAIO::SetQueueSize(int size)
 		cout << "memory allocation failed." << endl;
 #if defined(IOMTR_OS_LINUX) || defined(IOMTR_OS_OSX) || defined(IOMTR_OS_SOLARIS)
 		free(this_cqid->element_list);
+#ifdef IOMTR_SETTING_LINUX_LIBAIO
+		if (this_cqid->iocb_list != NULL) {
+			free(this_cqid->iocb_list);
+		}
+		if (this_cqid->events != NULL) {
+			free(this_cqid->events);
+		}
+#endif
 #elif defined(IOMTR_OS_NETWARE)
 		NXMemFree(this_cqid->element_list);
 #else
@@ -157,9 +169,30 @@ BOOL CQAIO::SetQueueSize(int size)
 #endif
 		return (FALSE);
 	}
+#ifdef IOMTR_SETTING_LINUX_LIBAIO
+        if ((this_cqid->iocb_list == NULL) || (this_cqid->events == NULL)) {
+		cout << "memory allocation failed - iocb_list or events." << endl;
+		if (this_cqid->iocb_list != NULL) {
+			free(this_cqid->iocb_list);
+		}
+		if (this_cqid->events != NULL) {
+			free(this_cqid->events);
+		}
+        return (FALSE);
+	}
+#endif
 
 	this_cqid->size = size;
 	memset(this_cqid->aiocb_list, 0, sizeof(struct aiocb64 *) * size);
+#ifdef IOMTR_SETTING_LINUX_LIBAIO
+	memset(this_cqid->iocb_list, 0, sizeof(struct iocb *) * size);
+        memset(&this_cqid->io_ctx_id, 0, sizeof(io_context_t));
+        memset(this_cqid->events, 0, sizeof(struct io_event));
+        if (io_queue_init(size, &this_cqid->io_ctx_id) < 0) {
+        	cout << "Error: cannot initialize aio completion queue: " << strerror(errno) << endl;
+        	return (FALSE);
+        }
+#endif
 	memset(this_cqid->element_list, 0, sizeof(struct CQ_Element) * size);
 
 #ifdef _DEBUG

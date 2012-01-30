@@ -268,6 +268,9 @@ using namespace std;
  #elif defined(IOMTR_OS_LINUX) || defined(IOMTR_OS_SOLARIS)
   #include <malloc.h>
   #include <aio.h>
+  #ifdef IOMTR_SETTING_LINUX_LIBAIO
+   #include <libaio.h>
+  #endif
  #else
   #error ===> ERROR: You have to define exactly one IOMTR_CPU_* global define!
  #endif
@@ -849,6 +852,9 @@ struct dynamo_param {
 // } LARGE_INTEGER;
  struct CQ_Element {
 	struct  aiocb64 aiocbp;
+#ifdef IOMTR_SETTING_LINUX_LIBAIO
+        struct  iocb iocbp;
+#endif
 	void   *data;
 	int	done;
 	int	error;
@@ -862,7 +868,12 @@ struct dynamo_param {
  struct IOCQ {
 	CQ_Element      *element_list;
 	struct aiocb64 **aiocb_list;
-	int	         size;
+#ifdef IOMTR_SETTING_LINUX_LIBAIO
+	struct iocb **iocb_list;
+        io_context_t io_ctx_id;
+        struct io_event *events;
+#endif
+	int	        size;
 	int	         last_freed;
 	int	         position;
  };

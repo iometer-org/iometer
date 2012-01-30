@@ -103,7 +103,7 @@ extern int kstatfd;
 #if defined(IOMTR_OS_LINUX)
 DWORDLONG jiffies(void)
 {
-	DWORDLONG j[8], jf;
+	DWORDLONG j[9], jf;
 	FILE *fp;
 	char tmpBuf[SMLBUFSIZE];
 	int i;
@@ -112,16 +112,16 @@ DWORDLONG jiffies(void)
 		return jf;
 	}
 
-	for (i = 0; i < 8; i++)
+	for (i = 0; i < 9; i++)
 		j[i] = 0;
 	fp = fopen("/proc/stat", "r");
 	fgets(tmpBuf, SMLBUFSIZE, fp);
 	fgets(tmpBuf, SMLBUFSIZE, fp);
-	sscanf(tmpBuf, "cpu0 %lld %lld %lld %lld %lld %lld %lld %lld\n", 
-			j, j + 1, j + 2, j + 3, j + 4, j + 5, j + 6, j + 7);
+	sscanf(tmpBuf, "cpu0 %lld %lld %lld %lld %lld %lld %lld %lld %lld\n", 
+			j, j + 1, j + 2, j + 3, j + 4, j + 5, j + 6, j + 7, j + 8);
 	fclose(fp);
 	jf = 0;
-	for (i = 0; i < 8; i++)
+	for (i = 0; i < 9; i++)
 		jf += j[i];
 	return jf;
 }

@@ -107,6 +107,7 @@ STRIP=/usr/bin/strip
 # Some common definitions used.
 # Note 1) -DWORKAROUND_MOD_BUG can be dropped if -O is used in place of -g in CFLAGS
 # Note 2) -D_DETAILS=1 -D_DEBUG enables maximum debug information
+# Note 3) -DIOMTR_SETTING_LINUX_LIBAIO enables using libaio for better handling of AIO
 CFLAGS=	-O3 \
 	-Wall \
 	-D_GNU_SOURCE \
@@ -115,6 +116,7 @@ CFLAGS=	-O3 \
 	-D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 \
 	-D_REENTRANT -DNOMINMAX \
 	-DUSE_NEW_DISCOVERY_MECHANISM -DFORCE_STRUCT_ALIGN \
+	-DIOMTR_SETTING_LINUX_LIBAIO \
 	-DIOMTR_SETTING_CPU_AFFINITY
 #	-ggdb
 
@@ -126,7 +128,10 @@ CFLAGS=	-O3 \
 # case, change this line as follows:
 #
 # LDFLAGS= ../glibc-2.1/rt/librt.a -lpthread
-LDFLAGS= -lrt -lpthread
+# LDFLAGS= -lrt -lpthread
+
+# Use Linux libaio for asynchronous I/Os 
+LDFLAGS= -lrt -lpthread -laio
 
 OBJECTS= IOGlobals.o \
          Pulsar.o \

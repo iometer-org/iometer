@@ -369,8 +369,7 @@ int CDECL main(int argc, char *argv[])
 	struct aioinit aioDefaults;
 
 	memset(&aioDefaults, 0, sizeof(aioDefaults));
-	aioDefaults.aio_threads = 2;
-	aioDefaults.aio_threads = 2;
+	aioDefaults.aio_threads = 32;
 	aio_init(&aioDefaults);
 	kstatfd = InitIoctlInterface();
 #if defined(IOMTR_CPU_XSCALE)

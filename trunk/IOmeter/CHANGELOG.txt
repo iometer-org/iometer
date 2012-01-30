@@ -18,6 +18,9 @@ Version 1.1.0 (GA?)
      or activating alternative code paths (-force_raw and -use_rdtsc)
      are now consolidated in the new --flag option.
 - Bug fixes:
+   - (Linux) Patch by Jinpyo Kim enabling the use of libaio on Linux.
+     The code path is controlled by IOMTR_SETTING_LINUX_LIBAIO and is
+     enabled by default.
    - (Linux) Removed stropts.h include for Linux, as this file is no
      longer available with newer Linux distributions.
    - (OS X) Specialized the OS X makefile (Makefile-OSX.all) into

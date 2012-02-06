@@ -4,8 +4,8 @@
 
 
 
-Version 1.1.0 (GA?)
-===================
+Version 1.1.0 (GA)
+==================
 
 - New functionality:
    - (Windows) Support for identifying GPT disks with hidden
@@ -18,6 +18,8 @@ Version 1.1.0 (GA?)
      or activating alternative code paths (-force_raw and -use_rdtsc)
      are now consolidated in the new --flag option.
 - Bug fixes:
+   - (Linux) The O_DIRECT flag was reintroducted for opening targets
+     under Linux. 
    - (Linux) Patch by Jinpyo Kim enabling the use of libaio on Linux.
      The code path is controlled by IOMTR_SETTING_LINUX_LIBAIO and is
      enabled by default.

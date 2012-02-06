@@ -1524,13 +1524,32 @@ BOOL TargetDisk::Open(volatile TestState * test_state, int open_flag)
 {
 	// open_flag is a 
 	if (IsType(spec.type, LogicalDiskType)) {
-#if defined(IOMTR_OS_SOLARIS) || defined(IOMTR_OS_LINUX)
+#if defined(IOMTR_OS_LINUX)
+// It is preferred to open the target with O_DIRECT in order to minimize the
+// effects of caching. Unfortunately we had problems in the past with O_DIRECT
+// and multiple outstanding IOs so the flag was removed. Using libaio, this
+// is no longer an issue and O_DIRECT has been reintroduced accordingly.
+//
+// TODO: Ultimately the way forward is to stick to a good automatic default,
+// but (i) add functionality to display the used flags and (ii) add an option
+// for the user to explicitely specify the flags.
+#ifdef IOMTR_SETTING_LINUX_LIBAIO
+		((struct File *)disk_file)->fd =
+		    open(file_name, O_DIRECT | O_RDWR | O_CREAT | O_LARGEFILE | open_flag, S_IRUSR | S_IWUSR);
+#else
+#warning ===> WARNING: Dynamo will not open the target with O_DIRECT, because it is not safe in your environment.
 		((struct File *)disk_file)->fd =
 		    open(file_name, O_RDWR | O_CREAT | O_LARGEFILE | open_flag, S_IRUSR | S_IWUSR);
+#endif
 #elif defined(IOMTR_OS_NETWARE)
 		NXFileOpen(0, (void *)file_name, (NXMode_t) (NX_O_RDWR | NX_O_CREAT | open_flag),
 			   &((struct File *)disk_file)->fd);
 		((struct File *)disk_file)->type = LogicalDiskType;
+#elif defined(IOMTR_OS_OSX)
+		((struct File *)disk_file)->fd = open(file_name, O_RDWR | O_CREAT | open_flag, S_IRUSR | S_IWUSR);
+#elif defined(IOMTR_OS_SOLARIS)
+		((struct File *)disk_file)->fd =
+		    open(file_name, O_RDWR | O_CREAT | O_LARGEFILE | open_flag, S_IRUSR | S_IWUSR);
 #elif defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)
 		// Ignore errors that occur if trying to open a floppy or CD-ROM with
 		// nothing in the drive.
@@ -1539,24 +1558,37 @@ BOOL TargetDisk::Open(volatile TestState * test_state, int open_flag)
 				       FILE_SHARE_WRITE, NULL, OPEN_ALWAYS,
 				       FILE_FLAG_NO_BUFFERING | FILE_FLAG_OVERLAPPED, NULL);
 		SetErrorMode(0);
-#elif defined(IOMTR_OS_OSX)
-		((struct File *)disk_file)->fd = open(file_name, O_RDWR | O_CREAT | open_flag, S_IRUSR | S_IWUSR);
 #else
 #warning ===> WARNING: You have to do some coding here to get the port done!
 #endif
 	} else if (IsType(spec.type, PhysicalDiskType)) {
-#if defined(IOMTR_OS_SOLARIS) || defined(IOMTR_OS_LINUX)
+#if defined(IOMTR_OS_LINUX)
+// It is preferred to open the target with O_DIRECT in order to minimize the
+// effects of caching. Unfortunately we had problems in the past with O_DIRECT
+// and multiple outstanding IOs so the flag was removed. Using libaio, this
+// is no longer an issue and O_DIRECT has been reintroduced accordingly.
+//
+// TODO: Ultimately the way forward is to stick to a good automatic default,
+// but (i) add functionality to display the used flags and (ii) add an option
+// for the user to explicitely specify the flags.
+#ifdef IOMTR_SETTING_LINUX_LIBAIO
+		((struct File *)disk_file)->fd = open(file_name, O_DIRECT | O_RDWR | O_LARGEFILE, S_IRUSR | S_IWUSR);
+#else
+#warning ===> WARNING: Dynamo will not open the target with O_DIRECT, because it is not safe in your environment.
 		((struct File *)disk_file)->fd = open(file_name, O_RDWR | O_LARGEFILE, S_IRUSR | S_IWUSR);
+#endif
 #elif defined(IOMTR_OS_NETWARE)
 		((struct File *)disk_file)->fd = NWOpenDevice(atoi(file_name), 0);
+#elif defined(IOMTR_OS_OSX)
+		((struct File *)disk_file)->fd = open(file_name, O_RDWR, S_IRUSR | S_IWUSR);
+#elif defined(IOMTR_OS_SOLARIS)
+		((struct File *)disk_file)->fd = open(file_name, O_RDWR | O_LARGEFILE, S_IRUSR | S_IWUSR);
 #elif defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)
 		SetErrorMode(SEM_FAILCRITICALERRORS);
 		disk_file = CreateFile(file_name, GENERIC_READ | GENERIC_WRITE,
 				       FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
 				       OPEN_EXISTING, FILE_FLAG_NO_BUFFERING | FILE_FLAG_OVERLAPPED, NULL);
 		SetErrorMode(0);
-#elif defined(IOMTR_OS_OSX)
-		((struct File *)disk_file)->fd = open(file_name, O_RDWR, S_IRUSR | S_IWUSR);
 #else
 #warning ===> WARNING: You have to do some coding here to get the port done!
 #endif

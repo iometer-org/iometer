@@ -134,17 +134,18 @@ void AccessSpecList::InsertIdleSpec()
 //
 void AccessSpecList::InsertDefaultSpecs()
 {
+	enum {ITER_ONE=0, ITER_ALL=1, ITER_MAX=2};
 	Test_Spec *spec;
 	int index = 0;
 	int iterations = 0;
 
 	// Runs through 2 iterations, one for individual access specs, and one for the all-in-one
-	while (iterations < 2)
+	while (iterations < ITER_MAX)
 	{
 		spec = New(); 
 		index = 0;
 
-		if (iterations == 0) _snprintf(spec->name, MAX_NAME, "512 B; 100%% Read; 0%% random");
+		if (iterations == ITER_ONE) _snprintf(spec->name, MAX_NAME, "512 B; 100%% Read; 0%% random");
 		else 	_snprintf(spec->name, MAX_NAME, "All in one");
 
 		spec->access[index].of_size = 100;
@@ -158,7 +159,7 @@ void AccessSpecList::InsertDefaultSpecs()
 
 #ifndef IOMTR_SETTING_NO_OLD_ACCESS_SPEC
 
-		if (iterations == 0) 
+		if (iterations == ITER_ONE) 
 		{ 
 			spec = New(); 
 			_snprintf(spec->name, MAX_NAME, "512 B; 75%% Read; 0%% random");
@@ -174,7 +175,7 @@ void AccessSpecList::InsertDefaultSpecs()
 		spec->access[index].align = 0;
 		spec->access[index].reply = 0;
 #endif
-		if (iterations == 0) 
+		if (iterations == ITER_ONE) 
 		{
 			spec = New(); 
 			_snprintf(spec->name, MAX_NAME, "512 B; 50%% Read; 0%% random");
@@ -191,7 +192,7 @@ void AccessSpecList::InsertDefaultSpecs()
 		spec->access[index].reply = 0;
 
 #ifndef IOMTR_SETTING_NO_OLD_ACCESS_SPEC
-		if (iterations == 0) 
+		if (iterations == ITER_ONE) 
 		{
 			spec = New(); 
 			_snprintf(spec->name, MAX_NAME, "512 B; 25%% Read; 0%% random");
@@ -208,7 +209,7 @@ void AccessSpecList::InsertDefaultSpecs()
 		spec->access[index].reply = 0;
 #endif
 
-		if (iterations == 0) 
+		if (iterations == ITER_ONE) 
 		{
 			spec = New(); 
 			_snprintf(spec->name, MAX_NAME, "512 B; 0%% Read; 0%% random");
@@ -226,7 +227,7 @@ void AccessSpecList::InsertDefaultSpecs()
 
 	// 4096 Bytes / 4 Kilo Bytes
 
-		if (iterations == 0) 
+		if (iterations == ITER_ONE) 
 		{ 
 			spec = New(); 
 			_snprintf(spec->name, MAX_NAME, "4 KiB; 100%% Read; 0%% random");
@@ -244,7 +245,7 @@ void AccessSpecList::InsertDefaultSpecs()
 
 #ifndef IOMTR_SETTING_NO_OLD_ACCESS_SPEC
 
-		if (iterations == 0) 
+		if (iterations == ITER_ONE) 
 		{ 
 			spec = New(); 
 			_snprintf(spec->name, MAX_NAME, "4 KiB; 75%% Read; 0%% random");
@@ -261,11 +262,12 @@ void AccessSpecList::InsertDefaultSpecs()
 		spec->access[index].reply = 0;
 #endif
 
-		if (iterations == 0) 
+		if (iterations == ITER_ONE) 
 		{ 
 			spec = New(); 
 			_snprintf(spec->name, MAX_NAME, "4 KiB; 50%% Read; 0%% random");
 		}
+		else index++;
 
 		spec->access[index].of_size = 100;
 		spec->access[index].size = 4096;
@@ -278,11 +280,12 @@ void AccessSpecList::InsertDefaultSpecs()
 
 #ifndef IOMTR_SETTING_NO_OLD_ACCESS_SPEC
 
-		if (iterations == 0) 
+		if (iterations == ITER_ONE) 
 		{ 
 			spec = New(); 
 			_snprintf(spec->name, MAX_NAME, "4 KiB; 25%% Read; 0%% random");
 		}
+		else index++;
 
 		spec->access[index].of_size = 100;
 		spec->access[index].size = 4096;
@@ -294,11 +297,12 @@ void AccessSpecList::InsertDefaultSpecs()
 		spec->access[index].reply = 0;
 #endif
 
-		if (iterations == 0) 
+		if (iterations == ITER_ONE) 
 		{ 
 			spec = New(); 
 			_snprintf(spec->name, MAX_NAME, "4 KiB; 0%% Read; 0%% random");
 		}
+		else index++;
 
 		spec->access[index].of_size = 100;
 		spec->access[index].size = 4096;
@@ -312,11 +316,12 @@ void AccessSpecList::InsertDefaultSpecs()
 #ifdef IOMTR_SETTING_USE_NEW_ACCESS_SPEC
 	// 4096 Bytes / 4 Kilo Bytes
 
-		if (iterations == 0) 
+		if (iterations == ITER_ONE) 
 		{ 
 			spec = New(); 
 			_snprintf(spec->name, MAX_NAME, "4 KiB aligned; 100%% Read; 100%% random");
 		}
+		else index++;
 
 		spec->access[index].of_size = 100;
 		spec->access[index].size = 4096;
@@ -327,11 +332,12 @@ void AccessSpecList::InsertDefaultSpecs()
 		spec->access[index].align = 4096;
 		spec->access[index].reply = 0;
 
-		if (iterations == 0) 
+		if (iterations == ITER_ONE) 
 		{ 
 			spec = New(); 
 			_snprintf(spec->name, MAX_NAME, "4 KiB aligned; 50%% Read; 100%% random");
 		}
+		else index++;
 
 		spec->access[index].of_size = 100;
 		spec->access[index].size = 4096;
@@ -342,11 +348,12 @@ void AccessSpecList::InsertDefaultSpecs()
 		spec->access[index].align = 4096;
 		spec->access[index].reply = 0;
 
-		if (iterations == 0) 
+		if (iterations == ITER_ONE) 
 		{ 
 			spec = New(); 
 			_snprintf(spec->name, MAX_NAME, "4 KiB aligned; 0%% Read; 100%% random");
 		}
+		else index++;
 
 		spec->access[index].of_size = 100;
 		spec->access[index].size = 4096;
@@ -360,11 +367,12 @@ void AccessSpecList::InsertDefaultSpecs()
 	
 		// 16384 Bytes / 16 Kilo Bytes
 
-		if (iterations == 0) 
+		if (iterations == ITER_ONE) 
 		{ 
 			spec = New(); 
 			_snprintf(spec->name, MAX_NAME, "16 KiB; 100%% Read; 0%% random");
 		}
+		else index++;
 
 		spec->access[index].of_size = 100;
 		spec->access[index].size = 16384;
@@ -377,11 +385,12 @@ void AccessSpecList::InsertDefaultSpecs()
 
 #ifndef IOMTR_SETTING_NO_OLD_ACCESS_SPEC
 		
-		if (iterations == 0) 
+		if (iterations == ITER_ONE) 
 		{ 
 			spec = New(); 
 			_snprintf(spec->name, MAX_NAME, "16 KiB; 75%% Read; 0%% random");
 		}
+		else index++;
 
 		spec->access[index].of_size = 100;
 		spec->access[index].size = 16384;
@@ -393,11 +402,12 @@ void AccessSpecList::InsertDefaultSpecs()
 		spec->access[index].reply = 0;
 #endif
 
-		if (iterations == 0) 
+		if (iterations == ITER_ONE) 
 		{ 
 			spec = New(); 
 			_snprintf(spec->name, MAX_NAME, "16 KiB; 50%% Read; 0%% random");
 		}
+		else index++;
 
 		spec->access[index].of_size = 100;
 		spec->access[index].size = 16384;
@@ -410,11 +420,12 @@ void AccessSpecList::InsertDefaultSpecs()
 
 #ifndef IOMTR_SETTING_NO_OLD_ACCESS_SPEC
 
-		if (iterations == 0) 
+		if (iterations == ITER_ONE) 
 		{ 
 			spec = New(); 
 			_snprintf(spec->name, MAX_NAME, "16 KiB; 25%% Read; 0%% random");
 		}
+		else index++;
 
 		spec->access[index].of_size = 100;
 		spec->access[index].size = 16384;
@@ -426,11 +437,12 @@ void AccessSpecList::InsertDefaultSpecs()
 		spec->access[index].reply = 0;
 #endif
 
-		if (iterations == 0) 
+		if (iterations == ITER_ONE) 
 		{ 
 			spec = New(); 
 			_snprintf(spec->name, MAX_NAME, "16 KiB; 0%% Read; 0%% random");
 		}
+		else index++;
 
 		spec->access[index].of_size = 100;
 		spec->access[index].size = 16384;
@@ -444,11 +456,12 @@ void AccessSpecList::InsertDefaultSpecs()
 	// 32768 Bytes / 32 Kilo Bytes
 #ifndef IOMTR_SETTING_NO_OLD_ACCESS_SPEC
 
-		if (iterations == 0) 
+		if (iterations == ITER_ONE) 
 		{ 
 			spec = New(); 
 			_snprintf(spec->name, MAX_NAME, "32 KiB; 100%% Read; 0%% random");
 		}
+		else index++;
 
 		spec->access[index].of_size = 100;
 		spec->access[index].size = 32768;
@@ -459,11 +472,12 @@ void AccessSpecList::InsertDefaultSpecs()
 		spec->access[index].align = 0;
 		spec->access[index].reply = 0;
 
-		if (iterations == 0) 
+		if (iterations == ITER_ONE) 
 		{ 
 			spec = New(); 
 			_snprintf(spec->name, MAX_NAME, "32 KiB; 75%% Read; 0%% random");
 		}
+		else index++;
 
 		spec->access[index].of_size = 100;
 		spec->access[index].size = 32768;
@@ -474,11 +488,12 @@ void AccessSpecList::InsertDefaultSpecs()
 		spec->access[index].align = 0;
 		spec->access[index].reply = 0;
 
-		if (iterations == 0) 
+		if (iterations == ITER_ONE) 
 		{ 
 			spec = New(); 
 			_snprintf(spec->name, MAX_NAME, "32 KiB; 50%% Read; 0%% random");
 		}
+		else index++;
 
 		spec->access[index].of_size = 100;
 		spec->access[index].size = 32768;
@@ -489,11 +504,12 @@ void AccessSpecList::InsertDefaultSpecs()
 		spec->access[index].align = 0;
 		spec->access[index].reply = 0;
 
-		if (iterations == 0) 
+		if (iterations == ITER_ONE) 
 		{ 
 			spec = New(); 
 			_snprintf(spec->name, MAX_NAME, "32 KiB; 25%% Read; 0%% random");
 		}
+		else index++;
 
 		spec->access[index].of_size = 100;
 		spec->access[index].size = 32768;
@@ -504,11 +520,12 @@ void AccessSpecList::InsertDefaultSpecs()
 		spec->access[index].align = 0;
 		spec->access[index].reply = 0;
 
-		if (iterations == 0) 
+		if (iterations == ITER_ONE) 
 		{ 
 			spec = New(); 
 			_snprintf(spec->name, MAX_NAME, "32 KiB; 0%% Read; 0%% random");
 		}
+		else index++;
 
 		spec->access[index].of_size = 100;
 		spec->access[index].size = 32768;
@@ -522,11 +539,12 @@ void AccessSpecList::InsertDefaultSpecs()
 
 #ifdef IOMTR_SETTING_USE_NEW_ACCESS_SPEC
 
-		if (iterations == 0) 
+		if (iterations == ITER_ONE) 
 		{ 
 			spec = New(); 
 			_snprintf(spec->name, MAX_NAME, "64 KiB; 100%% Read; 0%% random");
 		}
+		else index++;
 
 		spec->access[index].of_size = 100;
 		spec->access[index].size = 65536;
@@ -537,11 +555,12 @@ void AccessSpecList::InsertDefaultSpecs()
 		spec->access[index].align = 0;
 		spec->access[index].reply = 0;
 
-		if (iterations == 0) 
+		if (iterations == ITER_ONE) 
 		{ 
 			spec = New(); 
 			_snprintf(spec->name, MAX_NAME, "64 KiB; 50%% Read; 0%% random");
 		}
+		else index++;
 
 		spec->access[index].of_size = 100;
 		spec->access[index].size = 65536;
@@ -552,11 +571,12 @@ void AccessSpecList::InsertDefaultSpecs()
 		spec->access[index].align = 0;
 		spec->access[index].reply = 0;
 
-		if (iterations == 0) 
+		if (iterations == ITER_ONE) 
 		{ 
 			spec = New(); 
 			_snprintf(spec->name, MAX_NAME, "64 KiB; 0%% Read; 0%% random");
 		}
+		else index++;
 
 		spec->access[index].of_size = 100;
 		spec->access[index].size = 65536;
@@ -567,11 +587,12 @@ void AccessSpecList::InsertDefaultSpecs()
 		spec->access[index].align = 0;
 		spec->access[index].reply = 0;
 
-		if (iterations == 0) 
+		if (iterations == ITER_ONE) 
 		{ 
 			spec = New(); 
 			_snprintf(spec->name, MAX_NAME, "256 KiB; 100%% Read; 0%% random");
 		}
+		else index++;
 
 		spec->access[index].of_size = 100;
 		spec->access[index].size = 262144;
@@ -582,11 +603,12 @@ void AccessSpecList::InsertDefaultSpecs()
 		spec->access[index].align = 0;
 		spec->access[index].reply = 0;
 
-		if (iterations == 0) 
+		if (iterations == ITER_ONE) 
 		{ 
 			spec = New(); 
 			_snprintf(spec->name, MAX_NAME, "256 KiB; 50%% Read; 0%% random");
 		}
+		else index++;
 
 		spec->access[index].of_size = 100;
 		spec->access[index].size = 262144;
@@ -597,11 +619,12 @@ void AccessSpecList::InsertDefaultSpecs()
 		spec->access[index].align = 0;
 		spec->access[index].reply = 0;
 
-		if (iterations == 0) 
+		if (iterations == ITER_ONE) 
 		{ 
 			spec = New(); 
 			_snprintf(spec->name, MAX_NAME, "256 KiB; 0%% Read; 0%% random");
 		}
+		else index++;
 
 		spec->access[index].of_size = 100;
 		spec->access[index].size = 262144;
@@ -613,6 +636,22 @@ void AccessSpecList::InsertDefaultSpecs()
 		spec->access[index].reply = 0;
 
 #endif  // #ifdef IOMTR_SETTING_USE_NEW_ACCESS_SPEC
+
+		if (iterations == ITER_ALL) 
+		{
+			// Terminate the spec for the all_in_one case
+			spec->access[++index].of_size = IOERROR;
+
+			// Fix up the percent access for each entry based on the total
+			// as evenly as possible.
+			for (int i=0; i<index; i++)
+			{
+				if (100%index && (i < 100%index))
+					spec->access[i].of_size = 100/index + 1;
+				else
+					spec->access[i].of_size = 100/index;
+			}
+		}
 	
 		iterations++;
 	} // while

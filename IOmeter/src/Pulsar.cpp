@@ -880,7 +880,7 @@ static void ParseParam(int argc, char *argv[], struct dynamo_param *param)
 			return;
 		}
 			
-#if defined(IOMTR_OS_LINUX) || defined(IOMTR_OSFAMILY_WINDOWS)
+#if defined(IOMTR_OSFAMILY_WINDOWS) || defined(IOMTR_OS_LINUX)
 		if (strcasecmp(pcOption, "C") == 0) {
 			if (argv[I])
 			{

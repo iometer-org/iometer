@@ -712,7 +712,7 @@ void Syntax(const char *errmsg /*=NULL*/ )
 	cout << endl;
 	cout << "   System Options" << endl;
 	cout << endl;		
-#if defined(IOMTR_OS_LINUX) || defined(IOMTR_OSFAMILY_WINDOWS)
+#if defined(IOMTR_OSFAMILY_WINDOWS) || defined(IOMTR_OS_LINUX)
 	cout << "       -c cpu_mask" << endl;
 	cout << "              Enables CPU affinity. It binds Dynamo to the processing units"  << endl;
 	cout << "              (HW threads) specified by the cpu_mask. This is used for"       << endl;

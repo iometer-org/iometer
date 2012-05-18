@@ -156,20 +156,20 @@ find important global defines (-D<key>[=<value>]):
  
    This are global defines to identify the Operating System family:
 
-   IOMTR_OSFAMILY_NETWARE    Any Netware based Operating System
-   IOMTR_OSFAMILY_UNIX       Any UNIX, currently Linux and Solaris
-   IOMTR_OSFAMILY_WINDOWS    Any Windows based Operating System
+   IOMTR_OSFAMILY_NETWARE    Any Netware based operating system
+   IOMTR_OSFAMILY_UNIX       Any UNIX style operating system
+                             (currently Linux, OS X and Solaris)
+   IOMTR_OSFAMILY_WINDOWS    Any Windows based operating system
 
-   Note: The Operating System family could be autodetected by mapping the
+   Note: The operating system family could be autodetected by mapping the
          given IOMTR_OS_... value. But this implies, that every code- and
 	 headerfile includes IOCommon.h which is not given at this time.
 
  o IOMTR_OS_...
 
    This are global defines to identify the Operating System itself: 
-   IOMTR_OS_FREEBSD          FreeBSD, 32 bit *
-   IOMTR_OS_LINUX            Linux, 32 bit   
-   IOMTR_OS_LINUX64          Linux, 64 bit *
+   IOMTR_OS_FREEBSD          FreeBSD *
+   IOMTR_OS_LINUX            Linux (both 32 bit and 64 bit)
    IOMTR_OS_NETWARE          Novell Netware, 32 bit
    IOMTR_OS_OSX              Mac OS X, 64 bit
    IOMTR_OS_SOLARIS          Sun Solaris (64 bit)
@@ -183,21 +183,22 @@ find important global defines (-D<key>[=<value>]):
    This are _no_ global defines, but used in the iomtr_kstat module code,
    so they are listed here as well:
    IOMTR_OSVERSION_LINUX24   Linux, 2.4 kernel
-   IOMTR_OSVERSION_LINUX26   Linux, 2.6 kernel   
+   IOMTR_OSVERSION_LINUX26   Linux, 2.6 kernel
+   IOMTR_OSVERSION_LINUX30   Linux, 3.0 kernel *
    
    * = Not yet implemented / supported.
 
  o IOMTR_CPU_...
 
    This are global defines to identify the Processor / CPU itself: 
-   IOMTR_CPU_ALPHA           Alpa CPU (Digital->Compaq->HP) *
-   IOMTR_CPU_I386            Intel x86 processors (32 bit)
+   IOMTR_CPU_ALPHA           Alpha CPU (Digital->Compaq->HP) *
+   IOMTR_CPU_I386            Intel i386 based processors (32 bit)
    IOMTR_CPU_IA64            Intel Itanium family (64 bit)
    IOMTR_CPU_MIPS            MIPS CPU (used in SGI machines etc.) *
    IOMTR_CPU_PPC             PowerPC processor (Apple machines etc.)
    IOMTR_CPU_SPARC           Sun Sparc processor (64 bit)
    IOMTR_CPU_X86_64          AMD x86 with 64 bit extention and
-                             Intel Xeon with EM64T
+                             Intel Xeon with EM64T (64 bit)
    IOMTR_CPU_XSCALE          Intel XScale processor
     
    * = Not yet implemented / supported.
@@ -208,10 +209,10 @@ find important global defines (-D<key>[=<value>]):
    active by default. Such parts of the code can be dangerous or require
    non standard libraries: 
    
-   IOMTR_SETTING_CPU_AFFINITY  Enables the CPU affinity support within the
-                               coding - currently supported on Linux and
-			       Windows only (on other platforms this code
-			       does nothing).
+   IOMTR_SETTING_CPU_AFFINITY  Enables the process affinity support within 
+                               the coding - currently supported on Linux 
+                               and Windows only (on other platforms this 
+                               code does nothing).
    IOMTR_SETTING_GCC_M64       The GCC compiler used for Linux builds have
                                a (GCC) build time option to make pointers
                                and longs 64 bits. Useful only on 64 bit
@@ -557,8 +558,7 @@ A.2 Dynamo
       IOManager.cpp implements the platform independent as well as the
       Windows related stuff.
       IOManagerLinux.cpp and IOManagerSolaris.cpp contains coding related
-      to that platforms - the differenciation is done by cheating with
-      defines.
+      to that platforms - implementations are switched by global defines.
 
     - IOGrunt.h               (Grunt)
     - IOGrunt.cpp             (Grunt)

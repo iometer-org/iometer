@@ -122,6 +122,15 @@ CGalileoApp::~CGalileoApp()
 	delete login_port;
 }
 
+void CGalileoApp::CloseAllDocuments(BOOL bEndSession) 
+{
+	if (bEndSession)
+   {
+      m_wndStatusBar.DestroyWindow();
+      m_wndToolBar.DestroyWindow();
+   }
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // The one and only CGalileoApp object
 

@@ -699,7 +699,7 @@ void Syntax(const char *errmsg /*=NULL*/ )
 	cout << "              this particular Dynamo instance."                               << endl;
 	cout << "              Please make sure, that the computer where Iometer is running"   << endl;
 	cout << "              on, can actually ping this host name successfully. Otherwise"   << endl;
-	cout << "              Dynamo and Iometer will hand a long time during login."         << endl;
+	cout << "              Dynamo and Iometer will hang a long time during login."         << endl;
 	cout << endl;
 	cout << "       -n dynamo_name" << endl;
 	cout << "              In the Iometer GUI, the different Dynamo instances are listed"  << endl;

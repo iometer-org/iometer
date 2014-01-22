@@ -438,8 +438,8 @@ void CPageAccess::Remove()
 //
 void CPageAccess::ShowAssignedAccess()
 {
-	int m, w, s, mgr_count, wkr_count, spec_count;
-	Manager *mgr;
+	int m, w, s, mgr_count, wkr_count = 0, spec_count;
+	Manager *mgr = NULL;
 	Worker *wkr = NULL;
 	Test_Spec *spec;
 
@@ -546,7 +546,7 @@ void CPageAccess::SetAssignedAccess(BOOL enable)
 {
 	Manager *mgr;
 	Worker *wkr;
-	BOOL enabling_worker;
+	BOOL enabling_worker = FALSE;
 
 	// Get the currently selected manager and worker.
 	switch (theApp.pView->m_pWorkerView->GetSelectedType()) {

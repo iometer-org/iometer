@@ -2545,6 +2545,7 @@ BOOL Worker::LoadConfigTargets(ICF_ifstream & infile)
 				ErrorMessage("While restoring network worker target assignments, "
 					     "remote manager could not be found in the ManagerMap.  "
 					     "Please report this as an Iometer bug.");
+				return FALSE;
 			}
 
 			remote_nic_total = remote_manager->InterfaceCount(tgt_type);

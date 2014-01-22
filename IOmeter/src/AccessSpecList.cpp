@@ -872,7 +872,7 @@ BOOL AccessSpecList::SaveResults(ostream & outfile)
 
 	outfile << "'End access specifications" << endl;
 
-	delete spec_active;
+	delete [] spec_active;
 
 	return TRUE;
 }

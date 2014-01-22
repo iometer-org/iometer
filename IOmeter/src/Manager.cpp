@@ -1735,7 +1735,7 @@ BOOL Manager::LoadConfig(ICF_ifstream & infile, BOOL load_aspecs, BOOL load_targ
 	CString key, value;
 	int counter;
 	CString wkr_name, token;
-	TargetType wkr_type_hex;
+	TargetType wkr_type_hex = InvalidType;
 	Worker *wkr;
 	int wkr_count, wkr_svr_count;
 

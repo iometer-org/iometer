@@ -87,9 +87,10 @@ IMPLEMENT_DYNAMIC(CICFOpenDialog, CFileDialog)
 
 /////////////////////////////////////////////////////////////////////////////
 // CICFOpenDialog dialog
-    CICFOpenDialog::CICFOpenDialog()
-:  CFileDialog(TRUE, "icf", "", NULL,
-	    "Iometer Configuration Files (*.icf)|*.icf|" "Text Files (*.txt)|*.txt|All Files (*.*)|*.*||")
+   CICFOpenDialog::CICFOpenDialog()
+:  CFileDialog(TRUE, "icf", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, 
+	            "Iometer Configuration Files (*.icf)|*.icf|" "Text Files (*.txt)|*.txt|All Files (*.*)|*.*||", 
+               NULL, 0UL, FALSE)
 {
 	CString title;
 	char *buf;
@@ -104,9 +105,6 @@ IMPLEMENT_DYNAMIC(CICFOpenDialog, CFileDialog)
 	
 	m_ofn.lpTemplateName = MAKEINTRESOURCE(IDD_FILEOPEN_OPTS);
 
-	// This is key to getting the templates working properly and secondary opens to work at all?!
-	m_bVistaStyle = FALSE;
-	
 	//{{AFX_DATA_INIT(CICFOpenDialog)
 	isCkTestSetup = TRUE;
 	isCkResultsDisplay = TRUE;

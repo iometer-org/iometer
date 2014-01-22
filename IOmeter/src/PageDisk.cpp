@@ -324,7 +324,7 @@ void CPageDisk::ShowTargets()
 	Manager *manager;
 	Target_Spec *disk;
 	TV_INSERTSTRUCT tvstruct;
-	HTREEITEM hLastLogicalParent, hLastPhysicalParent;
+	HTREEITEM hLastLogicalParent = NULL, hLastPhysicalParent = NULL;
 
 	manager = theApp.pView->m_pWorkerView->GetSelectedManager();
 	if (!manager)

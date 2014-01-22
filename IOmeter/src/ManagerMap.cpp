@@ -236,39 +236,34 @@ BOOL ManagerMap::IsThisManagerNeeded(const Manager * const mgr)
 void ManagerMap::SpawnLocalManagers()
 {
 	int mapsize = map.GetSize();
+	CString nt_name;
+	DWORD namelength = MAX_NETWORK_NAME;
+
+	// Get the local machine's NetBIOS/NT name first.
+	// This can be done using CGalileoApp::IsAddressLocal, but that
+	// would match IP addresses as well, which is undesirable.
+	::GetComputerName(nt_name.GetBuffer(MAX_NETWORK_NAME), &namelength);
+	nt_name.ReleaseBuffer();	
 
 	// Go through each manager entry in the map.
 	for (int counter = 0; counter < mapsize; counter++) {
+
+		//
+		// Fix the failure to load managers when more than 1  are specified in an ICF file. 
+		// Looks for the netbios and "(Local)" names first, then match only the local 
+		// address to match the original behavior.
+		//
+		
 		// If this manager's address is local and the manager is unassigned...
-
-		if (map[counter].mgr == NULL && (theApp.IsAddressLocal(map[counter].address)
-						 || ((map[counter].address == "")	// "special local host" case
-						     && (map[counter].name.Compare(HOSTNAME_LOCAL) == 0)))) {
-			// Get the local machine's NetBIOS/NT name.
-			// This can be done using CGalileoApp::IsAddressLocal, but that
-			// would match IP addresses as well, which is undesirable.
-			CString nt_name;
-			DWORD namelength = MAX_NETWORK_NAME;
-
-			::GetComputerName(nt_name.GetBuffer(MAX_NETWORK_NAME), &namelength);
-			nt_name.ReleaseBuffer();
-
-			// See if it is necessary to specify a name parameter for this manager.
-
-			// If this local manager's name is the same as the local machine name,
-			// it is unnecessary to specify a name parameter.
-			//
-			// Old Dynamos don't support a name parameter and will close without
-			// attempting a connection to Iometer if a name parameter is specified.
-			// The user will not see any incompatible version notice in this case.
-			// When possible, using the name parameter should be avoided for this reason.
-			if ((nt_name.CompareNoCase(map[counter].name) == 0)
-			    || ((map[counter].address == "")	// "special local host" case
-				&& (map[counter].name.Compare(HOSTNAME_LOCAL) == 0))) {
-				// Spawn a Dynamo with the default name (the machine's name).
-				theApp.LaunchDynamo();
-			} else {
+		if (map[counter].mgr == NULL) {
+			if (((map[counter].address == "") && (map[counter].name.Compare(HOSTNAME_LOCAL) == 0))
+				|| (map[counter].name.CompareNoCase(nt_name) == 0) // match local netbios name only
+				){
+					// Spawn a Dynamo with local defaults
+					theApp.LaunchDynamo();
+			} else if (theApp.IsAddressLocal(map[counter].address)) {
 				// Spawn a Dynamo with the appropriate name parameter.
+				// For local Dynamo with a non-default name.
 				theApp.LaunchDynamo(" -n " + map[counter].name);
 			}
 		}

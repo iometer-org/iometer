@@ -204,17 +204,21 @@
 #if defined(IOMTR_OSFAMILY_WINDOWS)   // Only first, because it is needed here!
  //#define VC_EXTRALEAN
  //#pragma warning (disable: 4242)
+#include "StdAfx.h"
+//#define WIN32_LEAN_AND_MEAN 1
+//#include <Windows.h>
+//#include <windef.h>  
  #include <process.h>
  #include <io.h>
  #include <direct.h>
- #include <afxwin.h>
- #include <afxext.h>
- #include <afxcmn.h>
- #include <winioctl.h>
+// #include <afxwin.h>
+// #include <afxext.h>
+// #include <afxcmn.h>
  #include <iomanip>
  #include <winperf.h>
  #include <winreg.h>
- #include <afxmt.h>
+ #include <winioctl.h>
+// #include <afxmt.h>
  #include <malloc.h>
 #endif
 // ----------------------------------------------------------------------------

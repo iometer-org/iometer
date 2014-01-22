@@ -130,6 +130,7 @@ class CGalileoApp:public CWinApp {
 	virtual int ExitInstance();
 	virtual BOOL OnIdle(LONG lCount);
 	virtual CDocument *OpenDocumentFile(LPCTSTR lpszFileName);
+	virtual void CloseAllDocuments(BOOL bEndSession); 
 	//}}AFX_VIRTUAL
 
 // Implementation

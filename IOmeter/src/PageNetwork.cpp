@@ -392,7 +392,7 @@ void CPageNetwork::ShowTargetSelection()
 {
 	Manager *manager, *partner_manager;
 	Worker *worker, *partner_worker;
-	char *remote_address;
+	char *remote_address = NULL;
 	HTREEITEM hmgr;
 	HTREEITEM hifc;
 	int i, expected_worker;

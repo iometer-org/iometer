@@ -89,7 +89,7 @@
 /* ######################################################################### */
 
 #if defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)
-#include <afx.h>
+#include "StdAfx.h"
 #endif
 
 #include "IOPortTCP.h"

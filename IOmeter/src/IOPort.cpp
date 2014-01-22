@@ -81,6 +81,7 @@
 /* ######################################################################### */
 
 #if defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)
+#include "StdAfx.h"
 #include "GalileoApp.h"
 #endif
 #include "IOPort.h"

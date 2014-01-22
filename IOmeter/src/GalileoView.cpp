@@ -798,12 +798,20 @@ void CGalileoView::StartTest()
 	theApp.test_state = TestRampingUp;
 	run_index++;
 
+	// If IOmeter was invoked from the commandline with a config file, activate the display page
+	if (theApp.cmdline.GetConfigFile())
+	{
+		m_pPropSheet->SetActivePage(DISPLAY_PAGE);
+	}
+
 	m_pPageDisplay->Update();
 
 	// display BigMeter if need
 	if (theApp.cmdline.GetShowBigmeter())
+	{
 		m_pPageDisplay->ShowBigMeter(0);
-
+	}
+	
 	// Display the current test status.
 	UpdateTestStatus();
 

@@ -178,8 +178,8 @@ class Manager {
 	BOOL Set_Targets(int worker_no, int count, Target_Spec * target_specs);
 
 	// Processing messages aimed at disk stuff.
-	void Prepare_Disks(int target);
-	void Stop_Prepare(int target);
+	void Prepare_Disks();
+	void Stop_Prepare();
 
 	int Report_Disks(Target_Spec * disk_spec);
 #if defined(IOMTR_OSFAMILY_UNIX)

@@ -105,6 +105,7 @@ void CAccessDialog::DoDataExchange(CDataExchange * pDX)
 	//{{AFX_DATA_MAP(CAccessDialog)
 	DDX_Control(pDX, RReplySize, m_RReplySize);
 	DDX_Control(pDX, RNoReply, m_RNoReply);
+	DDX_Control(pDX, RAlignRequestSize, m_RAlignRequestSize);
 	DDX_Control(pDX, RAlignSector, m_RAlignSector);
 	DDX_Control(pDX, RAlignBytes, m_RAlignBytes);
 	DDX_Control(pDX, SReplyMegabytes, m_SReplyMegabytes);
@@ -155,6 +156,7 @@ BEGIN_MESSAGE_MAP(CAccessDialog, CDialog)
     ON_EN_KILLFOCUS(EAlignBytes, OnKillfocusEAligns)
     ON_NOTIFY(UDN_DELTAPOS, SBytes, OnDeltaposSSizes)
     ON_NOTIFY(UDN_DELTAPOS, SAlignBytes, OnDeltaposSAligns)
+	ON_BN_CLICKED(RAlignRequestSize, OnRAlignRequestSize)
     ON_BN_CLICKED(RAlignSector, OnRAlignSector)
     ON_BN_CLICKED(RAlignBytes, OnRAlignBytes)
     ON_EN_KILLFOCUS(EBurstLength, OnChangeBurst)
@@ -191,8 +193,8 @@ BOOL CAccessDialog::OnInitDialog()
 	m_SBytes.SetRange(0, MAX_SIZE_RANGE);
 	m_SAlignMegabytes.SetRange(0, MAX_SIZE_RANGE);
 	m_SAlignKilobytes.SetRange(0, MAX_SIZE_RANGE);
+	m_SAlignKilobytes.SetPos(2);
 	m_SAlignBytes.SetRange(0, MAX_SIZE_RANGE);
-	m_SAlignBytes.SetPos(512);
 	m_SReplyMegabytes.SetRange(0, MAX_SIZE_RANGE);
 	m_SReplyKilobytes.SetRange(0, MAX_SIZE_RANGE);
 	m_SReplyBytes.SetRange(0, MAX_SIZE_RANGE);
@@ -216,8 +218,6 @@ BOOL CAccessDialog::OnInitDialog()
 	size_controls.SBytesID = SBytes;
 	size_controls.SKilobytesID = SKilobytes;
 	size_controls.SMegabytesID = SMegabytes;
-	size_controls.RSelectedID = 0;
-	size_controls.RNotSelectedID = 0;
 
 	// 2462 SDK compiler didn't like the "this->" for Win64 so we'll just remove it
 	//  since it really isn't needed anyway...
@@ -238,8 +238,6 @@ BOOL CAccessDialog::OnInitDialog()
 	align_controls.SBytesID = SAlignBytes;
 	align_controls.SKilobytesID = SAlignKilobytes;
 	align_controls.SMegabytesID = SAlignMegabytes;
-	align_controls.RSelectedID = RAlignBytes;
-	align_controls.RNotSelectedID = RAlignSector;
 
 	// 2462 SDK compiler didn't like the "this->" for Win64 so we'll just remove it
 	//  since it really isn't needed anyway...
@@ -249,7 +247,7 @@ BOOL CAccessDialog::OnInitDialog()
 	align_controls.SetFunc = &CAccessDialog::SetAlign;
 
 // RSelectedID MUST be greater than RNotSelectedID, for the sake of GetCheckedRadioButton().
-#if !(RAlignBytes > RAlignSector)
+#if !(RAlignBytes > RAlignSector && RAlignSector > RAlignRequestSize )
 #error RAlignBytes is not greater than RAlignSector in resource.h!
 #endif
 
@@ -265,8 +263,6 @@ BOOL CAccessDialog::OnInitDialog()
 	reply_controls.SBytesID = SReplyBytes;
 	reply_controls.SKilobytesID = SReplyKilobytes;
 	reply_controls.SMegabytesID = SReplyMegabytes;
-	reply_controls.RSelectedID = RReplySize;
-	reply_controls.RNotSelectedID = RNoReply;
 
 	// 2462 SDK compiler didn't like the "this->" for Win64 so we'll just remove it
 	//  since it really isn't needed anyway...
@@ -354,11 +350,6 @@ DWORD CAccessDialog::GetMKBSpinners(MKBControls * which)
 //
 void CAccessDialog::EnableMKBControls(MKBControls * which, BOOL enabled)
 {
-	if (which->RSelectedID && which->RNotSelectedID) {
-		CheckRadioButton(which->RNotSelectedID, which->RSelectedID,
-				 (enabled ? which->RSelectedID : which->RNotSelectedID));
-	}
-
 	which->EMegabytesCtrl->EnableWindow(enabled);
 	which->EKilobytesCtrl->EnableWindow(enabled);
 	which->EBytesCtrl->EnableWindow(enabled);
@@ -382,7 +373,7 @@ void CAccessDialog::OnKillfocusESizes()
 //
 void CAccessDialog::OnKillfocusEAligns()
 {
-	if (GetCheckedRadioButton(RAlignSector, RAlignBytes) == RAlignBytes)
+	if (GetCheckedRadioButton(RAlignRequestSize, RAlignBytes) == RAlignBytes)
 		SetAlign(GetMKBEditbox(&align_controls));
 }
 
@@ -435,12 +426,6 @@ void CAccessDialog::OnDeltaposMKB(MKBControls * which, NMHDR * pNMHDR)
 	NM_UPDOWN *pNMUpDown = (NM_UPDOWN *) pNMHDR;
 	DWORD edited_size;
 
-	// Do not process spinner change if the RSelectedID radio button is specified and is not selected.
-	if (which->RSelectedID && which->RNotSelectedID &&
-	    (UINT) GetCheckedRadioButton(which->RNotSelectedID, which->RSelectedID)
-	    != which->RSelectedID) {
-		return;
-	}
 	// See if the user edited the value directly, then pressed the spin
 	// control.  If so, force an update of the edited value before processing
 	// the up/down spin.
@@ -654,6 +639,24 @@ void CAccessDialog::OnOK()
 //
 // User selected sector alignment radio button - disable byte align edit box, other stuff
 //
+void CAccessDialog::OnRAlignRequestSize()
+{
+	// Get the current alignment setting.
+	DWORD old_align = GetAlign();
+
+	// Disable the alignment controls.
+	EnableMKBControls(&align_controls, FALSE);
+
+	// Set the alignment in the access spec to "request size".
+	SetAlign(GetSize());
+
+	// Set the (disabled) alignment controls to the last value shown.
+	SetMKBSpinners(&align_controls, old_align);
+}
+
+//
+// User selected sector alignment radio button - disable byte align edit box, other stuff
+//
 void CAccessDialog::OnRAlignSector()
 {
 	// Get the current alignment setting.
@@ -661,10 +664,9 @@ void CAccessDialog::OnRAlignSector()
 
 	// Disable the alignment controls.
 	EnableMKBControls(&align_controls, FALSE);
+
 	// Set the alignment in the access spec to "sector".
 	SetAlign(0);
-	// Set the (disabled) alignment controls to the last value shown.
-	SetMKBSpinners(&align_controls, old_align);
 }
 
 //
@@ -884,13 +886,14 @@ BOOL CAccessDialog::InsertLine(Access_Spec * access_spec, int line_no)
 		m_EBurstLength.EnableWindow(TRUE);
 		m_RAlignBytes.EnableWindow(TRUE);
 		m_RAlignSector.EnableWindow(TRUE);
+		m_RAlignRequestSize.EnableWindow(TRUE);
 		m_RReplySize.EnableWindow(TRUE);
 		m_RNoReply.EnableWindow(TRUE);
 		m_BInsertBefore.EnableWindow(TRUE);
 		m_BDelete.EnableWindow(TRUE);
 		m_BOk.EnableWindow(TRUE);
 
-		if (GetCheckedRadioButton(RAlignSector, RAlignBytes) == RAlignBytes) {
+		if (GetCheckedRadioButton(RAlignRequestSize, RAlignBytes) == RAlignBytes) {
 			m_EAlignMegabytes.EnableWindow(TRUE);
 			m_EAlignKilobytes.EnableWindow(TRUE);
 			m_EAlignBytes.EnableWindow(TRUE);
@@ -938,6 +941,7 @@ BOOL CAccessDialog::DeleteLine()
 		m_EBurstLength.EnableWindow(FALSE);
 		m_RAlignBytes.EnableWindow(FALSE);
 		m_RAlignSector.EnableWindow(FALSE);
+		m_RAlignRequestSize.EnableWindow(FALSE);
 		m_EAlignMegabytes.EnableWindow(FALSE);
 		m_EAlignKilobytes.EnableWindow(FALSE);
 		m_EAlignBytes.EnableWindow(FALSE);
@@ -965,26 +969,50 @@ BOOL CAccessDialog::DeleteLine()
 //
 void CAccessDialog::SetAll(Access_Spec * spec)
 {
+	// setup the align radio controls
+	if (!spec->align)
+	{
+		EnableMKBControls(&align_controls, FALSE);
+
+		// Set the (disabled) alignment controls to 512 bytes (standard sector size).
+		SetMKBSpinners(&align_controls, 512);
+
+		CheckRadioButton(RAlignRequestSize, RAlignBytes, RAlignSector);
+	}
+	else if(spec->align == spec->size)
+	{
+		EnableMKBControls(&align_controls, FALSE);
+
+		CheckRadioButton(RAlignRequestSize, RAlignBytes, RAlignRequestSize);
+	}
+	else
+	{
+		EnableMKBControls(&align_controls, TRUE);
+
+		CheckRadioButton(RAlignRequestSize, RAlignBytes, RAlignBytes);
+	}
+
+	EnableMKBControls(&reply_controls, spec->reply);
+	if (!spec->reply)
+	{
+		// Set the (disabled) reply size controls to the current transfer size.
+		SetMKBSpinners(&reply_controls, spec->size);
+
+		CheckRadioButton(RNoReply, RReplySize, RNoReply);
+	}
+	else
+	{
+		CheckRadioButton(RNoReply, RReplySize, RReplySize);
+	}
+
 	SetSize(spec->size);
 	SetAccess(spec->of_size);
 	SetReads(spec->reads);
 	SetRandom(spec->random);
 	SetDelay(spec->delay);
 	SetBurst(spec->burst);
-
 	SetAlign(spec->align);
-	EnableMKBControls(&align_controls, spec->align);
-	if (!spec->align) {
-		// Set the (disabled) alignment controls to 512 bytes (standard sector size).
-		SetMKBSpinners(&align_controls, 512);
-	}
-
 	SetReply(spec->reply);
-	EnableMKBControls(&reply_controls, spec->reply);
-	if (!spec->reply) {
-		// Set the (disabled) reply size controls to the current transfer size.
-		SetMKBSpinners(&reply_controls, spec->size);
-	}
 }
 
 //
@@ -1142,8 +1170,11 @@ void CAccessDialog::SetAlign(DWORD align)
 
 	m_LAccess.SetItemText(item_being_changed, LAccessAlignment, buffer);
 
-	// Update the controls.
-	SetMKBSpinners(&align_controls, align);
+	if(m_RAlignBytes.GetCheck() == BST_CHECKED)
+	{
+		// Update the controls.
+		SetMKBSpinners(&align_controls, align);
+	}
 
 	UpdateData(FALSE);
 }
@@ -1201,6 +1232,12 @@ void CAccessDialog::SetSize(DWORD size)
 	// to the new transfer size.
 	if ((UINT) GetCheckedRadioButton(RNoReply, RReplySize) != RReplySize)
 		SetMKBSpinners(&reply_controls, size);
+
+	// if aligning on request size, change the alignment
+	if(m_RAlignRequestSize.GetCheck() == BST_CHECKED)
+	{
+		SetAlign(size);
+	}
 
 	UpdateData(FALSE);
 }

@@ -1224,7 +1224,9 @@ BOOL TargetDisk::Prepare(DWORDLONG * prepare_offset, volatile TestState * test_s
 	BOOL retval;
 	int i;
 	void *buffer = NULL;
-	DWORD bytes;
+	DWORD bytes; // static to aid switch to single sectors to finish up preparing
+	BOOL onSingleSectors = FALSE; // mark if a switch needs to be made to single sector writes
+	BOOL singleSectorSwitch = FALSE; // mark that single sectors are being used to write
 	DWORDLONG rand_seed;
 #ifdef IOMTR_SETTING_LINUX_LIBAIO
  	struct statfs fsInfo;
@@ -1323,6 +1325,13 @@ BOOL TargetDisk::Prepare(DWORDLONG * prepare_offset, volatile TestState * test_s
 	}
 
 	do {
+		// if marked to switch to single sectors, do so now
+		if(onSingleSectors)
+		{
+			singleSectorSwitch = TRUE;
+			bytes = sector_size;
+		}
+
 		// If we're still writing and there are any available slots, queue up some
 		// writes.
 		if ((*test_state == TestPreparing) && write_ok && (num_outstanding < PREPARE_QDEPTH)) {
@@ -1340,7 +1349,14 @@ BOOL TargetDisk::Prepare(DWORDLONG * prepare_offset, volatile TestState * test_s
 #endif
 					// Stop writing and break out of the write loop.
 					write_ok = FALSE;
-					break;
+					
+					// if not already doing single sectors, mark it now
+					if(!singleSectorSwitch)
+					{
+						onSingleSectors = TRUE;
+					}
+					else
+						break;
 				}
 #ifdef IOMTR_SETTING_LINUX_LIBAIO
 				statResult = fstatfs(fd, &fsInfo);
@@ -1413,7 +1429,15 @@ BOOL TargetDisk::Prepare(DWORDLONG * prepare_offset, volatile TestState * test_s
 #endif
 							// Stop writing and break out of the write loop.
 							write_ok = FALSE;
-							break;
+
+							// if not already doing single sectors, mark it now
+							if(!singleSectorSwitch)
+							{
+								onSingleSectors = TRUE;
+							}
+							else
+								break;
+
 						} else {
 							// It didn't start OK!  Bail out.
 							cout << "***Error (immediately) writing " << bytes_written <<
@@ -1470,6 +1494,13 @@ BOOL TargetDisk::Prepare(DWORDLONG * prepare_offset, volatile TestState * test_s
 						write_ok = FALSE;
 						busy[i] = FALSE;
 						num_outstanding--;
+
+						// if not already doing single sectors, mark it now
+						if(!singleSectorSwitch)
+						{
+							onSingleSectors = TRUE;
+						}
+
 					} else {
 						// The I/O failed!  Bail out.
 						cout << "***Error (eventually) writing " << bytes_written << " of " <<
@@ -1485,6 +1516,10 @@ BOOL TargetDisk::Prepare(DWORDLONG * prepare_offset, volatile TestState * test_s
 				}
 			}
 		}		// Done checking for I/O completions.
+
+		// don't quit until single sectors had a chance to write to complete filling
+		if(!singleSectorSwitch)
+			write_ok = TRUE;
 	}
 	while ((*test_state == TestPreparing) && (write_ok || (num_outstanding > 0)));
 	// Keep looping until (the user tells us to stop) OR 

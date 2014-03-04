@@ -429,7 +429,9 @@ void ManagerList::SaveResults(ostream * file, int access_index, int result_type)
 	    << "Total Raw Run Time,Starting Sector,Maximum Size,Queue Depth,"
 	    << "% CPU Utilization,% User Time,% Privileged Time,% DPC Time,"
 	    << "% Interrupt Time,Processor Speed,Interrupts per Second,"
-	    << "CPU Effectiveness,Packets/Second,Packet Errors," << "Segments Retransmitted/Second" << endl;
+		<< "CPU Effectiveness,Packets/Second,Packet Errors," << "Segments Retransmitted/Second"
+		<< ",0 to 50 uS,50 to 100 uS,100 to 200 uS,200 to 500 uS,0.5 to 1 mS,1 to 2 mS,2 to 5 mS,5 to 10 mS,10 to 15 mS,15 to 20 mS,20 to 30 mS,30 to 50 mS,50 to 100 mS,100 to 200 mS,200 to 500 mS,0.5 to 1 S,1 to 2 s,2 to 4.7 s,4.7 to 5 s,5 to 10 s, >= 10 s"
+		<< endl;
 
 	// Writing manager list results
 
@@ -492,6 +494,10 @@ void ManagerList::SaveResults(ostream * file, int access_index, int result_type)
 	for (stat = 0; stat < TCP_RESULTS; stat++)
 		(*file) << "," << results[WHOLE_TEST_PERF].tcp_statistics[stat];
 
+	for (stat = 0; stat < LATENCY_BIN_SIZE; stat++) {
+		(*file) << "," << results[WHOLE_TEST_PERF].raw.latency_bin[stat];
+	}
+
 	(*file) << endl;
 
 	// If requested, save manager results.
@@ -512,7 +518,7 @@ void ManagerList::SaveResults(ostream * file, int access_index, int result_type)
 // Calculation intensive code to determine the combined performance for
 // all managers and their workers.  Programmers beware.
 //
-void ManagerList::UpdateResults(int which_perf)
+void ManagerList::UpdateResults(int which_perf, bool instantaneousDump)
 {
 	Manager *manager;
 
@@ -540,7 +546,7 @@ void ManagerList::UpdateResults(int which_perf)
 			continue;
 		}
 		// Request an update from all managers and process the results.
-		manager->UpdateResults(which_perf);
+		manager->UpdateResults(which_perf, instantaneousDump);
 
 		// Recording error results.
 		results[which_perf].total_errors += manager->results[which_perf].total_errors;
@@ -612,6 +618,10 @@ void ManagerList::UpdateResults(int which_perf)
 		}
 		for (stat = 0; stat < NI_COMBINE_RESULTS; stat++) {
 			results[which_perf].ni_statistics[stat] += manager->results[which_perf].ni_statistics[stat];
+		}
+
+		for (stat = 0; stat < LATENCY_BIN_SIZE; stat++) {
+			results[which_perf].raw.latency_bin[stat] += manager->results[which_perf].raw.latency_bin[stat];
 		}
 	}
 	if (results[which_perf].raw.read_count || results[which_perf].raw.write_count) {
@@ -1599,4 +1609,98 @@ BOOL ManagerList::GetManagerInfo(ICF_ifstream & infile, CString & manager_name, 
 	network_name = value;
 
 	return TRUE;
+}
+
+void ManagerList::SaveResultsInstantaneous(ostream * file, int access_index, int result_type)
+{
+	char specname[MAX_WORKER_NAME];
+	int stat = 0;
+	struct _timeb tb;
+	struct tm *ptm;
+	char acDummy[64];
+	// Writing manager list results
+
+	_ftime(&tb);
+	ptm = localtime(&tb.time);
+	snprintf(acDummy, 64, "%04d-%02d-%02d %02d:%02d:%02d:%003d", ptm->tm_year + 1900,
+	ptm->tm_mon + 1, ptm->tm_mday, ptm->tm_hour, ptm->tm_min, ptm->tm_sec, tb.millitm);
+
+	(*file) << acDummy << "," << "ALL" << "," << "All" << "," << GetCommonAccessSpec(access_index, specname)
+	    << "," << ManagerCount(ActiveType)
+	    << "," << WorkerCount(ActiveType)
+	    << "," << TargetCount(ActiveType) + WorkerCount((TargetType) (GenericClientType | ActiveType))
+	    << "," << results[WHOLE_TEST_PERF].IOps
+	    << "," << results[WHOLE_TEST_PERF].read_IOps
+	    << "," << results[WHOLE_TEST_PERF].write_IOps
+	    << "," << results[WHOLE_TEST_PERF].MBps_Bin
+	    << "," << results[WHOLE_TEST_PERF].read_MBps_Bin
+	    << "," << results[WHOLE_TEST_PERF].write_MBps_Bin
+	    << "," << results[WHOLE_TEST_PERF].MBps_Dec
+	    << "," << results[WHOLE_TEST_PERF].read_MBps_Dec
+	    << "," << results[WHOLE_TEST_PERF].write_MBps_Dec
+	    << "," << results[WHOLE_TEST_PERF].transactions_per_second
+	    << "," << results[WHOLE_TEST_PERF].connections_per_second
+	    << "," << results[WHOLE_TEST_PERF].ave_latency
+	    << "," << results[WHOLE_TEST_PERF].ave_read_latency
+	    << "," << results[WHOLE_TEST_PERF].ave_write_latency
+	    << "," << results[WHOLE_TEST_PERF].ave_transaction_latency
+	    << "," << results[WHOLE_TEST_PERF].ave_connection_latency
+	    << "," << results[WHOLE_TEST_PERF].max_latency
+	    << "," << results[WHOLE_TEST_PERF].max_read_latency
+	    << "," << results[WHOLE_TEST_PERF].max_write_latency
+	    << "," << results[WHOLE_TEST_PERF].max_transaction_latency
+	    << "," << results[WHOLE_TEST_PERF].max_connection_latency
+	    << "," << results[WHOLE_TEST_PERF].total_errors
+	    << "," << results[WHOLE_TEST_PERF].raw.read_errors
+	    << "," << results[WHOLE_TEST_PERF].raw.write_errors
+	    << "," << results[WHOLE_TEST_PERF].raw.bytes_read
+	    << "," << results[WHOLE_TEST_PERF].raw.bytes_written
+	    << "," << results[WHOLE_TEST_PERF].raw.read_count
+	    << "," << results[WHOLE_TEST_PERF].raw.write_count
+	    << "," << results[WHOLE_TEST_PERF].raw.connection_count << ",";
+
+	if (GetConnectionRate(ActiveType) == ENABLED_VALUE)
+		(*file) << GetTransPerConn(ActiveType);
+	else
+		(*file) << AMBIGUOUS_VALUE;
+
+	(*file) << ",,,,,,,,,";	// unused raw results for manager list
+
+	(*file) << "," << GetDiskStart((TargetType) (GenericDiskType | ActiveType))
+	    << "," << GetDiskSize((TargetType) (GenericDiskType | ActiveType))
+	    << "," << GetQueueDepth(ActiveType);
+
+	for (stat = 0; stat < CPU_UTILIZATION_RESULTS; stat++)
+		(*file) << "," << results[WHOLE_TEST_PERF].CPU_utilization[stat];
+
+	(*file) << ","		// processor speed
+	    << "," << results[WHOLE_TEST_PERF].CPU_utilization[CPU_IRQ];
+
+	(*file) << "," << results[WHOLE_TEST_PERF].CPU_effectiveness;
+
+	for (stat = 0; stat < NI_COMBINE_RESULTS; stat++)
+		(*file) << "," << results[WHOLE_TEST_PERF].ni_statistics[stat];
+
+	for (stat = 0; stat < TCP_RESULTS; stat++)
+		(*file) << "," << results[WHOLE_TEST_PERF].tcp_statistics[stat];
+
+	for (stat = 0; stat < LATENCY_BIN_SIZE; stat++) {
+		(*file) << "," <<  results[WHOLE_TEST_PERF].raw.latency_bin[stat];
+	}
+
+	(*file) << endl;
+
+	//// If requested, save manager results.
+	//if (result_type == RecordAll || result_type == RecordNoTargets || result_type == RecordNoWorkers) {
+	//	for (int i = 0; i < ManagerCount(); i++)
+	//		GetManager(i)->SaveResults(file, access_index, result_type);
+	//}
+
+	// Write current timestamp into the result file
+	(*file) << "'Time Stamp" << endl;
+	_ftime(&tb);
+	ptm = localtime(&tb.time);
+	snprintf(acDummy, 64, "%04d-%02d-%02d %02d:%02d:%02d:%003d", ptm->tm_year + 1900,
+		ptm->tm_mon + 1, ptm->tm_mday, ptm->tm_hour, ptm->tm_min, ptm->tm_sec, tb.millitm);
+	(*file) << acDummy << endl;
 }

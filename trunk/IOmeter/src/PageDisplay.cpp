@@ -97,7 +97,7 @@ CPageDisplay::CPageDisplay():CPropertyPage(CPageDisplay::IDD)
 	//{{AFX_DATA_INIT(CPageDisplay)
 	//}}AFX_DATA_INIT
 
-	// Fill in conversion table of delay (ms) value for each setting of m_SUpdateDelay control
+	// Fill in conversion table of delay (ms) value for each setting of m_CUpdateFrequency control
 	delay_table[0] = 1000;
 	delay_table[1] = 2000;
 	delay_table[2] = 3000;
@@ -109,6 +109,8 @@ CPageDisplay::CPageDisplay():CPropertyPage(CPageDisplay::IDD)
 	delay_table[8] = 45000;
 	delay_table[9] = 60000;
 	delay_table[10] = 0;
+
+	isInstantaneousMode = false;
 }
 
 CPageDisplay::~CPageDisplay()
@@ -125,7 +127,10 @@ void CPageDisplay::DoDataExchange(CDataExchange * pDX)
 	DDX_Control(pDX, PRate4, m_PRate4);
 	DDX_Control(pDX, PRate5, m_PRate5);
 	DDX_Control(pDX, PRate6, m_PRate6);
-	DDX_Control(pDX, SUpdateDelay, m_SUpdateDelay);
+	DDX_Control(pDX, CUpdateFrequency, m_CUpdateFrequency);
+	DDX_Control(pDX, CRecordLastUpdate, m_CRecordLastUpdate);
+	DDX_Control(pDX, RAvgLastUpdate, m_CRAvgLastUpdate);
+	DDX_Control(pDX, RAvgWholeTest, m_CRAvgWholeTest);
 	//}}AFX_DATA_MAP
 }
 
@@ -133,9 +138,6 @@ BOOL CPageDisplay::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
 
-	// Init all display thingies.
-	m_SUpdateDelay.SetRange(0, (NUM_UPDATE_TIMES - 1));
-	m_SUpdateDelay.SetPageSize(1);
 	Initialize();		// Initialize most everything.
 
 	return TRUE;		// return TRUE unless you set the focus to a control
@@ -165,6 +167,8 @@ BEGIN_MESSAGE_MAP(CPageDisplay, CPropertyPage)
     ON_BN_CLICKED(BBigMeter4, OnBBigMeter4)
     ON_BN_CLICKED(BBigMeter5, OnBBigMeter5)
 	ON_BN_CLICKED(BBigMeter6, OnBBigMeter6)
+	ON_CBN_SELCHANGE(CUpdateFrequency, OnSelchangeCUpdateFrequency)
+	ON_BN_CLICKED(CRecordLastUpdate, OnCRecordLastUpdate)
     //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -685,8 +689,8 @@ BOOL CPageDisplay::GetDisplayData(Results * results, int result_type, double *re
 
 UINT CPageDisplay::GetUpdateDelay()
 {
-	// We know that the slider value will be in the range 0..(NUM_UPDATE_TIMES - 1)
-	return (delay_table[m_SUpdateDelay.GetPos()]);
+	// We know that the combo box value will be in the range 0..(NUM_UPDATE_TIMES - 1)
+	return (delay_table[m_CUpdateFrequency.GetCurSel()]);
 }
 
 void CPageDisplay::SetUpdateDelay(UINT new_delay)
@@ -701,7 +705,7 @@ void CPageDisplay::SetUpdateDelay(UINT new_delay)
 		}
 	}
 
-	m_SUpdateDelay.SetPos(new_setting);
+	m_CUpdateFrequency.SetCurSel(new_setting);
 }
 
 int CPageDisplay::GetWhichPerf()
@@ -722,14 +726,45 @@ void CPageDisplay::SetWhichPerf(int which_perf)
 	}
 }
 
-void CPageDisplay::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar * pScrollBar)
+// Update frequency has changed.
+void CPageDisplay::OnSelchangeCUpdateFrequency()
 {
-	// Treat moving the update frequency scroll bar as if the timer had expired.
-	if (pScrollBar == (CScrollBar *) & m_SUpdateDelay && nSBCode == SB_ENDSCROLL &&
-	    (theApp.test_state == TestRecording)) {
+	if(theApp.test_state == TestRecording)
+	{
 		theApp.pView->SetTimer(DISPLAY_TIMER, 0, NULL);
 	}
-	CPropertyPage::OnHScroll(nSBCode, nPos, pScrollBar);
+}
+
+// Enables and disables the instantaneous output depending on the check box state.
+void CPageDisplay::OnCRecordLastUpdate()
+{
+	isInstantaneousMode = m_CRecordLastUpdate.GetCheck() == TRUE;
+
+	if(isInstantaneousMode)
+	{
+		SetWhichPerf(LAST_UPDATE_PERF);
+		m_CRAvgWholeTest.EnableWindow(FALSE);
+		SetUpdateDelay(1);
+	}
+	else
+	{
+		m_CRAvgWholeTest.EnableWindow(TRUE);
+	}
+}
+
+bool CPageDisplay::IsInstantaneousMode()
+{
+	return isInstantaneousMode;
+}
+
+void CPageDisplay::Enable(BOOL enable)
+{
+	m_CRecordLastUpdate.EnableWindow(enable);
+
+	if(m_CRecordLastUpdate.GetCheck())
+	{
+		m_CRAvgLastUpdate.EnableWindow(enable);
+	}
 }
 
 //
@@ -1048,7 +1083,14 @@ BOOL CPageDisplay::SaveConfig(ostream & outfile)
 	// Save settings for page as a whole.
 	outfile << "'RESULTS DISPLAY =======================" "========================================" << endl;
 
-	outfile << "'Update Frequency,Update Type" << endl << "\t" << GetUpdateDelay() / 1000;
+	outfile << "'Record Last Update Results,Update Frequency,Update Type" << endl << "\t";
+
+	if(IsInstantaneousMode())
+		outfile << "ENABLED";
+	else
+		outfile << "DISABLED";
+
+	outfile << "," << GetUpdateDelay() / 1000;
 
 	if (GetWhichPerf() == LAST_UPDATE_PERF)
 		outfile << "," << "LAST_UPDATE" << endl;
@@ -1109,7 +1151,17 @@ BOOL CPageDisplay::LoadConfig(const CString & infilename)
 
 		if (key.CompareNoCase("'END results display") == 0) {
 			break;
-		} else if (key.CompareNoCase("'Update Frequency,Update Type") == 0) {
+		} else if (key.CompareNoCase("'Record Last Update Results,Update Frequency,Update Type") == 0) {
+
+			CString record_last_update = ICF_ifstream::ExtractFirstToken(value);
+
+			if(record_last_update.CompareNoCase("ENABLED") == 0)
+				m_CRecordLastUpdate.SetCheck(TRUE);
+			else
+				m_CRecordLastUpdate.SetCheck(FALSE);
+
+			OnCRecordLastUpdate();
+
 			int update_frequency;
 			CString update_type;
 
@@ -1213,14 +1265,13 @@ BOOL CPageDisplay::LoadConfig(const CString & infilename)
 void CPageDisplay::OnRAvgLastUpdate()
 {
 	if (theApp.test_state == TestRecording)
-		theApp.manager_list.UpdateResults(LAST_UPDATE_PERF);
+		theApp.manager_list.UpdateResults(LAST_UPDATE_PERF, IsInstantaneousMode());
 	Update();
 }
 
 void CPageDisplay::OnRAvgWholeTest()
 {
 	if (theApp.test_state == TestRecording)
-		theApp.manager_list.UpdateResults(WHOLE_TEST_PERF);
+		theApp.manager_list.UpdateResults(WHOLE_TEST_PERF, IsInstantaneousMode());
 	Update();
 }
-

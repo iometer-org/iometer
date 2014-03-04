@@ -193,6 +193,7 @@ class CGalileoView:public CView {
 	CString result_file;
 	int noteTime;
 
+	void PrepareInstantaneousFile();
 	struct {
 		UINT nID;
 		BOOL enabled;

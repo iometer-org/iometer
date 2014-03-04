@@ -187,9 +187,8 @@ STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Results Display"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    CONTROL         "Start of Test",RAvgWholeTest,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,135,14,52,10
-    CONTROL         "Last Update",RAvgLastUpdate,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,135,27,53,10
-    CONTROL         "Slider1",SUpdateDelay,"msctls_trackbar32",TBS_AUTOTICKS | WS_GROUP | WS_TABSTOP,197,10,181,18
+    CONTROL         "Start of Test",RAvgWholeTest,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,213,15,52,10
+    CONTROL         "Last Update",RAvgLastUpdate,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,213,25,53,10
     CHECKBOX        "BResultType1",BResultType1,11,61,115,12,BS_LEFT | BS_PUSHLIKE | WS_GROUP
     CHECKBOX        "BResultType2",BResultType2,11,87,115,12,BS_LEFT | BS_PUSHLIKE
     CHECKBOX        "BResultType3",BResultType3,11,112,115,12,BS_LEFT | BS_PUSHLIKE
@@ -202,26 +201,15 @@ BEGIN
     PUSHBUTTON      ">",BBigMeter4,367,136,10,12
     PUSHBUTTON      ">",BBigMeter5,367,162,10,12
     PUSHBUTTON      ">",BBigMeter6,367,187,10,12
-    CTEXT           "1",IDC_STATIC,201,30,10,8
-    CTEXT           "2",IDC_STATIC,217,30,9,8
-    CTEXT           "3",IDC_STATIC,233,30,11,8
-    CTEXT           "4",IDC_STATIC,251,30,9,8
-    CTEXT           "5",IDC_STATIC,267,30,9,8
-    CTEXT           "10",IDC_STATIC,279,30,15,8
-    CTEXT           "15",IDC_STATIC,297,30,13,8
-    CTEXT           "30",IDC_STATIC,313,30,13,8
-    CTEXT           "45",IDC_STATIC,329,30,13,8
-    CTEXT           "60",IDC_STATIC,345,30,14,8
     CONTROL         "Progress1",PRate1,"msctls_progress32",PBS_SMOOTH | WS_BORDER,130,61,234,13
     CONTROL         "Progress1",PRate2,"msctls_progress32",PBS_SMOOTH | WS_BORDER,130,87,234,13
     LTEXT           "All Managers",TWorker1,130,53,63,8,SS_NOTIFY
     LTEXT           "All Managers",TWorker2,130,79,63,8,SS_NOTIFY
-    RTEXT           "oo",IDC_STATIC,359,29,13,8,NOT WS_GROUP
     CTEXT           "Worker1Rate",TRate1,191,53,120,8,SS_WORDELLIPSIS
     RTEXT           "Wrk1MAX",TRate1MAX,329,53,34,8
     CTEXT           "Worker2Rate",TRate2,191,79,120,8,SS_WORDELLIPSIS
     RTEXT           "Wrk2MAX",TRate2MAX,329,79,34,8
-    GROUPBOX        "Update Frequency (seconds)",IDC_STATIC,195,2,186,40
+    GROUPBOX        "Update Frequency (seconds)",IDC_STATIC,275,5,103,40
     GROUPBOX        "Display",IDC_STATIC,2,45,379,163
     CONTROL         "Progress1",PRate3,"msctls_progress32",PBS_SMOOTH | WS_BORDER,130,112,234,13
     LTEXT           "All Managers",TWorker3,130,104,63,8,SS_NOTIFY
@@ -240,7 +228,10 @@ BEGIN
     CTEXT           "Worker6Rate",TRate6,191,179,120,8,SS_WORDELLIPSIS
     RTEXT           "Wrk6MAX",TRate6MAX,329,179,34,8
     CTEXT           "Drag managers and workers\nfrom the Topology window\nto the progress bar of your choice. ",IDC_STATIC,12,12,114,26
-    GROUPBOX        "Results Since",IDC_STATIC,129,2,61,40
+    GROUPBOX        "Results Since",IDC_STATIC,204,5,70,40
+    COMBOBOX        CUpdateFrequency,303,19,48,78,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Record last update results to file",CRecordLastUpdate,
+                    "Button",BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,126,5,73,40
 END
 
 IDD_ABOUTBOX DIALOG  0, 0, 253, 159
@@ -265,10 +256,10 @@ BEGIN
     CTEXT           "Topology",IDC_STATIC,3,0,88,8
 END
 
-IDD_SETUP DIALOG  0, 0, 383, 210
+IDD_SETUP DIALOGEX 0, 0, 383, 210
 STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Test Setup"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
     LTEXT           "Test Description",IDC_STATIC,2,5,52,8
     EDITTEXT        ETestName,2,14,378,14,ES_AUTOHSCROLL
@@ -367,18 +358,19 @@ BEGIN
     GROUPBOX        "Burst Length",IDC_STATIC,240,217,65,27
     EDITTEXT        EBurstLength,246,225,37,12,ES_AUTOHSCROLL | ES_NUMBER
     LTEXT           "I/Os",IDC_STATIC,286,228,15,8
-    GROUPBOX        "Align I/Os on",IDC_STATIC,333,203,140,46
-    CONTROL         "Sector Boundaries",RAlignSector,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,340,214,90,8
-    CONTROL         "",RAlignBytes,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,340,227,10,8
-    EDITTEXT        EAlignMegabytes,352,225,34,12,ES_AUTOHSCROLL | ES_NUMBER
-    CONTROL         "Spin1",SAlignMegabytes,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,380,222,11,17
-    EDITTEXT        EAlignKilobytes,391,225,34,12,ES_AUTOHSCROLL | ES_NUMBER
-    CONTROL         "Spin1",SAlignKilobytes,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,419,222,11,17
-    EDITTEXT        EAlignBytes,430,225,34,12,ES_AUTOHSCROLL | ES_NUMBER
-    CONTROL         "Spin1",SAlignBytes,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,458,222,11,17
-    CTEXT           "Megabytes",TAlignMegabytes,350,238,37,8
-    CTEXT           "Kilobytes",TAlignKilobytes,390,238,37,8
-    CTEXT           "Bytes",TAlignBytes,429,238,37,8
+    GROUPBOX        "Align I/Os on",IDC_STATIC,333,203,140,63
+	CONTROL         "Request Size Boundaries",RAlignRequestSize,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,340,214,90,8
+    CONTROL         "Sector Boundaries",RAlignSector,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,340,226,90,8
+    CONTROL         "",RAlignBytes,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,340,239,10,8
+    EDITTEXT        EAlignMegabytes,352,237,34,12,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "Spin1",SAlignMegabytes,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,380,234,11,17
+    EDITTEXT        EAlignKilobytes,391,237,34,12,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "Spin1",SAlignKilobytes,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,419,234,11,17
+    EDITTEXT        EAlignBytes,430,237,34,12,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "Spin1",SAlignBytes,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,458,234,11,17
+    CTEXT           "Megabytes",TAlignMegabytes,350,250,37,8
+    CTEXT           "Kilobytes",TAlignKilobytes,390,250,37,8
+    CTEXT           "Bytes",TAlignBytes,429,250,37,8
     GROUPBOX        "Reply Size",IDC_STATIC,10,258,140,46
     CONTROL         "No Reply",RNoReply,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,17,269,90,8
     CONTROL         "",RReplySize,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,17,282,10,8
@@ -569,11 +561,13 @@ BEGIN
         RIGHTMARGIN, 473
         VERTGUIDE, 170
         VERTGUIDE, 333
+        VERTGUIDE, 340
         TOPMARGIN, 5
         BOTTOMMARGIN, 304
         HORZGUIDE, 148
         HORZGUIDE, 203
         HORZGUIDE, 258
+        HORZGUIDE, 266
     END
 
     IDD_NETWORKS, DIALOG
@@ -824,6 +818,33 @@ BEGIN
 0x7350, 0x7565, 0x6f64, 0x7220, 0x6e61, 0x6f64, 0x006d, 
     CDataPattern, 0x403, 12, 0
 0x7546, 0x6c6c, 0x7220, 0x6e61, 0x6f64, 0x006d, 
+    0
+END
+
+IDD_DISPLAY DLGINIT
+BEGIN
+    CUpdateFrequency, 0x403, 2, 0
+0x0031, 
+    CUpdateFrequency, 0x403, 2, 0
+0x0032, 
+    CUpdateFrequency, 0x403, 2, 0
+0x0033, 
+    CUpdateFrequency, 0x403, 2, 0
+0x0034, 
+    CUpdateFrequency, 0x403, 2, 0
+0x0035, 
+    CUpdateFrequency, 0x403, 3, 0
+0x3031, "\000" 
+    CUpdateFrequency, 0x403, 3, 0
+0x3531, "\000" 
+    CUpdateFrequency, 0x403, 3, 0
+0x3033, "\000" 
+    CUpdateFrequency, 0x403, 3, 0
+0x3534, "\000" 
+    CUpdateFrequency, 0x403, 3, 0
+0x3036, "\000" 
+    CUpdateFrequency, 0x403, 3, 0
+0x6f6f, "\000" 
     0
 END
 

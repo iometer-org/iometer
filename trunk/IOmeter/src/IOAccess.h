@@ -113,6 +113,9 @@ class Access {
 	int max_transfer;	// Maximum size of a transfer request for a test.
 
 	BOOL HasWrite();
+
+	double	latency_bin_values[LATENCY_BIN_SIZE];
+
       private:
 
 	ACCESS access_grid[MAX_ACCESS_SPECS];

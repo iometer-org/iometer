@@ -559,11 +559,10 @@ void Manager::SetTargetsToPrepare(int worker_index)
 //
 // Receives the answer to a prepare command.
 //
-BOOL Manager::PreparedAnswer(int worker_index)
+BOOL Manager::PreparedAnswer()
 {
 	Message msg;
 	int t, i;
-	Worker *wkr = GetWorker(worker_index);
 
 	// Get the notification message that the prepare is done.
 	Receive(&msg);
@@ -572,12 +571,19 @@ BOOL Manager::PreparedAnswer(int worker_index)
 	if (!msg.data)
 		return FALSE;
 
-	// Update the ready status of all disk targets that the worker prepared.
-	for (t = 0; t < wkr->TargetCount(); t++) {
-		// Find the worker's corresponding disk in the manager's disk list.
-		for (i = 0; i < InterfaceCount(GenericDiskType); i++) {
-			if (!strcmp(wkr->GetTarget(t)->spec.name, GetInterface(i, GenericDiskType)->name)) {
-				GetInterface(i, GenericDiskType)->disk_info.ready = TRUE;
+	Worker *wkr;
+	int w, wkr_count = WorkerCount();
+
+	for (w = 0; w < wkr_count; w++) {
+		wkr = GetWorker(w);
+
+		// Update the ready status of all disk targets that the worker prepared.
+		for (t = 0; t < wkr->TargetCount(); t++) {
+			// Find the worker's corresponding disk in the manager's disk list.
+			for (i = 0; i < InterfaceCount(GenericDiskType); i++) {
+				if (!strcmp(wkr->GetTarget(t)->spec.name, GetInterface(i, GenericDiskType)->name)) {
+					GetInterface(i, GenericDiskType)->disk_info.ready = TRUE;
+				}
 			}
 		}
 	}
@@ -669,6 +675,10 @@ void Manager::SaveResults(ostream * file, int access_index, int result_type)
 	for (stat = 0; stat < TCP_RESULTS; stat++)
 		(*file) << "," << results[WHOLE_TEST_PERF].tcp_statistics[stat];
 
+	for (int x = 0; x < LATENCY_BIN_SIZE; x++) {
+		(*file) << "," << results[WHOLE_TEST_PERF].raw.latency_bin[x];
+	}
+
 	(*file) << endl;
 
 	// Save individual CPU results.
@@ -692,14 +702,17 @@ void Manager::SaveResults(ostream * file, int access_index, int result_type)
 	// If requested, save workers' results.
 	if (result_type == RecordAll || result_type == RecordNoTargets) {
 		for (int i = 0; i < WorkerCount(); i++)
+		{
 			GetWorker(i)->SaveResults(file, access_index, result_type);
+			GetWorker(i)->SaveResultsInstantaneousWorkerAverage(access_index, result_type);
+		}
 	}
 }
 
 //
 // Updating the results stored with the manager.
 //
-void Manager::UpdateResults(int which_perf)
+void Manager::UpdateResults(int which_perf, bool instantaneousDump)
 {
 	Worker *worker;
 	Data_Message *data_msg;
@@ -783,7 +796,7 @@ void Manager::UpdateResults(int which_perf)
 			continue;
 		}
 		// Receive an update from a worker and process the results.
-		worker->UpdateResults(which_perf);
+		worker->UpdateResults(which_perf, instantaneousDump);
 
 		// Recording maximum time any of the workers ran.
 		if (worker->results[which_perf].raw.counter_time > results[which_perf].raw.counter_time)
@@ -849,6 +862,9 @@ void Manager::UpdateResults(int which_perf)
 		    worker->results[which_perf].raw.transaction_latency_sum;
 		results[which_perf].raw.connection_latency_sum +=
 		    worker->results[which_perf].raw.connection_latency_sum;
+
+		for (int x = 0; x < LATENCY_BIN_SIZE; x++)
+			results[which_perf].raw.latency_bin[x] += worker->results[which_perf].raw.latency_bin[x];
 
 		// Copying results only reported for the manager to the workers.
 		// This allows the results to be displayed in the results page in the GUI.

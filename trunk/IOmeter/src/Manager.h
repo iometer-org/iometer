@@ -205,13 +205,13 @@ class Manager {
 	BOOL SetAccess(int access_index);
 	BOOL SetTargets();
 	void SetTargetsToPrepare(int worker_index);
-	BOOL PreparedAnswer(int worker_index);
+	BOOL PreparedAnswer();
 	//
 	// Functions to deal with results.
 	void ResetResults(int which_perf);
 	void ResetAllResults();
 	void SaveResults(ostream * file, int access_index, int result_type);
-	void UpdateResults(int which_perf);
+	void UpdateResults(int which_perf, bool instantaneousDump);
 	//
 	// Results for the last run test
 	Results results[MAX_PERF];

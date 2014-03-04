@@ -644,8 +644,7 @@ BOOL Worker::SetTargets()
 
 //
 // Checks all targets to make sure that they're prepared to run, and marks those
-// that need to be as active.  If any need to be prepared, it sends a message
-// to Dynamo and begins preparing them.
+// that need to be as active.
 //
 void Worker::SetTargetsToPrepare()
 {
@@ -666,7 +665,6 @@ void Worker::SetTargetsToPrepare()
 	// Send a message to Dynamo to set the targets needing preparation.
 	theApp.test_state = TestPreparing;
 	SetTargets();
-	manager->Send(GetIndex(), PREP_DISKS);
 }
 
 //
@@ -745,6 +743,10 @@ void Worker::SaveResults(ostream * file, int access_index, int result_type)
 
 	for (stat = 0; stat < NI_COMBINE_RESULTS + TCP_RESULTS; stat++) {
 		(*file) << ",";	// Space for network results
+	}
+
+	for (stat = 0; stat < LATENCY_BIN_SIZE; stat++) {
+		(*file) << "," << results[WHOLE_TEST_PERF].raw.latency_bin[stat];
 	}
 
 	(*file) << endl;
@@ -874,6 +876,10 @@ void Worker::SaveResults(ostream * file, int access_index, int result_type)
 		for (stat = 0; stat < NI_COMBINE_RESULTS + TCP_RESULTS; stat++)
 			(*file) << ",";	// Space for network results
 
+		for (stat = 0; stat < LATENCY_BIN_SIZE; stat++) {
+			(*file) << "," << results[WHOLE_TEST_PERF].raw.latency_bin[stat];
+		}
+
 		(*file) << endl;
 	}
 	if (IsType(Type(), GenericClientType))
@@ -884,7 +890,7 @@ void Worker::SaveResults(ostream * file, int access_index, int result_type)
 // Updating the workers results for the last test.  This functions performs
 // some heavy duty calculations.  Enter at your own risk.
 //
-void Worker::UpdateResults(int which_perf)
+void Worker::UpdateResults(int which_perf, bool instantaneousDump)
 {
 	Data_Message *data_msg;
 	double run_time;
@@ -1016,6 +1022,9 @@ void Worker::UpdateResults(int which_perf)
 			raw->connection_count += raw_device_results->connection_count;
 			raw->transaction_count += raw_device_results->transaction_count;
 
+			for (int x = 0; x < LATENCY_BIN_SIZE; x++)
+				raw->latency_bin[x] += raw_device_results->latency_bin[x];
+
 			// Calculated results.
 			results[which_perf].MBps_Bin += device_results->MBps_Bin;
 			results[which_perf].read_MBps_Bin += device_results->read_MBps_Bin;
@@ -1091,6 +1100,11 @@ void Worker::UpdateResults(int which_perf)
 			raw->connection_latency_sum += raw_device_results->connection_latency_sum;
 		} else {
 			device_results->ave_connection_latency = (double)0;
+		}
+
+		if(which_perf>0 && instantaneousDump)
+		{
+			SaveResultsInstantaneous(device_results);
 		}
 	}
 
@@ -2594,4 +2608,183 @@ BOOL Worker::LoadConfigTargets(ICF_ifstream & infile)
 			return FALSE;
 		}
 	}
+}
+
+void Worker::SaveResultsInstantaneous(Results * device_results)
+{
+	ofstream file(theApp.instantaneous_file, ios::app);
+	int stat;
+
+	// Writing results for worker.
+	struct tm *ptm;
+	char acDummy[64];
+	struct _timeb tb;
+	_ftime(&tb);
+	ptm = localtime(&tb.time);
+	snprintf(acDummy, 64, "%04d-%02d-%02d %02d:%02d:%02d:%003d", ptm->tm_year + 1900,
+	ptm->tm_mon + 1, ptm->tm_mday, ptm->tm_hour, ptm->tm_min, ptm->tm_sec, tb.millitm);
+
+	(file) << acDummy /*time(NULL)*/ << "," << "WORKER" << "," << name << ",,,";	// space for managers running and workers running.
+
+		(file) << "," << 1;	// currently only 1 target (server) per client
+
+	(file) << "," << device_results->IOps
+	    << "," << device_results->read_IOps
+	    << "," << device_results->write_IOps
+	    << "," << device_results->MBps_Bin
+	    << "," << device_results->read_MBps_Bin
+	    << "," << device_results->write_MBps_Bin
+	    << "," << device_results->MBps_Dec
+	    << "," << device_results->read_MBps_Dec
+	    << "," << device_results->write_MBps_Dec
+	    << "," << device_results->transactions_per_second
+	    << "," << device_results->connections_per_second
+	    << "," << device_results->ave_latency
+	    << "," << device_results->ave_read_latency
+	    << "," << device_results->ave_write_latency
+	    << "," << device_results->ave_transaction_latency
+	    << "," << device_results->ave_connection_latency
+	    << "," << device_results->max_latency
+	    << "," << device_results->max_read_latency
+	    << "," << device_results->max_write_latency
+	    << "," << device_results->max_transaction_latency
+	    << "," << device_results->max_connection_latency
+	    << "," << device_results->total_errors
+	    << "," << device_results->raw.read_errors 
+		<< "," << device_results->raw.write_errors
+	    // Writing raw result information for completed I/Os.
+	    << "," << device_results->raw.bytes_read
+	    << "," << device_results->raw.bytes_written
+	    << "," << device_results->raw.read_count
+	    << "," << device_results->raw.write_count
+	    << "," << device_results->raw.connection_count << ",";
+
+	//if (GetConnectionRate(ActiveType) == ENABLED_VALUE)
+	//	(file) << GetTransPerConn(ActiveType);
+	//else
+		(file) << AMBIGUOUS_VALUE;
+
+	(file) << "," << device_results->raw.read_latency_sum
+		<< "," << device_results->raw.write_latency_sum
+	    << "," << device_results->raw.transaction_latency_sum
+	    << "," << device_results->raw.connection_latency_sum
+	    << "," << device_results->raw.max_raw_read_latency
+	    << "," << device_results->raw.max_raw_write_latency
+	    << "," << device_results->raw.max_raw_transaction_latency
+	    << "," << device_results->raw.max_raw_connection_latency
+	    << "," << device_results->raw.counter_time;
+
+	(file) << "," << GetDiskStart((TargetType) (GenericDiskType | ActiveType))
+	    << "," << GetDiskSize((TargetType) (GenericDiskType | ActiveType))
+	    << "," << GetQueueDepth(ActiveType);
+
+	for (stat = 0; stat < CPU_UTILIZATION_RESULTS; stat++)
+		(file) << ",";	// Space for CPU utilization
+
+	(file) << "," <<  manager->timer_resolution << ",,"; // Space for IRQ/sec, CPU_effectiveness
+
+	for (stat = 0; stat < NI_COMBINE_RESULTS + TCP_RESULTS; stat++) {
+		(file) << ",";	// Space for network results
+	}
+
+	for (stat = 0; stat < LATENCY_BIN_SIZE; stat++) {
+		(file) << "," << device_results->raw.latency_bin[stat];
+	}
+
+	(file) << endl;
+
+	file.close();
+}
+
+void Worker::SaveResultsInstantaneousWorkerAverage(int access_index, int result_type)
+{
+	ofstream file(theApp.instantaneous_file, ios::app);
+
+	int stat;
+
+	struct tm *ptm;
+	char acDummy[64];
+	struct _timeb tb;
+	_ftime(&tb);
+	ptm = localtime(&tb.time);
+	snprintf(acDummy, 64, "%04d-%02d-%02d %02d:%02d:%02d:%003d", ptm->tm_year + 1900,
+	ptm->tm_mon + 1, ptm->tm_mday, ptm->tm_hour, ptm->tm_min, ptm->tm_sec, tb.millitm);
+
+	// Saving combined results.
+	if (!ActiveInCurrentTest())
+		return;
+
+	// Writing results for worker.
+	(file) << acDummy << "," << "WORKER" << "," << name << "," << GetAccessSpec(access_index)->name << ",,";	// space for managers running and workers running.
+
+	if (IsType(Type(), GenericClientType))
+		(file) << "," << 1;	// currently only 1 target (server) per client
+	else
+		(file) << "," << TargetCount(ActiveType);
+
+	(file) << "," << results[WHOLE_TEST_PERF].IOps
+	    << "," << results[WHOLE_TEST_PERF].read_IOps
+	    << "," << results[WHOLE_TEST_PERF].write_IOps
+	    << "," << results[WHOLE_TEST_PERF].MBps_Bin
+	    << "," << results[WHOLE_TEST_PERF].read_MBps_Bin
+	    << "," << results[WHOLE_TEST_PERF].write_MBps_Bin
+	    << "," << results[WHOLE_TEST_PERF].MBps_Dec
+	    << "," << results[WHOLE_TEST_PERF].read_MBps_Dec
+	    << "," << results[WHOLE_TEST_PERF].write_MBps_Dec
+	    << "," << results[WHOLE_TEST_PERF].transactions_per_second
+	    << "," << results[WHOLE_TEST_PERF].connections_per_second
+	    << "," << results[WHOLE_TEST_PERF].ave_latency
+	    << "," << results[WHOLE_TEST_PERF].ave_read_latency
+	    << "," << results[WHOLE_TEST_PERF].ave_write_latency
+	    << "," << results[WHOLE_TEST_PERF].ave_transaction_latency
+	    << "," << results[WHOLE_TEST_PERF].ave_connection_latency
+	    << "," << results[WHOLE_TEST_PERF].max_latency
+	    << "," << results[WHOLE_TEST_PERF].max_read_latency
+	    << "," << results[WHOLE_TEST_PERF].max_write_latency
+	    << "," << results[WHOLE_TEST_PERF].max_transaction_latency
+	    << "," << results[WHOLE_TEST_PERF].max_connection_latency
+	    << "," << results[WHOLE_TEST_PERF].total_errors
+	    << "," << results[WHOLE_TEST_PERF].raw.read_errors << "," << results[WHOLE_TEST_PERF].raw.write_errors
+	    // Writing raw result information for completed I/Os.
+	    << "," << results[WHOLE_TEST_PERF].raw.bytes_read
+	    << "," << results[WHOLE_TEST_PERF].raw.bytes_written
+	    << "," << results[WHOLE_TEST_PERF].raw.read_count
+	    << "," << results[WHOLE_TEST_PERF].raw.write_count
+	    << "," << results[WHOLE_TEST_PERF].raw.connection_count << ",";
+
+	if (GetConnectionRate(ActiveType) == ENABLED_VALUE)
+		(file) << GetTransPerConn(ActiveType);
+	else
+		(file) << AMBIGUOUS_VALUE;
+
+	(file) << "," << results[WHOLE_TEST_PERF].raw.read_latency_sum
+	    << "," << results[WHOLE_TEST_PERF].raw.write_latency_sum
+	    << "," << results[WHOLE_TEST_PERF].raw.transaction_latency_sum
+	    << "," << results[WHOLE_TEST_PERF].raw.connection_latency_sum
+	    << "," << results[WHOLE_TEST_PERF].raw.max_raw_read_latency
+	    << "," << results[WHOLE_TEST_PERF].raw.max_raw_write_latency
+	    << "," << results[WHOLE_TEST_PERF].raw.max_raw_transaction_latency
+	    << "," << results[WHOLE_TEST_PERF].raw.max_raw_connection_latency
+	    << "," << results[WHOLE_TEST_PERF].raw.counter_time;
+
+	(file) << "," << GetDiskStart((TargetType) (GenericDiskType | ActiveType))
+	    << "," << GetDiskSize((TargetType) (GenericDiskType | ActiveType))
+	    << "," << GetQueueDepth(ActiveType);
+
+	for (stat = 0; stat < CPU_UTILIZATION_RESULTS; stat++)
+		(file) << ",";	// Space for CPU utilization
+
+	(file) << "," <<  manager->timer_resolution << ",,"; // Space for IRQ/sec, CPU_effectiveness
+
+	for (stat = 0; stat < NI_COMBINE_RESULTS + TCP_RESULTS; stat++) {
+		(file) << ",";	// Space for network results
+	}
+
+	for (stat = 0; stat < LATENCY_BIN_SIZE; stat++) {
+		(file) << "," << results[WHOLE_TEST_PERF].raw.latency_bin[stat];
+	}
+
+	(file) << endl;
+
+	file.close();
 }

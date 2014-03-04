@@ -856,17 +856,21 @@ BOOL AccessSpecList::SaveResults(ostream & outfile)
 		// Write access specifications to a file, data comma separated.
 		outfile << "'size,% of size,% reads,% random,delay,burst,align,reply" << endl;
 
-		for (int line_index = 0; line_index < MAX_ACCESS_SPECS; line_index++) {
+		for (int line_index = 0; line_index < MAX_ACCESS_SPECS; line_index++)
+		{
 			if (spec->access[line_index].of_size == IOERROR)
 				break;
+
 			outfile
-			    << spec->access[line_index].size << ","
-			    << spec->access[line_index].of_size << ","
-			    << spec->access[line_index].reads << ","
-			    << spec->access[line_index].random << ","
-			    << spec->access[line_index].delay << ","
-			    << spec->access[line_index].burst << ","
-			    << spec->access[line_index].align << "," << spec->access[line_index].reply << endl;
+				<< spec->access[line_index].size << ","
+				<< spec->access[line_index].of_size << ","
+				<< spec->access[line_index].reads << ","
+				<< spec->access[line_index].random << ","
+				<< spec->access[line_index].delay << ","
+				<< spec->access[line_index].burst << ","
+				<< spec->access[line_index].align << "," 
+				<< spec->access[line_index].reply << ",";
+			outfile << endl;
 		}
 	}
 
@@ -1226,7 +1230,7 @@ void AccessSpecList::InitAccessSpecLine(Access_Spec * spec_line)
 	spec_line->reads = 67;
 	spec_line->delay = 0;
 	spec_line->burst = 1;
-	spec_line->align = 0;
+	spec_line->align = spec_line->size;
 	spec_line->reply = 0;
 }
 

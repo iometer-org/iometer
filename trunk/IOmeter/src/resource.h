@@ -56,12 +56,13 @@
 #define SBytes                          1030
 #define SKilobytes                      1031
 #define SMegabytes                      1032
-#define RAlignSector                    1033
-#define RAlignBytes                     1034
-#define RNoReply                        1035
-#define SAlignMegabytes                 1036
-#define SAlignKilobytes                 1037
-#define SAlignBytes                     1038
+#define RAlignRequestSize               1033
+#define RAlignSector                    1034
+#define RAlignBytes                     1035
+#define RNoReply                        1036
+#define SAlignMegabytes                 1037
+#define SAlignKilobytes                 1038
+#define SAlignBytes                     1039
 #define GGlobalFrame                    1039
 #define RReplySize                      1040
 #define GAssignedFrame                  1041
@@ -131,6 +132,9 @@
 #define TCountdown                      1117
 #define LManagers                       1118
 #define CDataPattern                    1119
+#define CUpdateFrequency                1121
+#define IDC_CHECK1                      1122
+#define CRecordLastUpdate               1122
 #define TVersion                        2000
 #define TAccess                         2001
 #define TRandom                         2002
@@ -194,7 +198,6 @@
 #define SRead                           5000
 #define SRandom                         5001
 #define SAccess                         5002
-#define SUpdateDelay                    5003
 #define CTestType                       6000
 #define PRate1                          7000
 #define PRate2                          7001
@@ -257,9 +260,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        138
+#define _APS_NEXT_RESOURCE_VALUE        139
 #define _APS_NEXT_COMMAND_VALUE         10009
-#define _APS_NEXT_CONTROL_VALUE         1120
+#define _APS_NEXT_CONTROL_VALUE         1123
 #define _APS_NEXT_SYMED_VALUE           500
 #endif
 #endif

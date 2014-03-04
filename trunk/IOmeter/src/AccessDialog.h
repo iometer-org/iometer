@@ -88,10 +88,7 @@ struct MKBControls {
 	UINT SBytesID;
 	UINT SKilobytesID;
 	UINT SMegabytesID;
-	UINT RSelectedID;	// radio button indicating MKBControls are selected
-	UINT RNotSelectedID;	// radio button indicating MKBControls are not selected
-	// RSelectedID MUST be greater than RNotSelectedID, for the sake of GetCheckedRadioButton().
-	// If there are no controlling radio buttons, set both to zero.
+
 	 DWORD(CAccessDialog::*GetFunc) ();	// pointer to getter function
 	void (CAccessDialog::*SetFunc) (DWORD);	// pointer to setter function
 	// GetFunc and SetFunc are POINTERS TO MEMBER FUNCTIONS, which have a special syntax.
@@ -129,6 +126,7 @@ class CAccessDialog:public CDialog {
 	enum { IDD = IDD_ACCESSDLG };
 	CButton m_RReplySize;
 	CButton m_RNoReply;
+	CButton m_RAlignRequestSize;
 	CButton m_RAlignSector;
 	CButton m_RAlignBytes;
 	CSpinButtonCtrl m_SReplyMegabytes;
@@ -248,6 +246,7 @@ class CAccessDialog:public CDialog {
 	virtual void OnOK();
 	afx_msg void OnDeltaposSSizes(NMHDR * pNMHDR, LRESULT * pResult);
 	afx_msg void OnDeltaposSAligns(NMHDR * pNMHDR, LRESULT * pResult);
+	afx_msg void OnRAlignRequestSize();
 	afx_msg void OnRAlignSector();
 	afx_msg void OnRAlignBytes();
 	afx_msg void OnChangeBurst();

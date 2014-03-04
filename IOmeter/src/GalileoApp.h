@@ -85,6 +85,7 @@ class CGalileoApp:public CWinApp {
       public:
 	CGalileoApp();
 	~CGalileoApp();
+	CString instantaneous_file;
 
 	const char *GetVersionString(BOOL fWithDebugIndicator = FALSE);
 

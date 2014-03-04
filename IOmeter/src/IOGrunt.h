@@ -148,6 +148,7 @@ class Grunt {
 
 	int target_count;	// Number of disks/networks.
 	Access access_spec;	// Access specs for a test.
+	double timer_resolution;
 	void *read_data;	// Pointer to general data memory area for reading and writing.
 	void *write_data;
 	void *saved_write_data_pointer;

@@ -603,7 +603,7 @@ int Manager::Report_VIs(Target_Spec * vi_spec)
 //
 // Preparing drives for selected grunts.
 //
-void Manager::Prepare_Disks(int target)
+void Manager::Prepare_Disks()
 {
 	int i, loop_start, loop_finish;
 
@@ -613,26 +613,11 @@ void Manager::Prepare_Disks(int target)
 		GenerateRandomData();
 	}
 
-	if (target == ALL_WORKERS) {
-		// Preparing all grunts at the same time.  This requires a great
-		// amount of coordination on the part of Iometer to ensure that the
-		// grunts do not prepare the same drives.
-		for (i = 0; i < grunt_count; i++) {
-			if (!grunts[i]->Prepare_Disks()) {
-				// Send failure message back to Iometer.
-				msg.data = 0;
-				if (IsBigEndian()) {
-					(void)reorder(msg);
-				}
-				prt->Send(&msg);
-				return;
-			}
-		}
-		loop_start = 0;
-		loop_finish = grunt_count;
-	} else {
-		// Preparing a single grunt.
-		if (!grunts[target]->Prepare_Disks()) {
+	// Preparing all grunts at the same time.  This requires a great
+	// amount of coordination on the part of Iometer to ensure that the
+	// grunts do not prepare the same drives.
+	for (i = 0; i < grunt_count; i++) {
+		if (!grunts[i]->Prepare_Disks()) {
 			// Send failure message back to Iometer.
 			msg.data = 0;
 			if (IsBigEndian()) {
@@ -641,10 +626,10 @@ void Manager::Prepare_Disks(int target)
 			prt->Send(&msg);
 			return;
 		}
-
-		loop_start = target;
-		loop_finish = loop_start + 1;
 	}
+
+	loop_start = 0;
+	loop_finish = grunt_count;
 
 	// Peek to see if the prepare was be canceled by the user.
 	for (i = loop_start; i < loop_finish; i++) {
@@ -772,6 +757,8 @@ void Manager::Report_Results(int which_perf)
 					target_result->connection_latency_sum
 					    -= prev_target_result->connection_latency_sum;
 					target_result->counter_time -= prev_target_result->counter_time;
+					for(int x = 0; x < LATENCY_BIN_SIZE; x++)
+						target_result->latency_bin[x]  -= prev_target_result->latency_bin[x];
 
 					// Use values from prev_worker_performance for "max_" values.
 					target_result->max_raw_read_latency = prev_target_result->max_raw_read_latency;
@@ -887,7 +874,7 @@ BOOL Manager::Process_Message()
 #if _DETAILS
 		cout << "in Process_Message() : PREP_DISKS" << endl;
 #endif
-		Prepare_Disks(msg.data);
+		Prepare_Disks();
 		break;
 
 		// Signalling to stop disk preparation.
@@ -895,7 +882,7 @@ BOOL Manager::Process_Message()
 #if _DETAILS
 		cout << "in Process_Message() : STOP_PREPARE" << endl;
 #endif
-		Stop_Prepare(msg.data);
+		Stop_Prepare();
 		break;
 
 		// Reporting all targets accessible by this manager.
@@ -1230,15 +1217,12 @@ void Manager::Stop_Test(int target)
 //
 // Signalling to stop disk preparation.
 //
-void Manager::Stop_Prepare(int target)
+void Manager::Stop_Prepare()
 {
 	cout << "Stopping..." << endl << flush;
 
-	if (target == ALL_WORKERS)
-		for (int i = 0; i < grunt_count; i++)
-			grunts[i]->grunt_state = TestIdle;
-	else
-		grunts[target]->grunt_state = TestIdle;
+	for (int i = 0; i < grunt_count; i++)
+		grunts[i]->grunt_state = TestIdle;
 
 	cout << "   Stopped." << endl << flush;
 }
@@ -1428,6 +1412,7 @@ void Manager::Add_Workers(int count)
 		// Assign grunt to manager's data buffer by default.
 		grunts[grunt_count]->read_data = data;
 		grunts[grunt_count]->write_data = data;
+		grunts[grunt_count]->timer_resolution = perf_data[0].timer_resolution;
 		grunt_count++;
 		msg.data++;
 	}

@@ -206,7 +206,9 @@ class Worker {
 	void ResetResults(int which_perf);
 	void ResetAllResults();
 	void SaveResults(ostream * file, int access_index, int result_type);
-	void UpdateResults(int which_perf);
+	void SaveResultsInstantaneous(Results * device_results);
+	void SaveResultsInstantaneousWorkerAverage(int access_index, int result_type);
+	void UpdateResults(int which_perf, bool instantaneousDump);
 	//
 	// Results for last run test.
 	Results results[MAX_PERF];

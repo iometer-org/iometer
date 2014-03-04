@@ -557,6 +557,8 @@ typedef unsigned __int8     uint8_t;
 
 #define MAX_GUI_IOPS   ((uint32) -1) // max 32bit value
 
+#define LATENCY_BIN_SIZE 21
+
 // ----------------------------------------------------------------------------
 #if defined(IOMTR_OSFAMILY_NETWARE) || defined(IOMTR_OSFAMILY_UNIX)
  //param does not contain a valid internet address
@@ -718,6 +720,7 @@ struct Raw_Result
 	DWORDLONG    transaction_latency_sum;
 	DWORDLONG    connection_latency_sum;   // Application latencies for a Connection.
 	__int64	     counter_time;	       // Difference between ending and starting counter time stamps.
+	__int64		 latency_bin[LATENCY_BIN_SIZE];
 } STRUCT_ALIGN_IOMETER;
 // Storing results for all targets in a single structure.
 struct Target_Results

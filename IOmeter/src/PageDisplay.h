@@ -157,10 +157,15 @@ class CPageDisplay:public CPropertyPage {
 	void SelectManagerByName(int button, const char *mgr_name, const int mgr_id);
 	void SelectWorkerByName(int button, const char *wkr_name, const int wkr_id);
 	void SelectWorkerViewItem(const int bar_number);
+	bool IsInstantaneousMode();
+	void Enable(BOOL enable);
 // Dialog Data
 	//{{AFX_DATA(CPageDisplay)
 	enum { IDD = IDD_DISPLAY };
-	CSliderCtrl m_SUpdateDelay;
+	CComboBox m_CUpdateFrequency;
+	CButton m_CRecordLastUpdate;
+	CButton m_CRAvgLastUpdate;
+	CButton m_CRAvgWholeTest;
 	CProgressCtrl m_PRate1;
 	CProgressCtrl m_PRate2;
 	CProgressCtrl m_PRate3;
@@ -184,9 +189,10 @@ class CPageDisplay:public CPropertyPage {
 	// Generated message map functions
 	//{{AFX_MSG(CPageDisplay)
 	 virtual BOOL OnInitDialog();	// Inits everything.
-	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar * pScrollBar);	// Update the display when
 	afx_msg void OnRAvgLastUpdate();
 	afx_msg void OnRAvgWholeTest();
+	afx_msg void OnSelchangeCUpdateFrequency();
+	afx_msg void OnCRecordLastUpdate();
 	//}}AFX_MSG
 	 DECLARE_MESSAGE_MAP()
 	    // The OnBResultType[1..6]() functions are called in response to a click on one of the result
@@ -270,6 +276,7 @@ class CPageDisplay:public CPropertyPage {
 	} barcharts[NUM_STATUS_BARS];
 
 	int selected_button;
+	bool isInstantaneousMode;
 
 	UINT delay_table[NUM_UPDATE_TIMES];
 };

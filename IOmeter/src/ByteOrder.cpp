@@ -292,6 +292,9 @@ void reorder(Raw_Result & var)
 
 	reorder(var.counter_time);
 
+	for(int x = 0; x < LATENCY_BIN_SIZE; x++)
+		reorder(var.latency_bin[x]);
+
 	return;
 }
 

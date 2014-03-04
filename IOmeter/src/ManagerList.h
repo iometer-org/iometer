@@ -196,7 +196,8 @@ class ManagerList {
 	void ResetResults(int which_perf);
 	void ResetAllResults();
 	void SaveResults(ostream * file, int access_index, int result_type);
-	void UpdateResults(int which_perf);
+	void UpdateResults(int which_perf, bool instantaneousDump);
+	void SaveResultsInstantaneous(ostream * file, int access_index, int result_type);
 	//
 	// Results for the last run test.
 	Results results[MAX_PERF];

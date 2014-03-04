@@ -457,6 +457,7 @@ void CGalileoView::EnableWindow(BOOL enable)
 	m_pPageNetwork->EnableWindow(enable);
 	m_pPageAccess->EnableWindow(enable);
 	m_pPageSetup->EnableWindow(enable);
+	m_pPageDisplay->Enable(enable);
 }
 
 //
@@ -595,6 +596,7 @@ void CGalileoView::Go()
 		// file and not have the test record results.)
 		if (m_pPageSetup->result_type == RecordNone)
 			m_pPageSetup->result_type = RecordAll;
+
 	} else if (m_pPageSetup->result_type != RecordNone) {
 		// The user wants to save the results to a file,
 		// but no filename was specified on the command line.
@@ -604,21 +606,51 @@ void CGalileoView::Go()
 		file_box.m_ofn.lpstrTitle = "Save Results";
 
 		if (file_box.DoModal() == IDOK)
+		{
 			result_file = file_box.GetPathName();
+		}
 		else
 			result_file.Empty();
 	}
 	// If a result file is being used, 
-	if (!result_file.IsEmpty()) {
+	if (!result_file.IsEmpty())
+	{
 		// Opening result file.
-		ofstream file(result_file, ios::app);
+		ofstream fileResult(result_file, ios::app);
 
-		file << setiosflags(ios::fixed) << setprecision(2);
+		fileResult << setiosflags(ios::fixed) << setprecision(2);
+
+		if(m_pPageDisplay->IsInstantaneousMode())
+		{
+			// create a file name for the instantaneous dump
+			int location = result_file.ReverseFind('\\');
+
+			if(location != -1)
+			{
+				CString path = result_file.Left(location + 1);
+				CString file = result_file.Right(result_file.GetLength() - location - 1);
+
+				theApp.instantaneous_file = path + "inst" + file;
+			}
+			else
+			{
+				theApp.instantaneous_file = "inst" + result_file;
+			}
+
+			// create instantaneous dump
+			ofstream fileResultInstant(theApp.instantaneous_file, ios::app);
+
+			fileResultInstant << setiosflags(ios::fixed) << setprecision(2);
+
+			m_pPageSetup->SaveResults(&fileResultInstant);
+
+			fileResultInstant.close();
+		}
 
 		// Saving test configuration
-		m_pPageSetup->SaveResults(&file);
+		m_pPageSetup->SaveResults(&fileResult);
 
-		file.close();
+		fileResult.close();
 	}
 	// Save any settings that may change during the test, so they can be reset
 	// after the test runs.
@@ -790,6 +822,11 @@ void CGalileoView::RestoreSettings()
 //
 void CGalileoView::StartTest()
 {
+	if(m_pPageDisplay->IsInstantaneousMode())
+	{
+		PrepareInstantaneousFile();
+	}
+
 	if (!SetAccess() || !SetTargets()) {
 		TestDone(ReturnError);
 		return;
@@ -888,6 +925,24 @@ void CGalileoView::UpdateRemainNotification(void)
 		note.Format("Ramp remaining: %d sec", noteTime);
 	SetStatusBarPaneText(1, note);
 	noteTime--;
+
+	if(m_pPageDisplay->IsInstantaneousMode())
+	{
+		Manager *manager;
+		int wkr_count;
+		Worker * wkr;
+		while (manager_to_prepare < theApp.manager_list.ManagerCount()) 
+		{
+			manager = theApp.manager_list.GetManager(manager_to_prepare);
+			wkr_count = manager->WorkerCount();
+			for (worker_to_prepare = 0; worker_to_prepare < wkr_count; worker_to_prepare++)
+			{
+				wkr = manager->GetWorker(worker_to_prepare);
+
+				wkr->SaveResultsInstantaneous(0);
+			}
+		}
+	}
 }
 
 //
@@ -900,6 +955,8 @@ BOOL CGalileoView::DisksNotPrepared()
 
 	// Loop through managers.
 	while (manager_to_prepare < theApp.manager_list.ManagerCount()) {
+		BOOL requirePrepare = FALSE; // see if any preparations are needed
+
 		manager = theApp.manager_list.GetManager(manager_to_prepare);
 
 		// Loop through each manager's workers.
@@ -907,14 +964,22 @@ BOOL CGalileoView::DisksNotPrepared()
 		for (worker_to_prepare = 0; worker_to_prepare < wkr_count; worker_to_prepare++) {
 			// Does the worker need to prepare its targets?
 			if (!manager->GetWorker(worker_to_prepare)->ReadyToRunTests()) {
-				// enable StopAll button
+				// set all targets to get ready for preparing
 				manager->SetTargetsToPrepare(worker_to_prepare);
-				ButtonPrepare();
-				SetTimer(PREPARE_TIMER, LONG_DELAY, NULL);
-				SetStatusBarText(m_pPageSetup->test_name, "Preparing Drives");
-				return TRUE;	// preparing
+				requirePrepare = TRUE;
 			}
 		}
+
+		// handle actual prepare if needed
+		if(requirePrepare) {
+			manager->Send(ALL_WORKERS, PREP_DISKS);
+			ButtonPrepare();
+			SetTimer(PREPARE_TIMER, LONG_DELAY, NULL);
+			SetStatusBarText(m_pPageSetup->test_name, "Preparing Drives");
+
+			return TRUE; // preparing this manager
+		}
+
 		manager_to_prepare++;
 	}
 	return FALSE;		// all drives prepared
@@ -932,10 +997,10 @@ void CGalileoView::OnTimer(UINT_PTR nIDEvent)
 		// Get a results update from Dynamo and update the display.
 
 		// Always get results for the whole test so far.
-		theApp.manager_list.UpdateResults(WHOLE_TEST_PERF);
+		theApp.manager_list.UpdateResults(WHOLE_TEST_PERF, m_pPageDisplay->IsInstantaneousMode());
 		// Also get results since the last update, if requested.
 		if (m_pPageDisplay->GetWhichPerf() == LAST_UPDATE_PERF)
-			theApp.manager_list.UpdateResults(LAST_UPDATE_PERF);
+			theApp.manager_list.UpdateResults(LAST_UPDATE_PERF, m_pPageDisplay->IsInstantaneousMode());
 		// Update the display, using whole test or last update results as appropriate.
 		m_pPageDisplay->Update();
 
@@ -956,12 +1021,12 @@ void CGalileoView::OnTimer(UINT_PTR nIDEvent)
 
 	case PREPARE_TIMER:
 		// See if Dynamo has responded that the drive is prepared.
-		if (!theApp.manager_list.GetManager(manager_to_prepare)->Peek(worker_to_prepare))
+		if (!theApp.manager_list.GetManager(manager_to_prepare)->Peek(0))
 			return;	// not done yet - keep waiting
 
 		// Completion message has arrived.  Stop waiting and get response.
 		KillTimer(nIDEvent);
-		if (!theApp.manager_list.GetManager(manager_to_prepare)->PreparedAnswer(worker_to_prepare)) {
+		if (!theApp.manager_list.GetManager(manager_to_prepare)->PreparedAnswer()) {
 			ErrorMessage("Failed to prepare targets for testing.");
 			TestDone(ReturnError);
 		}
@@ -1020,8 +1085,8 @@ void CGalileoView::StopTest(ReturnVal test_successful)
 	// If we were recording results when we stopped.  Update the results.
 	if (recording) {
 		// Always get results for the whole test and since the last update.
-		theApp.manager_list.UpdateResults(WHOLE_TEST_PERF);
-		theApp.manager_list.UpdateResults(LAST_UPDATE_PERF);
+		theApp.manager_list.UpdateResults(WHOLE_TEST_PERF, m_pPageDisplay->IsInstantaneousMode());
+		theApp.manager_list.UpdateResults(LAST_UPDATE_PERF, m_pPageDisplay->IsInstantaneousMode());
 		// Update the display, using whole test or last update results as appropriate.
 		m_pPageDisplay->Update();
 		// Save them to a file if user requested it.
@@ -1116,11 +1181,20 @@ void CGalileoView::TestDone(ReturnVal test_successful)
 	case ReturnSuccess:
 		//If saving results, write a message into the result file to indicate all runs are complete
 		//This is to allow Automated tools to know when all testing is complete.
-		if ((m_pPageSetup->result_type != RecordNone) && !result_file.IsEmpty()) {
-			ofstream file(result_file, ios::app);
+		if ((m_pPageSetup->result_type != RecordNone) && !result_file.IsEmpty())
+		{
+			ofstream fileResult(result_file, ios::app);
 
-			file << "'End Test" << endl;
-			file.close();
+			fileResult << "'End Test" << endl;
+			fileResult.close();
+
+			if(m_pPageDisplay->IsInstantaneousMode())
+			{
+				ofstream fileResultInstant(theApp.instantaneous_file, ios::app);
+
+				fileResultInstant << "'End Test" << endl;
+				fileResultInstant.close();
+			}
 		}
 		m_pPageAccess->MarkAccesses(access_index);
 		SetStatusBarText("Test Completed Successfully");
@@ -1158,12 +1232,20 @@ void CGalileoView::SaveResults()
 	if ((m_pPageSetup->result_type == RecordNone) || result_file.IsEmpty())
 		return;
 
-	ofstream file(result_file, ios::app);
+	ofstream fileResult(result_file, ios::app);
 
 	// Save results for workers and their managers.
-	file << setiosflags(ios::fixed) << setprecision(6);
-	theApp.manager_list.SaveResults(&file, access_index, m_pPageSetup->result_type);
-	file.close();
+	fileResult << setiosflags(ios::fixed) << setprecision(6);
+	theApp.manager_list.SaveResults(&fileResult, access_index, m_pPageSetup->result_type);
+	fileResult.close();
+
+	if(m_pPageDisplay->IsInstantaneousMode())
+	{
+		ofstream fileResultInstant(theApp.instantaneous_file, ios::app);
+		fileResultInstant << setiosflags(ios::fixed) << setprecision(6);
+		theApp.manager_list.SaveResultsInstantaneous(&fileResultInstant, access_index, m_pPageSetup->result_type);
+		fileResultInstant.close();
+	}
 }
 
 //
@@ -1176,10 +1258,16 @@ void CGalileoView::SaveAccessSpecs()
 	if ((m_pPageSetup->result_type == RecordNone) || result_file.IsEmpty())
 		return;
 
-	ofstream file(result_file, ios::app);
+	if(m_pPageDisplay->IsInstantaneousMode())
+	{
+		ofstream fileResultInstant(theApp.instantaneous_file, ios::app);
+		theApp.access_spec_list.SaveResults(fileResultInstant);
+		fileResultInstant.close();
+	}
 
-	theApp.access_spec_list.SaveResults(file);
-	file.close();
+	ofstream fileResult(result_file, ios::app);
+	theApp.access_spec_list.SaveResults(fileResult);
+	fileResult.close();
 }
 
 //
@@ -2685,3 +2773,32 @@ void CGalileoView::OnMDisplay(int submenu_id, int menu_item)
 	else
 		m_pPageDisplay->OnMDisplay(submenu_id, menu_item, result_code);
 }
+void CGalileoView::PrepareInstantaneousFile()
+{
+	ofstream file(theApp.instantaneous_file, ios::app);
+	// Writing result header information.
+	(file) << "'Results" << endl
+		<< "TimeStamp,"
+	    << "'Target Type,Target Name,Access Specification Name,# Managers,"
+	    << "# Workers,# Disks,IOps,Read IOps,Write IOps,MBps (Binary),Read MBps (Binary),Write MBps (Binary),"
+		<< "MBps (Decimal),Read MBps (Decimal),Write MBps (Decimal),Transactions per Second,Connections per Second,"
+	    << "Average Response Time,Average Read Response Time,"
+	    << "Average Write Response Time,Average Transaction Time,"
+	    << "Average Connection Time,Maximum Response Time,"
+	    << "Maximum Read Response Time,Maximum Write Response Time,"
+	    << "Maximum Transaction Time,Maximum Connection Time,"
+	    << "Errors,Read Errors,Write Errors,Bytes Read,Bytes Written,Read I/Os,"
+	    << "Write I/Os,Connections,Transactions per Connection,"
+	    << "Total Raw Read Response Time,Total Raw Write Response Time,"
+	    << "Total Raw Transaction Time,Total Raw Connection Time,"
+	    << "Maximum Raw Read Response Time,Maximum Raw Write Response Time,"
+	    << "Maximum Raw Transaction Time,Maximum Raw Connection Time,"
+	    << "Total Raw Run Time,Starting Sector,Maximum Size,Queue Depth,"
+	    << "% CPU Utilization,% User Time,% Privileged Time,% DPC Time,"
+	    << "% Interrupt Time,Processor Speed,Interrupts per Second,"
+	    << "CPU Effectiveness,Packets/Second,Packet Errors," << "Segments Retransmitted/Second"
+		<< ",0 to 50 uS,50 to 100 uS,100 to 200 uS,200 to 500 uS,0.5 to 1 mS,1 to 2 mS,2 to 5 mS,5 to 10 mS,10 to 15 mS,15 to 20 mS,20 to 30 mS,30 to 50 mS,50 to 100 mS,100 to 200 mS,200 to 500 mS,0.5 to 1 S,1 to 2 s,2 to 4.7 s,4.7 to 5 s,5 to 10 s, >= 10 s"
+		<< endl;
+	file.close();
+}
+

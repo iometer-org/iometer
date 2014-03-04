@@ -902,6 +902,13 @@ void Grunt::Record_IO(Transaction * transaction, DWORDLONG end_IO)
 					result->max_raw_read_latency = transfer_time;
 				if (transfer_time > prev_result->max_raw_read_latency)
 					prev_result->max_raw_read_latency = transfer_time;
+
+				for(int binNum=1; binNum < LATENCY_BIN_SIZE; binNum++) {
+					if((double)transfer_time < access_spec.latency_bin_values[binNum]) {
+						result->latency_bin[binNum - 1] += 1;
+						break;
+					}
+				}
 			} else {
 				// Error occurred.
 				result->read_errors++;
@@ -919,6 +926,14 @@ void Grunt::Record_IO(Transaction * transaction, DWORDLONG end_IO)
 					result->max_raw_write_latency = transfer_time;
 				if (transfer_time > prev_result->max_raw_write_latency)
 					prev_result->max_raw_write_latency = transfer_time;
+
+				for(int binNum=1; binNum < LATENCY_BIN_SIZE; binNum++) {
+					if((double)transfer_time < access_spec.latency_bin_values[binNum]) {
+						result->latency_bin[binNum - 1] += 1;
+						break;
+					}
+				}
+
 			} else {
 				// Error occurred.
 				result->write_errors++;
@@ -1016,6 +1031,28 @@ void CDECL Grunt_Thread_Wrapper(void *grunt)
 {
 	if (param.cpu_affinity) // only if we have been provided an overriding affinity
 		((Grunt *) grunt)->Set_Affinity(param.cpu_affinity);
+
+	((Grunt *) grunt)->access_spec.latency_bin_values[0] =	0;												// 0us
+	((Grunt *) grunt)->access_spec.latency_bin_values[1] =	((Grunt *) grunt)->timer_resolution / 20000;	// 50us
+	((Grunt *) grunt)->access_spec.latency_bin_values[2] =	((Grunt *) grunt)->timer_resolution / 10000;	// 100us
+	((Grunt *) grunt)->access_spec.latency_bin_values[3] =	((Grunt *) grunt)->timer_resolution / 5000;		// 200us
+	((Grunt *) grunt)->access_spec.latency_bin_values[4] =	((Grunt *) grunt)->timer_resolution / 2000;		// 500us
+	((Grunt *) grunt)->access_spec.latency_bin_values[5] =	((Grunt *) grunt)->timer_resolution / 1000;		// 1ms
+	((Grunt *) grunt)->access_spec.latency_bin_values[6] =	((Grunt *) grunt)->timer_resolution / 500;		// 2ms
+	((Grunt *) grunt)->access_spec.latency_bin_values[7] =	((Grunt *) grunt)->timer_resolution / 200;		// 5ms
+	((Grunt *) grunt)->access_spec.latency_bin_values[8] =	((Grunt *) grunt)->timer_resolution / 100;		// 10ms
+	((Grunt *) grunt)->access_spec.latency_bin_values[9] =	((Grunt *) grunt)->timer_resolution / 67;		// 15ms
+	((Grunt *) grunt)->access_spec.latency_bin_values[10] =	((Grunt *) grunt)->timer_resolution / 50;		// 20ms
+	((Grunt *) grunt)->access_spec.latency_bin_values[11] =	((Grunt *) grunt)->timer_resolution / 33;		// 30ms
+	((Grunt *) grunt)->access_spec.latency_bin_values[12] =	((Grunt *) grunt)->timer_resolution / 20;		// 50ms
+	((Grunt *) grunt)->access_spec.latency_bin_values[13] =	((Grunt *) grunt)->timer_resolution / 10;		// 100ms
+	((Grunt *) grunt)->access_spec.latency_bin_values[14] =	((Grunt *) grunt)->timer_resolution / 5;		// 200ms
+	((Grunt *) grunt)->access_spec.latency_bin_values[15] =	((Grunt *) grunt)->timer_resolution / 2;		// 500ms
+	((Grunt *) grunt)->access_spec.latency_bin_values[16] =	((Grunt *) grunt)->timer_resolution;			// 1s
+	((Grunt *) grunt)->access_spec.latency_bin_values[17] =	((Grunt *) grunt)->timer_resolution * 2;		// 2s
+	((Grunt *) grunt)->access_spec.latency_bin_values[18] =	((Grunt *) grunt)->timer_resolution * 4;		// 4.7s
+	((Grunt *) grunt)->access_spec.latency_bin_values[19] =	((Grunt *) grunt)->timer_resolution * 5;		// 5s
+	((Grunt *) grunt)->access_spec.latency_bin_values[20] =	((Grunt *) grunt)->timer_resolution * 10;		// 10s
 
 	// open targets
 	((Grunt *) grunt)->Open_Targets();

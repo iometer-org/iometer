@@ -1169,10 +1169,6 @@ void CGalileoView::StopAll()
 //
 void CGalileoView::TestDone(ReturnVal test_successful)
 {
-	// If Iometer is in batch mode and the test finishes, close Iometer.
-	if (theApp.IsBatchMode())
-		::PostQuitMessage(0);
-
 	// Re-enable the GUI.
 	EnableWindow(TRUE);
 	ButtonReady();
@@ -1209,6 +1205,12 @@ void CGalileoView::TestDone(ReturnVal test_successful)
 
 	// Restore any previously saved test values.
 	RestoreSettings();
+
+	// If Iometer is in batch mode and the test finishes, close Iometer.
+	if (theApp.IsBatchMode()) {
+		ASSERT(AfxGetApp()->m_pMainWnd != NULL);
+      AfxGetApp()->m_pMainWnd->SendMessage(WM_CLOSE);
+   }
 }
 
 //
@@ -1276,6 +1278,7 @@ void CGalileoView::SaveAccessSpecs()
 void CGalileoView::OnFileOpen()
 {
 	BOOL flags[NumICFFlags];
+	CICFOpenDialog file_open_box;	// open config file dialog box
 
 	// Show the custom file open dialog.
 	if (file_open_box.DoModal() == IDCANCEL)
@@ -1298,6 +1301,7 @@ void CGalileoView::OnFileOpen()
 void CGalileoView::OnFileSave()
 {
 	BOOL flags[NumICFFlags];
+	CICFSaveDialog file_save_box;	// save config file dialog box
 
 	// Show the custom file save dialog.
 	if (file_save_box.DoModal() == IDCANCEL)

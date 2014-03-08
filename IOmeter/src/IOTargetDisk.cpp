@@ -1338,10 +1338,14 @@ BOOL TargetDisk::Prepare(DWORDLONG * prepare_offset, volatile TestState * test_s
 			// Loop through the I/O queue looking for idle slots.
 			for (i = 0; i < PREPARE_QDEPTH; i++) {
 				// Check to see if we've reached the end of the disk
-				if (spec.disk_info.maximum_size &&
+				// Windows debuggers lie when decoding spec.disk_info pushing
+				// values into local vars
+            int dd_sector_size = spec.disk_info.sector_size;
+            ULONGLONG dd_maximum_size = spec.disk_info.maximum_size;
+            ULONGLONG dd_starting_sector = spec.disk_info.starting_sector;
+				if (dd_maximum_size &&
 				    ((*prepare_offset + bytes) >
-				     ((spec.disk_info.starting_sector +
-				       (DWORDLONG) spec.disk_info.maximum_size) * spec.disk_info.sector_size))) {
+				     ((dd_starting_sector + dd_maximum_size) * dd_sector_size))) {
 					// A maximum disk size was specified by the user, and the next write 
 					// would go past the specified maximum size.  
 #ifdef _DEBUG

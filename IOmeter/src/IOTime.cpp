@@ -92,6 +92,9 @@
 /* ##                                                                     ## */
 /* ######################################################################### */
 
+#if defined(IOMTR_OS_WIN32) || defined(IOMTR_OS_WIN64)
+#include "StdAfx.h"
+#endif
 #include "IOCommon.h"
 
 #if defined(IOMTR_OS_LINUX)

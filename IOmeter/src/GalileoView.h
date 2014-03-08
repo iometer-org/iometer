@@ -182,8 +182,6 @@ class CGalileoView:public CView {
 	CPropertySheet *m_pPropSheet;
 
       protected:
-	CICFOpenDialog file_open_box;	// open config file dialog box
-	CICFSaveDialog file_save_box;	// save config file dialog box
 
 	// tracks whether parent frame has already been sized.
 	BOOL m_bSizedBefore;

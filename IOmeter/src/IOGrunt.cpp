@@ -665,14 +665,14 @@ BOOL Grunt::Set_Access(const Test_Spec * spec)
 //
 void Grunt::Set_Affinity(DWORD_PTR affinity)
 {
-	int found_bits = -1; // seed this guy so the first ++ starts at 0 to help with 0-based index
+	int one_bits = -1; // seed this guy so the first ++ starts at 0 to help with 0-based index
 	int effective_procs = 0;
 	int effective_index = 0;
+	int bit_position = 0;
 	DWORD_PTR effective_affinity = 1, temp_affinity = affinity;
 
-	// Calculate effective_procs, whcih  may be equal to or less 
-	// then actual number of procs, depending on the mask specified
-	// and never greater
+	// Count the number of bits in the affinity mask. We use this
+	// as the number of effective processers we will bind to.
 	while (temp_affinity)
 	{
 		if (temp_affinity & 0x1)
@@ -680,32 +680,43 @@ void Grunt::Set_Affinity(DWORD_PTR affinity)
 		temp_affinity = temp_affinity >> (DWORD_PTR) 1;
 	}
 
-	// Both index values are 0-based. Round-robin the threads
-	// if their number exceeds number processors.
+	// Use the workers index to round robin across the number
+	// of effective procs.
+	// Both index values are 0-based. 
 	effective_index = worker_index % effective_procs;
 	
-	while (effective_affinity)
-	{
-		if (affinity & effective_affinity)
-			found_bits++;
+	// Map the live bits of the affinity mask to workers and
+	// set the thread affinity.
 
-		if (effective_index == found_bits)
+	temp_affinity = affinity;
+	while (temp_affinity)
+	{
+		if (temp_affinity & (DWORD_PTR) 0x1)
+			one_bits++; // 0-based index!
+
+		if (effective_index == one_bits)
 		{
 			// We have a match for our index, so set the affinity for the thread
+			effective_affinity =  (DWORD_PTR) 1 << bit_position;
 #if defined(IOMTR_OSFAMILY_WINDOWS)
 			SetThreadAffinityMask(GetCurrentThread(), effective_affinity);
-//#elif defined(IOMTR_OS_LINUX)
-//			sched_setaffinity(gettid(), CPU_SETSIZE, &s)
+#elif defined(IOMTR_OS_LINUX)
+			cpu_set_t cpuset;
+			CPU_ZERO(&cpuset);
+			CPU_SET(bit_position, &cpuset); // same as effective_affinity
+			pthread_setaffinity_np(pthread_self(), CPU_SETSIZE,  &cpuset);
 #else
 #warning ===> WARNING: You have to do some coding here to get the port done!
 #endif
-			cout << "Worker " << worker_index << "setting thread affinity mask to 0x" 
-				 << hex << effective_affinity << endl;
+			cout << "Worker " << worker_index << " setting thread affinity mask to 0x" 
+				 << hex << effective_affinity << "." << endl;
 			break;
 		}
-		effective_affinity = effective_affinity << (DWORD_PTR) 0x1;
+		temp_affinity = temp_affinity >> (DWORD_PTR) 0x1;
+		bit_position++;
 	}
 }
+
 #else
 void Grunt::Set_Affinity(DWORD_PTR affinity)
 {

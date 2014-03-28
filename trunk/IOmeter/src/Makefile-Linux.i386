@@ -102,6 +102,7 @@ RM=/bin/rm -f
 MV=/bin/mv
 TOUCH=/usr/bin/touch
 STRIP=/usr/bin/strip
+CXX=/usr/bin/g++
 
 
 # Some common definitions used.

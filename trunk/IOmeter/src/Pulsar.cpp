@@ -712,7 +712,7 @@ void Syntax(const char *errmsg /*=NULL*/ )
 	cout << endl;
 	cout << "   System Options" << endl;
 	cout << endl;		
-#if defined(IOMTR_OSFAMILY_WINDOWS) || defined(IOMTR_OS_LINUX)
+#if defined(IOMTR_SETTING_CPU_AFFINITY) && (defined(IOMTR_OSFAMILY_WINDOWS) || defined(IOMTR_OS_LINUX))
 	cout << "       -c cpu_mask" << endl;
 	cout << "              Enables CPU affinity. It binds Dynamo to the processing units"  << endl;
 	cout << "              (HW threads) specified by the cpu_mask. This is used for"       << endl;
@@ -880,7 +880,7 @@ static void ParseParam(int argc, char *argv[], struct dynamo_param *param)
 			return;
 		}
 			
-#if defined(IOMTR_OSFAMILY_WINDOWS) || defined(IOMTR_OS_LINUX)
+#if defined (IOMTR_SETTING_CPU_AFFINITY) && (defined(IOMTR_OSFAMILY_WINDOWS) || defined(IOMTR_OS_LINUX))
 		if (strcasecmp(pcOption, "C") == 0) {
 			if (argv[I])
 			{
@@ -893,9 +893,9 @@ static void ParseParam(int argc, char *argv[], struct dynamo_param *param)
 				else
 					sscanf(argv[I],"%" IOMTR_FORMAT_SPEC_64BIT "d", &tempMask);
 
-#if defined (IOMTR_SETTING_CPU_AFFINITY)
+//#if defined (IOMTR_SETTING_CPU_AFFINITY)
 				param->cpu_affinity = tempMask;
-#endif
+//#endif
 			}
 			continue;
 		}

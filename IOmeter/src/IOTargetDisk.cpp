@@ -1341,8 +1341,8 @@ BOOL TargetDisk::Prepare(DWORDLONG * prepare_offset, volatile TestState * test_s
 				// Windows debuggers lie when decoding spec.disk_info pushing
 				// values into local vars
             int dd_sector_size = spec.disk_info.sector_size;
-            ULONGLONG dd_maximum_size = spec.disk_info.maximum_size;
-            ULONGLONG dd_starting_sector = spec.disk_info.starting_sector;
+            uint64_t dd_maximum_size = spec.disk_info.maximum_size;
+            uint64_t dd_starting_sector = spec.disk_info.starting_sector;
 				if (dd_maximum_size &&
 				    ((*prepare_offset + bytes) >
 				     ((dd_starting_sector + dd_maximum_size) * dd_sector_size))) {

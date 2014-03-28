@@ -94,7 +94,7 @@ CFLAGS=	-O \
 # case, change this line as follows:
 #
 # LDFLAGS= ../glibc-2.1/rt/librt.a -lpthread
-LDFLAGS= -lrt -lpthread -laio -g
+LDFLAGS= -lrt -lpthread -laio
 
 OBJECTS= IOGlobals.o \
          Pulsar.o \

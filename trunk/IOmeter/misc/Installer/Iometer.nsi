@@ -50,14 +50,15 @@
 ##### Global settings
 #------------------------------------------------------------------------------
 
-!define RELDATE "2006.07.27"
+!define RELDATE "2014.05.28"
 !define PLATF "win32"
 !define ARCH "i386"
+!define RELVER "1.1"
 
-Name "Iometer ${RELDATE}"
+Name "Iometer ${RELVER}"
 
-OutFile "iometer-${RELDATE}.${PLATF}.${ARCH}-setup.exe"
-InstallDir "$PROGRAMFILES\Iometer.org\Iometer ${RELDATE}"
+OutFile "iometer-${RELVER}.${PLATF}.${ARCH}-setup.exe"
+InstallDir "$PROGRAMFILES\Iometer.org\Iometer ${RELVER}"
 
 CRCCheck on
 XPStyle on
@@ -81,7 +82,7 @@ XPStyle on
 ###############################################################################
 #------------------------------------------------------------------------------
 !insertmacro MUI_PAGE_WELCOME
-!insertmacro MUI_PAGE_LICENSE "..\..\LICENSE"
+!insertmacro MUI_PAGE_LICENSE "..\..\LICENSE.TXT"
 !insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
@@ -107,8 +108,8 @@ SubSection /e "Components"
 		SectionIn RO
 		SetOutPath $INSTDIR
 		
-		File ..\..\src\Release\Iometer.exe
-		File ..\..\src\Release\Dynamo.exe
+		File ..\..\src\msvs11\Release\Win32\Iometer.exe
+		File ..\..\src\msvs11\Release\Win32\Dynamo.exe
 
 		WriteUninstaller "uninstall.exe"
 
@@ -131,19 +132,19 @@ SubSectionEnd
 #------------------------------------------------------------------------------
 Section "Start Menu Shortcuts" SectionStartMenu
 
-	CreateDirectory "$SMPROGRAMS\Iometer ${RELDATE}"
-	CreateShortCut  "$SMPROGRAMS\Iometer ${RELDATE}\Iometer.lnk"                     "$INSTDIR\iometer.exe"   "" "$INSTDIR\iometer.exe"   0
+	CreateDirectory "$SMPROGRAMS\Iometer ${RELVER}"
+	CreateShortCut  "$SMPROGRAMS\Iometer ${RELVER}\Iometer.lnk"                     "$INSTDIR\iometer.exe"   "" "$INSTDIR\iometer.exe"   0
         IfFileExists "$INSTDIR\iometer.pdf"   "" +2
-		CreateShortCut "$SMPROGRAMS\Iometer ${RELDATE}\Iometer Users Guide.lnk"  "$INSTDIR\iometer.pdf"   "" "$INSTDIR\iometer.pdf"   0
-	CreateShortCut  "$SMPROGRAMS\Iometer ${RELDATE}\Import Wizard for MS Access.lnk" "$INSTDIR\Wizard.mdb"    "" "$INSTDIR\Wizard.mdb"    0
-	CreateShortCut  "$SMPROGRAMS\Iometer ${RELDATE}\Uninstall Iometer.lnk"           "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
+		CreateShortCut "$SMPROGRAMS\Iometer ${RELVER}\Iometer Users Guide.lnk"  "$INSTDIR\iometer.pdf"   "" "$INSTDIR\iometer.pdf"   0
+	CreateShortCut  "$SMPROGRAMS\Iometer ${RELVER}\Import Wizard for MS Access.lnk" "$INSTDIR\Wizard.mdb"    "" "$INSTDIR\Wizard.mdb"    0
+	CreateShortCut  "$SMPROGRAMS\Iometer ${RELVER}\Uninstall Iometer.lnk"           "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
 
 SectionEnd
 #------------------------------------------------------------------------------
 Section "Uninstall"
   
-	Delete "$SMPROGRAMS\Iometer ${RELDATE}\*.*"
-	RMDir  "$SMPROGRAMS\Iometer ${RELDATE}"
+	Delete "$SMPROGRAMS\Iometer ${RELVER}\*.*"
+	RMDir  "$SMPROGRAMS\Iometer ${RELVER}"
 
 	Delete "$INSTDIR\Iometer.exe"
 	Delete "$INSTDIR\Dynamo.exe"
